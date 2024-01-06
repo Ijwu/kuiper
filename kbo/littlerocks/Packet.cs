@@ -1,5 +1,8 @@
-﻿namespace kbo.littlerocks;
+﻿using kbo.plantesimals;
 
+namespace kbo.littlerocks;
+
+[JsonConverter(typeof(PacketConverter))]
 public abstract record Packet
 {
     [JsonPropertyName("cmd")]

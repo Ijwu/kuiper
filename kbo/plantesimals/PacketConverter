@@ -1,3 +1,5 @@
+namespace kbo.plantesimals;
+
 public class PacketConverter : JsonConverter<Packet>
 {
     public override Packet? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
