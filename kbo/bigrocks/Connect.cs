@@ -37,8 +37,10 @@ public record Connect : Packet
         SlotData = slotData;
     }
 
-    [JsonConstructor]
-    private Connect() : base("Connect")
+// Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning disable CS8618
+    internal Connect() : base("Connect")
     {
     }
+#pragma warning restore CS8618
 }

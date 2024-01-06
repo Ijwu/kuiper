@@ -56,9 +56,11 @@ public record RoomInfo : Packet
         Time = time;
     }
 
-    [JsonConstructor]
-    private RoomInfo() : base("RoomInfo")
+// Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#pragma warning disable CS8618
+    internal RoomInfo() : base("RoomInfo")
     {
         
     }
+#pragma warning restore CS8618
 }
