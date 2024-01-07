@@ -9,6 +9,11 @@ using System.Diagnostics;
 //     Thread.Sleep(100);
 // }
 
+// AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+// {
+//     Console.WriteLine(args.ExceptionObject);
+// };
+
 Freighter freighter = new Freighter();
 await freighter.ConnectAsync(new Uri("wss://archipelago.gg:59493"));
 
@@ -18,4 +23,6 @@ tradeRoute.PacketReceived += (packet) =>
     Console.WriteLine($"Received packet: {packet}");
 };
 
-await freighter.SendPacketsAsync([new Connect("", "Blasphemous", "p1", Guid.NewGuid(), new Version(1, 0, 0), 0, new string[] { "tag" }, false)]);
+// await freighter.SendPacketsAsync([new Connect("", "Blasphemous", "p1", Guid.NewGuid(), new Version(4, 0, 0), 0, new string[] { "tag" }, false)]);
+
+await freighter.DisconnectAsync();

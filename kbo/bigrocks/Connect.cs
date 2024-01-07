@@ -1,3 +1,5 @@
+using kbo.plantesimals;
+
 namespace kbo.bigrocks;
 
 public record Connect : Packet
@@ -15,6 +17,7 @@ public record Connect : Packet
     public Guid Uuid { get; set; }
 
     [JsonPropertyName("version")]
+    [JsonConverter(typeof(NetworkVersionConverter))]
     public Version Version { get; set; }
 
     [JsonPropertyName("items_handling")]

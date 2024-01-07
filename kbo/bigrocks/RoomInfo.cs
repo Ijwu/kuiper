@@ -1,11 +1,15 @@
+using kbo.plantesimals;
+
 namespace kbo.bigrocks;
 
 public record RoomInfo : Packet
 {
     [JsonPropertyName("version")]
+    [JsonConverter(typeof(NetworkVersionConverter))]
     public Version Version { get; set; }
 
     [JsonPropertyName("generator_version")]
+    [JsonConverter(typeof(NetworkVersionConverter))]        
     public Version GeneratorVersion { get; set; }
 
     [JsonPropertyName("tags")]
@@ -36,13 +40,13 @@ public record RoomInfo : Packet
     public string SeedName { get; set; }
 
     [JsonPropertyName("time")]
-    public long Time { get; set; }
+    public double Time { get; set; }
 
     public RoomInfo(Version version, Version generatorVersion, string[] tags, bool hasPassword,
                     Dictionary<string,int> permissions, int hintCost, int locationCheckPoints,
                     string[] games, Dictionary<string, int> dataPackageVersions,
                     Dictionary<string, string> dataPackageChecksums, string seedName,
-                    long time)
+                    double time)
     {
         Version = version;
         GeneratorVersion = generatorVersion;

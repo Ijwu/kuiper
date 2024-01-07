@@ -17,9 +17,15 @@ public class Freighter
         await _client.ConnectAsync(serverUri, CancellationToken.None);
     }
 
+    public async Task DisconnectAsync()
+    {
+        await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", CancellationToken.None);
+    }
+
     public async Task SendPacketsAsync(Packet[] packets)
     {
         string jsonString = JsonSerializer.Serialize(packets);
+        Console.WriteLine($"SENDING: \n{jsonString}");
         byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
         var buffer = new ArraySegment<byte>(bytes, 0, bytes.Length);
         await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -42,6 +48,7 @@ public class Freighter
             using (var reader = new StreamReader(ms, Encoding.UTF8))
             {
                 string jsonString = reader.ReadToEnd();
+                Console.WriteLine($"RECEIVING: \n{jsonString}");
                 Packet[] packets = JsonSerializer.Deserialize<Packet[]>(jsonString);
                 return packets;
             }
