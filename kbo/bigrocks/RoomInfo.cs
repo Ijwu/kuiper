@@ -1,3 +1,5 @@
+namespace kbo.bigrocks;
+
 public record RoomInfo : Packet
 {
     [JsonPropertyName("version")]
@@ -40,7 +42,7 @@ public record RoomInfo : Packet
                     Dictionary<string,int> permissions, int hintCost, int locationCheckPoints,
                     string[] games, Dictionary<string, int> dataPackageVersions,
                     Dictionary<string, string> dataPackageChecksums, string seedName,
-                    long time) : base("RoomInfo")
+                    long time)
     {
         Version = version;
         GeneratorVersion = generatorVersion;
@@ -55,12 +57,4 @@ public record RoomInfo : Packet
         SeedName = seedName;
         Time = time;
     }
-
-// Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-#pragma warning disable CS8618
-    internal RoomInfo() : base("RoomInfo")
-    {
-        
-    }
-#pragma warning restore CS8618
 }

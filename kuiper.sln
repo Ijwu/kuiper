@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "belters", "belters\belters.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spaceport", "spaceport\spaceport.csproj", "{701D4B82-C8C2-4AF7-AF99-C2AD90F3311E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stm", "stm\stm.csproj", "{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{701D4B82-C8C2-4AF7-AF99-C2AD90F3311E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{701D4B82-C8C2-4AF7-AF99-C2AD90F3311E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{701D4B82-C8C2-4AF7-AF99-C2AD90F3311E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

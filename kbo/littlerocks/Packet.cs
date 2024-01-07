@@ -1,15 +1,10 @@
-﻿using kbo.plantesimals;
+﻿using kbo.bigrocks;
 
 namespace kbo.littlerocks;
 
-[JsonConverter(typeof(PacketConverter))]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "cmd")]
+[JsonDerivedType(typeof(Connect), "Connect")]
+[JsonDerivedType(typeof(RoomInfo), "RoomInfo")]
 public abstract record Packet
 {
-    [JsonPropertyName("cmd")]
-    public string PacketType { get; protected set; }
-
-    public Packet(string packetType)
-    {
-        PacketType = packetType;
-    }
 }
