@@ -1,13 +1,13 @@
 using kbo.littlerocks;
 using spaceport;
 
-public delegate void PacketReceivedHandler(Packet packet);
+public delegate void PacketsReceivedHandler(Packet[] packets);
 
 public class TradeRoute
 {
     private Freighter _freighter;
 
-    public event PacketReceivedHandler? PacketReceived;
+    public event PacketsReceivedHandler? PacketReceived;
 
     public TradeRoute(Freighter freighter)
     {
@@ -19,8 +19,8 @@ public class TradeRoute
     {
         while (true)
         {
-            Packet packet = await _freighter.ReceivePacketAsync();
-            PacketReceived?.Invoke(packet);
+            Packet[] packets = await _freighter.ReceivePacketsAsync();
+            PacketReceived?.Invoke(packets);
         }
     }
 }

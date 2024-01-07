@@ -17,15 +17,15 @@ public class Freighter
         await _client.ConnectAsync(serverUri, CancellationToken.None);
     }
 
-    public async Task SendPacketAsync(Packet packet)
+    public async Task SendPacketsAsync(Packet[] packets)
     {
-        string jsonString = JsonSerializer.Serialize(packet);
+        string jsonString = JsonSerializer.Serialize(packets);
         byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
         var buffer = new ArraySegment<byte>(bytes, 0, bytes.Length);
         await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
     }
 
-    public async Task<Packet> ReceivePacketAsync()
+    public async Task<Packet[]> ReceivePacketsAsync()
     {
         var buffer = new ArraySegment<byte>(new byte[8192]);
         WebSocketReceiveResult result;
@@ -34,7 +34,7 @@ public class Freighter
             do
             {
                 result = await _client.ReceiveAsync(buffer, CancellationToken.None);
-                ms.Write(buffer.Array, buffer.Offset, result.Count);
+                ms.Write(buffer.Array!, buffer.Offset, result.Count);
             }
             while (!result.EndOfMessage);
 
@@ -42,8 +42,8 @@ public class Freighter
             using (var reader = new StreamReader(ms, Encoding.UTF8))
             {
                 string jsonString = reader.ReadToEnd();
-                Packet packet = JsonSerializer.Deserialize<Packet>(jsonString);
-                return packet;
+                Packet[] packets = JsonSerializer.Deserialize<Packet[]>(jsonString);
+                return packets;
             }
         }
     }
