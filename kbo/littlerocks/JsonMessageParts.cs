@@ -1,6 +1,16 @@
 ﻿namespace kbo.littlerocks;
 
-public record class BaseJsonMessagePart
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "text")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "player_id")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "player_name")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "item_name")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "location_name")]
+[JsonDerivedType(typeof(TextJsonMessagePart), "entrance_name")]
+[JsonDerivedType(typeof(PlayerJsonMessagePart), "location_id")]
+[JsonDerivedType(typeof(PlayerAndFlagsJsonMessagePart), "item_id")]
+[JsonDerivedType(typeof(ColorJsonMessagePart), "color")]
+public abstract record class BaseJsonMessagePart
 {
     [JsonPropertyName("type")]
     public string? MessagePartType { get; set; }
@@ -33,17 +43,6 @@ public record class ColorJsonMessagePart : TextJsonMessagePart
     }
 }
 
-public record class FlagsJsonMessagePart : TextJsonMessagePart
-{
-    [JsonPropertyName("flags")]
-    public long Flags { get; set; }
-
-    public FlagsJsonMessagePart(string? messagePartType, string? text, long flags) : base(messagePartType, text)
-    {
-        Flags = flags;
-    }    
-}
-
 public record class PlayerJsonMessagePart : TextJsonMessagePart
 {
     [JsonPropertyName("player")]
@@ -53,4 +52,15 @@ public record class PlayerJsonMessagePart : TextJsonMessagePart
     {
         Player = player;
     }    
+}
+
+public record class PlayerAndFlagsJsonMessagePart : PlayerJsonMessagePart
+{
+    [JsonPropertyName("flags")]
+    public long Flags { get; set; }
+
+    public PlayerAndFlagsJsonMessagePart(string? messagePartType, string? text, long player, long flags) : base(messagePartType, text, player)
+    {
+        Flags = flags;
+    }  
 }
