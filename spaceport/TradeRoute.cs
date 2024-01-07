@@ -3,24 +3,40 @@ using spaceport;
 
 public delegate void PacketsReceivedHandler(Packet[] packets);
 
-public class TradeRoute
+public class TradeRoute : IDisposable
 {
-    private Freighter _freighter;
+    private const int PacketReceiveDelayMs = 25;
 
-    public event PacketsReceivedHandler? PacketReceived;
+    private Freighter _freighter;
+    private Task _receiveLoopTask;
+    private CancellationTokenSource _cts = new CancellationTokenSource();
+
+    public event PacketsReceivedHandler? PacketsReceived;
 
     public TradeRoute(Freighter freighter)
     {
         _freighter = freighter;
-        StartReceiveLoop();
+        _receiveLoopTask = Task.Run(() => StartReceiveLoop());
     }
 
-    private async void StartReceiveLoop()
+    private async Task StartReceiveLoop()
     {
         while (true)
         {
-            Packet[] packets = await _freighter.ReceivePacketsAsync();
-            PacketReceived?.Invoke(packets);
+            if (_cts.Token.IsCancellationRequested)
+                _cts.Token.ThrowIfCancellationRequested();
+
+            Packet[] packets = await _freighter.ReceivePacketsAsync(_cts.Token);
+            PacketsReceived?.Invoke(packets);
+
+            await Task.Delay(PacketReceiveDelayMs);
         }
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _receiveLoopTask.Wait();
+        _cts.Dispose();
     }
 }

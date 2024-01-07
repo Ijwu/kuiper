@@ -54,6 +54,7 @@ public class NetworkVersionConverter : JsonConverter<Version>
         writer.WriteNumber("major", value.Major);
         writer.WriteNumber("minor", value.Minor);
         writer.WriteNumber("build", value.Build);
+        writer.WriteString("class", "Version");
         writer.WriteEndObject();
     }
 }

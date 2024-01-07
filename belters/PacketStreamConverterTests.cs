@@ -74,7 +74,7 @@ public class PacketStreamConverterTests
         var jsonString = Encoding.UTF8.GetString(ms.ToArray());
         Console.WriteLine(jsonString);
         // Assert
-        var expectedJson = @"[{""cmd"":""RoomInfo"",""version"":{""major"":1,""minor"":2,""build"":3},""generator_version"":{""major"":4,""minor"":5,""build"":6},""tags"":[""tag1"",""tag2""],""password"":true,""permissions"":{""perm1"":1,""perm2"":2},""hint_cost"":3,""location_check_points"":4,""games"":[""game1"",""game2""],""datapackage_versions"":{""dpv1"":1,""dpv2"":2},""datapackage_checksums"":{""dpc1"":""c1"",""dpc2"":""c2""},""seed_name"":""seed"",""time"":1234567890},{""cmd"":""Connect"",""password"":""poop"",""game"":""poop"",""name"":""poop"",""uuid"":""00000000-0000-0000-0000-000000000000"",""version"":{""major"":1,""minor"":2,""build"":3},""items_handling"":0,""tags"":[""tag1"",""tag2""],""slot_data"":false}]";
+        var expectedJson = @"[{""cmd"":""RoomInfo"",""version"":{""major"":1,""minor"":2,""build"":3,""class"":""Version""},""generator_version"":{""major"":4,""minor"":5,""build"":6,""class"":""Version""},""tags"":[""tag1"",""tag2""],""password"":true,""permissions"":{""perm1"":1,""perm2"":2},""hint_cost"":3,""location_check_points"":4,""games"":[""game1"",""game2""],""datapackage_versions"":{""dpv1"":1,""dpv2"":2},""datapackage_checksums"":{""dpc1"":""c1"",""dpc2"":""c2""},""seed_name"":""seed"",""time"":1234567890},{""cmd"":""Connect"",""password"":""poop"",""game"":""poop"",""name"":""poop"",""uuid"":""00000000-0000-0000-0000-000000000000"",""version"":{""major"":1,""minor"":2,""build"":3,""class"":""Version""},""items_handling"":0,""tags"":[""tag1"",""tag2""],""slot_data"":false}]";
         Assert.That(jsonString, Is.EqualTo(expectedJson));
     }
 }

@@ -43,7 +43,7 @@ namespace belters
             // Arrange
             var converter = new NetworkVersionConverter();
             var version = new Version(1, 2, 3);
-            var expectedJson = "{\"major\":1,\"minor\":2,\"build\":3}";
+            var expectedJson = "{\"major\":1,\"minor\":2,\"build\":3,\"class\":\"Version\"}";
 
             // Act
             var jsonString = JsonSerializer.Serialize(version, new JsonSerializerOptions { Converters = { converter } });

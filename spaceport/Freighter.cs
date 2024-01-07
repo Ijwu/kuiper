@@ -12,26 +12,26 @@ public class Freighter
 {
     private ClientWebSocket _client = new ClientWebSocket();
 
-    public async Task ConnectAsync(Uri serverUri)
+    public async Task ConnectAsync(Uri serverUri, CancellationToken cancellationToken = default)
     {
-        await _client.ConnectAsync(serverUri, CancellationToken.None);
+        await _client.ConnectAsync(serverUri, cancellationToken);
     }
 
-    public async Task DisconnectAsync()
+    public async Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
-        await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", CancellationToken.None);
+        await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", cancellationToken);
     }
 
-    public async Task SendPacketsAsync(Packet[] packets)
+    public async Task SendPacketsAsync(Packet[] packets, CancellationToken cancellationToken = default)
     {
         string jsonString = JsonSerializer.Serialize(packets);
-        Console.WriteLine($"SENDING: \n{jsonString}");
         byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
+        Console.WriteLine(jsonString);
         var buffer = new ArraySegment<byte>(bytes, 0, bytes.Length);
-        await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        await _client.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
     }
 
-    public async Task<Packet[]> ReceivePacketsAsync()
+    public async Task<Packet[]> ReceivePacketsAsync(CancellationToken cancellationToken = default)
     {
         var buffer = new ArraySegment<byte>(new byte[8192]);
         WebSocketReceiveResult result;
@@ -39,7 +39,7 @@ public class Freighter
         {
             do
             {
-                result = await _client.ReceiveAsync(buffer, CancellationToken.None);
+                result = await _client.ReceiveAsync(buffer, cancellationToken);
                 ms.Write(buffer.Array!, buffer.Offset, result.Count);
             }
             while (!result.EndOfMessage);
@@ -48,9 +48,8 @@ public class Freighter
             using (var reader = new StreamReader(ms, Encoding.UTF8))
             {
                 string jsonString = reader.ReadToEnd();
-                Console.WriteLine($"RECEIVING: \n{jsonString}");
-                Packet[] packets = JsonSerializer.Deserialize<Packet[]>(jsonString);
-                return packets;
+                Packet[]? packets = JsonSerializer.Deserialize<Packet[]>(jsonString);
+                return packets ?? [];
             }
         }
     }
