@@ -3,32 +3,32 @@
 public record Connected : Packet
 {
     [JsonPropertyName("team")]
-    public int Team { get; set; }
+    public long Team { get; set; }
 
     [JsonPropertyName("slot")]
-    public int Slot { get; set; }
+    public long Slot { get; set; }
 
     [JsonPropertyName("players")]
     public NetworkPlayer[] Players { get; set; }
 
     [JsonPropertyName("missing_locations")]
-    public int[] MissingLocations { get; set; }
+    public long[] MissingLocations { get; set; }
 
     [JsonPropertyName("checked_locations")]
-    public int[] CheckedLocations { get; set; }
+    public long[] CheckedLocations { get; set; }
 
     [JsonPropertyName("slot_data")]
     public Dictionary<string, object>? SlotData { get; set; }
 
     [JsonPropertyName("slot_info")]
-    public Dictionary<int, NetworkSlot> SlotInfo { get; set; }
+    public Dictionary<long, NetworkSlot> SlotInfo { get; set; }
 
     [JsonPropertyName("hint_points")]
-    public int HintPoints { get; set; }
+    public long HintPoints { get; set; }
 
-    public Connected(int team, int slot, NetworkPlayer[] players, int[] missingLocations,
-                     int[] checkedLocations, Dictionary<string, object>? slotData,
-                     Dictionary<int, NetworkSlot> slotInfo, int hintPoints)
+    public Connected(long team, long slot, NetworkPlayer[] players, long[] missingLocations,
+                     long[] checkedLocations, Dictionary<string, object>? slotData,
+                     Dictionary<long, NetworkSlot> slotInfo, long hintPoints)
     {
         Team = team;
         Slot = slot;
