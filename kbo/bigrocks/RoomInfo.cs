@@ -19,7 +19,7 @@ public record RoomInfo : Packet
     public bool HasPassword { get; set; }
 
     [JsonPropertyName("permissions")]
-    public Dictionary<string, long> Permissions { get; set; }
+    public Dictionary<string, CommandPermission> Permissions { get; set; }
 
     [JsonPropertyName("hint_cost")]
     public long HintCost { get; set; }
@@ -43,7 +43,7 @@ public record RoomInfo : Packet
     public double Time { get; set; }
 
     public RoomInfo(Version version, Version generatorVersion, string[] tags, bool hasPassword,
-                    Dictionary<string,long> permissions, long hintCost, long locationCheckPoints,
+                    Dictionary<string, CommandPermission> permissions, long hintCost, long locationCheckPoints,
                     string[] games, Dictionary<string, long> dataPackageVersions,
                     Dictionary<string, string> dataPackageChecksums, string seedName,
                     double time)
