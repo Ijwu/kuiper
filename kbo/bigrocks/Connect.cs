@@ -21,7 +21,7 @@ public record Connect : Packet
     public Version Version { get; set; }
 
     [JsonPropertyName("items_handling")]
-    public int ItemsHandling { get; set; }
+    public ItemHandlingFlags ItemsHandling { get; set; }
 
     [JsonPropertyName("tags")]
     public string[] Tags { get; set; }
@@ -30,7 +30,8 @@ public record Connect : Packet
     public bool SlotData { get; set; }
 
     public Connect(string password, string game, string name, Guid uuid,
-                   Version version, int itemsHandling, string[] tags, bool slotData)
+                   Version version, ItemHandlingFlags itemsHandling, string[] tags, 
+                   bool slotData)
     {
         Password = password;
         Game = game;

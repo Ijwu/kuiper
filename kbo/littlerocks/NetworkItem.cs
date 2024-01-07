@@ -1,4 +1,4 @@
-﻿namespace kbo;
+﻿namespace kbo.littlerocks;
 
 public record NetworkItem : NetworkObject
 {
