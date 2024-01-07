@@ -47,7 +47,7 @@ public class PacketStreamConverterTests
         Assert.That(connect.Name, Is.EqualTo("poop"));
         Assert.That(connect.Uuid, Is.EqualTo(Guid.Empty));
         Assert.That(connect.Version, Is.EqualTo(new Version(1, 2, 3)));
-        Assert.That(connect.ItemsHandling, Is.EqualTo(0));
+        Assert.That(connect.ItemsHandling, Is.EqualTo(ItemHandlingFlags.None));
         Assert.That(connect.Tags, Is.EquivalentTo(new string[] { "tag1", "tag2" }));
         Assert.That(connect.SlotData, Is.False);
     }
