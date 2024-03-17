@@ -10,6 +10,8 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(LocationInfo), nameof(LocationInfo))]
 [JsonDerivedType(typeof(PrintJson), nameof(PrintJson))]
 [JsonDerivedType(typeof(RoomUpdate), nameof(RoomUpdate))]
+[JsonDerivedType(typeof(Bounced), nameof(Bounced))]
+[JsonDerivedType(typeof(InvalidPacket), nameof(InvalidPacket))]
 public abstract record Packet
 {
 }
