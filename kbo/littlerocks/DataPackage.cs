@@ -22,3 +22,14 @@ public record DataPackageGameData
         Version = Version;
     }
 }
+
+public record DataPackageContents 
+{
+    [JsonPropertyName("games")]
+    public Dictionary<string, DataPackageGameData> Games { get; set; }
+
+    public DataPackageContents(Dictionary<string, DataPackageGameData> games)
+    {
+        Games = games;
+    }
+}

@@ -2,11 +2,11 @@
 
 public record DataPackage : Packet
 {
-    [JsonPropertyName("games")]
-    public Dictionary<string, DataPackageGameData> Games { get; set; }
+    [JsonPropertyName("data")]
+    public DataPackageContents Data { get; set; }
 
-    public DataPackage(Dictionary<string, DataPackageGameData> games)
+    public DataPackage(DataPackageContents data)
     {
-        Games = games;
+        Data = data;
     }
 }
