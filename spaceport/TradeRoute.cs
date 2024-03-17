@@ -7,9 +7,9 @@ public class TradeRoute : IDisposable
 {
     private const int PacketReceiveDelayMs = 25;
 
-    private Freighter _freighter;
-    private Task _receiveLoopTask;
-    private CancellationTokenSource _cts = new CancellationTokenSource();
+    private readonly Freighter _freighter;
+    private readonly Task _receiveLoopTask;
+    private readonly CancellationTokenSource _cts = new();
 
     public event PacketsReceivedHandler? PacketsReceived;
 

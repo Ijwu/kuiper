@@ -1,7 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "data", IgnoreUnrecognizedTypeDiscriminators = true)]
-[JsonDerivedType(typeof(Chat), nameof(Chat))]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type", IgnoreUnrecognizedTypeDiscriminators = true)]
 [JsonDerivedType(typeof(ItemSend), nameof(ItemSend))]
 [JsonDerivedType(typeof(ItemCheat), nameof(ItemCheat))]
 [JsonDerivedType(typeof(Hint), nameof(Hint))]
@@ -14,17 +13,15 @@
 [JsonDerivedType(typeof(Release), nameof(Release))]
 [JsonDerivedType(typeof(Collect), nameof(Collect))]
 [JsonDerivedType(typeof(Countdown), nameof(Countdown))]
+[JsonDerivedType(typeof(CommandResult), nameof(CommandResult))]
+[JsonDerivedType(typeof(AdminCommandResult), nameof(AdminCommandResult))]
 public partial record PrintJson : Packet
 {
     [JsonPropertyName("data")]
-    public BaseJsonMessagePart[] Data { get; set; }
+    public TextJsonMessagePart[] Data { get; set; }
 
-    [JsonPropertyName("type")]
-    public string PrintJsonType { get; set; }
-
-    public PrintJson(BaseJsonMessagePart[] data, string printJsonType)
+    public PrintJson(TextJsonMessagePart[] data)
     {
         Data = data;
-        PrintJsonType = printJsonType;
     }
 }

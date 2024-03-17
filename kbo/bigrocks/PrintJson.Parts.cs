@@ -10,8 +10,8 @@ public partial record PrintJson
         [JsonPropertyName("item")]
         public NetworkItem Item { get; set; }
 
-        public ItemSend(BaseJsonMessagePart[] data, long receiving, NetworkItem item)
-            : base(data, nameof(ItemSend))
+        public ItemSend(TextJsonMessagePart[] data, long receiving, NetworkItem item)
+            : base(data)
         {
             Receiving = receiving;
             Item = item;
@@ -29,8 +29,8 @@ public partial record PrintJson
         [JsonPropertyName("team")]
         public long Team { get; set; }
 
-        public ItemCheat(BaseJsonMessagePart[] data, long receiving, NetworkItem item, long team)
-            : base(data, nameof(ItemCheat))
+        public ItemCheat(TextJsonMessagePart[] data, long receiving, NetworkItem item, long team)
+            : base(data)
         {
             Receiving = receiving;
             Item = item;
@@ -49,8 +49,8 @@ public partial record PrintJson
         [JsonPropertyName("found")]
         public bool Found { get; set; }
 
-        public Hint(BaseJsonMessagePart[] data, long receiving, NetworkItem item, bool found)
-            : base(data, nameof(Hint))
+        public Hint(TextJsonMessagePart[] data, long receiving, NetworkItem item, bool found)
+            : base(data)
         {
             Receiving = receiving;
             Item = item;
@@ -69,8 +69,8 @@ public partial record PrintJson
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
 
-        public Join(BaseJsonMessagePart[] data, long team, long slot, string[] tags)
-            : base(data, nameof(Join))
+        public Join(TextJsonMessagePart[] data, long team, long slot, string[] tags)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -86,8 +86,8 @@ public partial record PrintJson
         [JsonPropertyName("slot")]
         public long Slot { get; set; }
 
-        public Part(BaseJsonMessagePart[] data, long team, long slot)
-            : base(data, nameof(Part))
+        public Part(TextJsonMessagePart[] data, long team, long slot)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -105,8 +105,8 @@ public partial record PrintJson
         [JsonPropertyName("message")]
         public string Message { get; set; }
 
-        public Chat(BaseJsonMessagePart[] data, long team, long slot, string message)
-            : base(data, nameof(Chat))
+        public Chat(TextJsonMessagePart[] data, long team, long slot, string message)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -119,8 +119,8 @@ public partial record PrintJson
         [JsonPropertyName("message")]
         public string Message { get; set; }
 
-        public ServerChat(BaseJsonMessagePart[] data, string message)
-            : base(data, nameof(ServerChat))
+        public ServerChat(TextJsonMessagePart[] data, string message)
+            : base(data)
         {
             Message = message;
         }
@@ -137,12 +137,26 @@ public partial record PrintJson
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
 
-        public TagsChanged(BaseJsonMessagePart[] data, long team, long slot, string[] tags)
-            : base(data, nameof(TagsChanged))
+        public TagsChanged(TextJsonMessagePart[] data, long team, long slot, string[] tags)
+            : base(data)
         {
             Team = team;
             Slot = slot;
             Tags = tags;
+        }
+    }
+
+    public record CommandResult : PrintJson
+    {
+        public CommandResult(TextJsonMessagePart[] data) : base(data)
+        {
+        }
+    }
+
+    public record AdminCommandResult : PrintJson
+    {
+        public AdminCommandResult(TextJsonMessagePart[] data) : base(data)
+        {
         }
     }
 
@@ -154,8 +168,8 @@ public partial record PrintJson
         [JsonPropertyName("slot")]
         public long Slot { get; set; }
 
-        public Goal(BaseJsonMessagePart[] data, long team, long slot)
-            : base(data, nameof(Goal))
+        public Goal(TextJsonMessagePart[] data, long team, long slot)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -170,8 +184,8 @@ public partial record PrintJson
         [JsonPropertyName("slot")]
         public long Slot { get; set; }
 
-        public Release(BaseJsonMessagePart[] data, long team, long slot)
-            : base(data, nameof(Release))
+        public Release(TextJsonMessagePart[] data, long team, long slot)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -186,8 +200,8 @@ public partial record PrintJson
         [JsonPropertyName("slot")]
         public long Slot { get; set; }
 
-        public Collect(BaseJsonMessagePart[] data, long team, long slot)
-            : base(data, nameof(Collect))
+        public Collect(TextJsonMessagePart[] data, long team, long slot)
+            : base(data)
         {
             Team = team;
             Slot = slot;
@@ -199,8 +213,8 @@ public partial record PrintJson
         [JsonPropertyName("countdown")]
         public long CountdownTime { get; set; }
 
-        public Countdown(BaseJsonMessagePart[] data, long countdownTime)
-            : base(data, nameof(CountdownTime))
+        public Countdown(TextJsonMessagePart[] data, long countdownTime)
+            : base(data)
         {
             CountdownTime = countdownTime;
         }

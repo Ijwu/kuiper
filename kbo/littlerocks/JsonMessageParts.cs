@@ -1,33 +1,20 @@
 ﻿namespace kbo.littlerocks;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "text")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "player_id")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "player_name")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "item_name")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "location_name")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "entrance_name")]
 [JsonDerivedType(typeof(PlayerJsonMessagePart), "location_id")]
 [JsonDerivedType(typeof(PlayerAndFlagsJsonMessagePart), "item_id")]
 [JsonDerivedType(typeof(ColorJsonMessagePart), "color")]
-public abstract record class BaseJsonMessagePart
+public abstract record class TextJsonMessagePart
 {
     [JsonPropertyName("type")]
     public string? MessagePartType { get; set; }
 
-    public BaseJsonMessagePart(string? messagePartType)
-    {
-        MessagePartType = messagePartType;
-    }
-}
-
-public record class TextJsonMessagePart : BaseJsonMessagePart
-{
     [JsonPropertyName("text")]
     public string? Text { get; set; }
 
-    public TextJsonMessagePart(string? messagePartType, string? text) : base(messagePartType)
+    public TextJsonMessagePart(string? messagePartType, string? text)
     {
+        MessagePartType = messagePartType;
         Text = text;
     }
 }
