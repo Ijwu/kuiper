@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class StatusUpdate : Packet
+public record StatusUpdate : Packet
 {
     [JsonPropertyName("status")]
     public ClientStatus Status { get; set; }

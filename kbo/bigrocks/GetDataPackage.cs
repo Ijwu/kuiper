@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class GetDataPackage : Packet
+public record GetDataPackage : Packet
 {
     [JsonPropertyName("games")]
     public string[]? Games { get; set; }

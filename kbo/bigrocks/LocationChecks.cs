@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class LocationChecks : Packet
+public record LocationChecks : Packet
 {
     [JsonPropertyName("locations")]
     public long[] Locations { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class ConnectUpdate : Packet
+public record ConnectUpdate : Packet
 {
     [JsonPropertyName("items_handling")]
     public ItemHandlingFlags ItemsHandling { get; set; }

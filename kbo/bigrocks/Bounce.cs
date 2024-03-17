@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class Bounce : Packet
+public record Bounce : Packet
 {
      [JsonPropertyName("games")]
     public string[] Games { get; set; }

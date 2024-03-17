@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class Say : Packet
+public record Say : Packet
 {
     [JsonPropertyName("text")]
     public string Text { get; set; }

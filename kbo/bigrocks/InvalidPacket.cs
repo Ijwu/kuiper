@@ -1,6 +1,6 @@
 ﻿namespace kbo.bigrocks;
 
-public record class InvalidPacket : Packet
+public record InvalidPacket : Packet
 {
     [JsonPropertyName("type")]
     public string Type { get; set; }
