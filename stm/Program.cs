@@ -27,5 +27,18 @@ using kbo.plantesimals;
 // Thread.Sleep(500);
 // await freighter.DisconnectAsync();
 
-var thing = new PrintJson.ServerChat(Array.Empty<TextJsonMessagePart>(), "Hello, world!");
-Console.WriteLine(JsonSerializer.Serialize<PrintJson>(thing));
+var messageParts = new JsonMessagePart[]
+{
+    new TextJsonMessagePart("Hello, world!"),
+    new PlayerIdJsonMessagePart("player_id"),
+    new PlayerNameJsonMessagePart("player_name"),
+    new ItemIdJsonMessagePart("item_id", NetworkItemFlags.None, 0),
+    new ItemNameJsonMessagePart("item_name", NetworkItemFlags.None, 0),
+    new LocationIdJsonMessagePart("location_id", 0),
+    new LocationNameJsonMessagePart("location_name", 0),
+    new EntranceNameJsonMessagePart("entrance_name"),
+    new ColorJsonMessagePart("Hello, world!", "red")
+};
+
+var thing = new PrintJson(messageParts);
+Console.WriteLine(JsonSerializer.Serialize<Packet[]>(new []{thing}, new JsonSerializerOptions { WriteIndented = true }));

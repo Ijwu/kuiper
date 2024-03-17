@@ -18,9 +18,9 @@
 public partial record PrintJson : Packet
 {
     [JsonPropertyName("data")]
-    public TextJsonMessagePart[] Data { get; set; }
+    public JsonMessagePart[] Data { get; set; }
 
-    public PrintJson(TextJsonMessagePart[] data)
+    public PrintJson(JsonMessagePart[] data)
     {
         Data = data;
     }
