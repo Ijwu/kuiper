@@ -2,15 +2,18 @@
 using System.Text;
 using System.Text.Json;
 using kbo.littlerocks;
+using spaceport.schematics;
 
 namespace spaceport;
 
 /// <summary>
 /// A class which facilitates client and server interaction.
 /// </summary>
-public class Freighter
+public class Freighter : ITalkToTheServer
 {
     private ClientWebSocket _client = new ClientWebSocket();
+
+    public bool IsConnected => _client.State == WebSocketState.Open;
 
     public async Task ConnectAsync(Uri serverUri, CancellationToken cancellationToken = default)
     {
@@ -52,5 +55,10 @@ public class Freighter
                 return packets ?? [];
             }
         }
+    }
+
+    public void Dispose()
+    {
+        _client.Dispose();
     }
 }
