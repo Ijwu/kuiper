@@ -14,11 +14,13 @@ namespace belters
 
             // Act
             var version = JsonSerializer.Deserialize<Version>(json, new JsonSerializerOptions { Converters = { converter } })!;
-
-            // Assert
-            Assert.That(version.Major, Is.EqualTo(1));
-            Assert.That(version.Minor, Is.EqualTo(2));
-            Assert.That(version.Build, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                // Assert
+                Assert.That(version.Major, Is.EqualTo(1));
+                Assert.That(version.Minor, Is.EqualTo(2));
+                Assert.That(version.Build, Is.EqualTo(3));
+            });
         }
 
         [Test]
@@ -30,11 +32,13 @@ namespace belters
 
             // Act
             var version = JsonSerializer.Deserialize<Version>(json, new JsonSerializerOptions { Converters = { converter } })!;
-
-            // Assert
-            Assert.That(version.Major, Is.EqualTo(1));
-            Assert.That(version.Minor, Is.EqualTo(2));
-            Assert.That(version.Build, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                // Assert
+                Assert.That(version.Major, Is.EqualTo(1));
+                Assert.That(version.Minor, Is.EqualTo(2));
+                Assert.That(version.Build, Is.EqualTo(3));
+            });
         }
 
         [Test]

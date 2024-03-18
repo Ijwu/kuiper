@@ -19,7 +19,7 @@ public record DataPackageGameData
         ItemNameToId = itemNameToId;
         LocationNameToId = locationNameToId;
         Checksum = checksum;
-        Version = Version;
+        Version = version;
     }
 }
 
