@@ -1,6 +1,7 @@
 using kbo.littlerocks;
-using spaceport;
 using spaceport.schematics;
+
+namespace spaceport;
 
 /// <summary>
 /// Faciliates realtime handling of received packets.
@@ -13,8 +14,11 @@ public class ReceivingBay : IReceiveTrade
     private readonly CancellationTokenSource _cts = new();
     private Task? _receiveLoopTask;
 
-    private List<PacketsReceivedHandler> _packetsReceivedHandlers = [];
-    private List<PacketsReceivedHandlerAsync> _packetsReceivedHandlersAsync = [];
+    private readonly object _handlersLock = new();
+    private readonly List<PacketsReceivedHandler> _packetsReceivedHandlers = [];
+
+    private readonly object _handlersAsyncLock = new();
+    private readonly List<PacketsReceivedHandlerAsync> _packetsReceivedHandlersAsync = [];
 
     public ReceivingBay(ITalkToTheServer cargoTransport)
     {
@@ -35,24 +39,36 @@ public class ReceivingBay : IReceiveTrade
 
     public IDisposable OnPacketsReceived(PacketsReceivedHandler handler)
     {
-        _packetsReceivedHandlers.Add(handler);
+        lock (_handlersLock)
+        {
+            _packetsReceivedHandlers.Add(handler);
+        }
         return new OnPacketsReceivedHook(this, handler);
     }
 
     public IDisposable OnPacketsReceived(PacketsReceivedHandlerAsync handler)
     {
-        _packetsReceivedHandlersAsync.Add(handler);
+        lock (_handlersAsyncLock)
+        {
+            _packetsReceivedHandlersAsync.Add(handler);
+        }
         return new OnPacketsReceivedAsyncHook(this, handler);
     }
 
     internal void RemovePacketsReceivedHandler(PacketsReceivedHandler handler)
     {
-        _packetsReceivedHandlers.Remove(handler);
+        lock (_handlersLock)
+        {
+            _packetsReceivedHandlers.Remove(handler);
+        }
     }
 
     internal void RemovePacketsReceivedHandler(PacketsReceivedHandlerAsync handler)
     {
-        _packetsReceivedHandlersAsync.Remove(handler);
+        lock (_handlersAsyncLock)
+        {
+            _packetsReceivedHandlersAsync.Remove(handler);
+        }
     }
 
     private void PacketsReceived(Packet[] packets)
@@ -76,6 +92,7 @@ public class ReceivingBay : IReceiveTrade
 
     private async Task StartReceiveLoop()
     {
+        System.Console.WriteLine("Starting receive loop");
         while (true)
         {
             if (_cts.Token.IsCancellationRequested)
@@ -94,12 +111,14 @@ public class ReceivingBay : IReceiveTrade
         _receiveLoopTask?.Wait();
         _freighter.Dispose();
         _cts.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     public class OnPacketsReceivedHook : IDisposable
     {
         private readonly ReceivingBay _bay;
-        private PacketsReceivedHandler _handler;
+        private readonly PacketsReceivedHandler _handler;
 
         public OnPacketsReceivedHook(ReceivingBay tradeRoute, PacketsReceivedHandler handler)
         {
@@ -110,13 +129,14 @@ public class ReceivingBay : IReceiveTrade
         public void Dispose()
         {
             _bay.RemovePacketsReceivedHandler(_handler);
+            GC.SuppressFinalize(this);
         }
     }
 
     public class OnPacketsReceivedAsyncHook : IDisposable
     {
         private readonly ReceivingBay _tradeRoute;
-        private PacketsReceivedHandlerAsync _handler;
+        private readonly PacketsReceivedHandlerAsync _handler;
 
         public OnPacketsReceivedAsyncHook(ReceivingBay tradeRoute, PacketsReceivedHandlerAsync handler)
         {
@@ -127,6 +147,7 @@ public class ReceivingBay : IReceiveTrade
         public void Dispose()
         {
             _tradeRoute.RemovePacketsReceivedHandler(_handler);
+            GC.SuppressFinalize(this);
         }
     }
 }

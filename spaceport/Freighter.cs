@@ -11,7 +11,7 @@ namespace spaceport;
 /// </summary>
 public class Freighter : ITalkToTheServer
 {
-    private ClientWebSocket _client = new ClientWebSocket();
+    private readonly ClientWebSocket _client = new();
 
     public bool IsConnected => _client.State == WebSocketState.Open;
 
@@ -29,7 +29,6 @@ public class Freighter : ITalkToTheServer
     {
         string jsonString = JsonSerializer.Serialize(packets);
         byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
-        Console.WriteLine(jsonString);
         var buffer = new ArraySegment<byte>(bytes, 0, bytes.Length);
         await _client.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
     }
@@ -38,27 +37,23 @@ public class Freighter : ITalkToTheServer
     {
         var buffer = new ArraySegment<byte>(new byte[8192]);
         WebSocketReceiveResult result;
-        using (var ms = new MemoryStream())
+        using var ms = new MemoryStream();
+        do
         {
-            do
-            {
-                result = await _client.ReceiveAsync(buffer, cancellationToken);
-                ms.Write(buffer.Array!, buffer.Offset, result.Count);
-            }
-            while (!result.EndOfMessage);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            using (var reader = new StreamReader(ms, Encoding.UTF8))
-            {
-                string jsonString = reader.ReadToEnd();
-                Packet[]? packets = JsonSerializer.Deserialize<Packet[]>(jsonString);
-                return packets ?? [];
-            }
+            result = await _client.ReceiveAsync(buffer, cancellationToken);
+            System.Console.WriteLine($"[Freighter] Received {result.Count} bytes");
+            ms.Write(buffer.Array!, buffer.Offset, result.Count);
         }
+        while (!result.EndOfMessage);
+
+        ms.Seek(0, SeekOrigin.Begin);
+        Packet[]? packets = await JsonSerializer.DeserializeAsync<Packet[]>(ms, cancellationToken: cancellationToken);
+        return packets ?? [];
     }
 
     public void Dispose()
     {
         _client.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
