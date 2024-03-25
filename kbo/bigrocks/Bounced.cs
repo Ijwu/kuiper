@@ -1,4 +1,6 @@
-﻿namespace kbo.bigrocks;
+﻿using System.Text.Json.Nodes;
+
+namespace kbo.bigrocks;
 
 public record Bounced : Packet
 {
@@ -12,9 +14,9 @@ public record Bounced : Packet
     public string[] Tags { get; set; }
 
     [JsonPropertyName("data")]
-    public Dictionary<string, string> Data { get; set; }
+    public Dictionary<string, JsonNode> Data { get; set; }
 
-    public Bounced(string[] games, long[] slots, string[] tags, Dictionary<string, string> data)
+    public Bounced(string[] games, long[] slots, string[] tags, Dictionary<string, JsonNode> data)
     {
         Games = games;
         Slots = slots;
