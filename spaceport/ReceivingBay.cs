@@ -92,7 +92,6 @@ public class ReceivingBay : IReceiveTrade
 
     private async Task StartReceiveLoop()
     {
-        System.Console.WriteLine("Starting receive loop");
         while (true)
         {
             if (_cts.Token.IsCancellationRequested)
