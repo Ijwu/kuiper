@@ -1,44 +1,44 @@
 ﻿namespace kbo.littlerocks;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(TextJsonMessagePart), "text")]
-[JsonDerivedType(typeof(PlayerIdJsonMessagePart), "player_id")]
-[JsonDerivedType(typeof(PlayerNameJsonMessagePart), "player_name")]
-[JsonDerivedType(typeof(ItemIdJsonMessagePart), "item_id")]
-[JsonDerivedType(typeof(ItemNameJsonMessagePart), "item_name")]
-[JsonDerivedType(typeof(LocationIdJsonMessagePart), "location_id")]
-[JsonDerivedType(typeof(LocationNameJsonMessagePart), "location_name")]
-[JsonDerivedType(typeof(EntranceNameJsonMessagePart), "entrance_name")]
-[JsonDerivedType(typeof(ColorJsonMessagePart), "color")]
+[JsonDerivedType(typeof(Text), "text")]
+[JsonDerivedType(typeof(PlayerId), "player_id")]
+[JsonDerivedType(typeof(PlayerName), "player_name")]
+[JsonDerivedType(typeof(ItemId), "item_id")]
+[JsonDerivedType(typeof(ItemName), "item_name")]
+[JsonDerivedType(typeof(LocationId), "location_id")]
+[JsonDerivedType(typeof(LocationName), "location_name")]
+[JsonDerivedType(typeof(EntranceName), "entrance_name")]
+[JsonDerivedType(typeof(Color), "color")]
 public abstract record JsonMessagePart();
 
-public record TextJsonMessagePart : JsonMessagePart
+public record Text : JsonMessagePart
 {
     [JsonPropertyName("text")]
-    public string? Text { get; set; }
+    public string? Value { get; set; }
 
-    public TextJsonMessagePart(string? text)
+    public Text(string? value)
     {
-        Text = text;
+        Value = value;
     }
 }
 
-public record PlayerIdJsonMessagePart : TextJsonMessagePart
+public record PlayerId : Text
 {
-    public PlayerIdJsonMessagePart(string? text) : base(text)
+    public PlayerId(string? value) : base(value)
     {
     }
  
 }
 
-public record PlayerNameJsonMessagePart : TextJsonMessagePart
+public record PlayerName : Text
 {
-    public PlayerNameJsonMessagePart(string? text) : base(text)
+    public PlayerName(string? value) : base(value)
     {
     }
 }
 
-public record ItemIdJsonMessagePart : TextJsonMessagePart
+public record ItemId : Text
 {
     [JsonPropertyName("flags")]
     public NetworkItemFlags? Flags { get; set; }
@@ -46,54 +46,54 @@ public record ItemIdJsonMessagePart : TextJsonMessagePart
     [JsonPropertyName("player")]
     public long? Player { get; set; }
 
-    public ItemIdJsonMessagePart(string? text, NetworkItemFlags? flags, long? player) : base(text)
+    public ItemId(string? value, NetworkItemFlags? flags, long? player) : base(value)
     {
         Flags = flags;
         Player = player;
     }
 }
 
-public record ItemNameJsonMessagePart: ItemIdJsonMessagePart
+public record ItemName: ItemId
 {
-    public ItemNameJsonMessagePart(string? text, NetworkItemFlags? flags, long? player) : base(text, flags, player)
+    public ItemName(string? value, NetworkItemFlags? flags, long? player) : base(value, flags, player)
     {
     }
 }
 
-public record LocationIdJsonMessagePart : TextJsonMessagePart
+public record LocationId : Text
 {
 
     [JsonPropertyName("player")]
     public long? Player { get; set; }
 
-    public LocationIdJsonMessagePart(string? text, long? player) : base(text)
+    public LocationId(string? value, long? player) : base(value)
     {
         Player = player;
     }
 }
 
-public record LocationNameJsonMessagePart : LocationIdJsonMessagePart
+public record LocationName : LocationId
 {
-    public LocationNameJsonMessagePart(string? text, long? player) : base(text, player)
+    public LocationName(string? value, long? player) : base(value, player)
     {
     }
 }
 
-public record EntranceNameJsonMessagePart: TextJsonMessagePart
+public record EntranceName: Text
 {
-    public EntranceNameJsonMessagePart(string? text) : base(text)
+    public EntranceName(string? value) : base(value)
     {
     }
 
 }
 
-public record ColorJsonMessagePart : TextJsonMessagePart
+public record Color : Text
 {
     [JsonPropertyName("color")]
-    public string? Color { get; set; }
+    public string? ColorName { get; set; }
 
-    public ColorJsonMessagePart(string? text, string? color) : base(text)
+    public Color(string? value, string? color) : base(value)
     {
-        Color = color;
+        ColorName = color;
     }
 }
