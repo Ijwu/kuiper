@@ -12,4 +12,8 @@
     <ProjectReference Include="..\spaceport\spaceport.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui" Version="1.16.0" />
+  </ItemGroup>
+
 </Project>

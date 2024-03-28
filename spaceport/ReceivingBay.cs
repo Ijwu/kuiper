@@ -119,9 +119,9 @@ public class ReceivingBay : IReceiveTrade
         private readonly ReceivingBay _bay;
         private readonly PacketsReceivedHandler _handler;
 
-        public OnPacketsReceivedHook(ReceivingBay tradeRoute, PacketsReceivedHandler handler)
+        public OnPacketsReceivedHook(ReceivingBay bay, PacketsReceivedHandler handler)
         {
-            _bay = tradeRoute;
+            _bay = bay;
             _handler = handler;
         }
 
@@ -134,18 +134,18 @@ public class ReceivingBay : IReceiveTrade
 
     public class OnPacketsReceivedAsyncHook : IDisposable
     {
-        private readonly ReceivingBay _tradeRoute;
+        private readonly ReceivingBay _receivingBay;
         private readonly PacketsReceivedHandlerAsync _handler;
 
-        public OnPacketsReceivedAsyncHook(ReceivingBay tradeRoute, PacketsReceivedHandlerAsync handler)
+        public OnPacketsReceivedAsyncHook(ReceivingBay bay, PacketsReceivedHandlerAsync handler)
         {
-            _tradeRoute = tradeRoute;
+            _receivingBay = bay;
             _handler = handler;
         }
 
         public void Dispose()
         {
-            _tradeRoute.RemovePacketsReceivedHandler(_handler);
+            _receivingBay.RemovePacketsReceivedHandler(_handler);
             GC.SuppressFinalize(this);
         }
     }

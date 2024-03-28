@@ -1,22 +1,12 @@
-﻿using spaceport;
-using kbo.bigrocks;
-using kbo.littlerocks;
+﻿using stm;
+using Terminal.Gui;
 
-Freighter freighter = new();
-await freighter.ConnectAsync(new Uri("wss://archipelago.gg:46289"));
+Application.Init();
 
-var receivingBay = new ReceivingBay(freighter);
-receivingBay.StartReceiving();
+var apTopLevel = new ArchipelagoClientTopLevel();
+Application.Top.Add(apTopLevel);
+Application.Run();
 
-var hook = receivingBay.OnPacketsReceived(packets =>
-{
-    foreach (var packet in packets)
-    {
-        Console.WriteLine($"Received packet: {packet}");
-    }
-});
+await apTopLevel.DisconnectAsync();
 
-Packet[] packets = [new Connect(string.Empty, "Blasphemous", "a", Guid.NewGuid(), new Version(5,0,0), ItemHandlingFlags.All, [], false)];
-await freighter.SendPacketsAsync(packets);
-
-await freighter.DisconnectAsync();
+Application.Shutdown();

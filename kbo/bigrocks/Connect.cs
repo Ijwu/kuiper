@@ -5,7 +5,7 @@ namespace kbo.bigrocks;
 public record Connect : Packet
 {
     [JsonPropertyName("password")]
-    public string Password { get; set; }
+    public string? Password { get; set; }
 
     [JsonPropertyName("game")]
     public string Game { get; set; }
@@ -29,7 +29,7 @@ public record Connect : Packet
     [JsonPropertyName("slot_data")]
     public bool SlotData { get; set; }
 
-    public Connect(string password, string game, string name, Guid uuid,
+    public Connect(string? password, string game, string name, Guid uuid,
                    Version version, ItemHandlingFlags itemsHandling, string[] tags, 
                    bool slotData)
     {
