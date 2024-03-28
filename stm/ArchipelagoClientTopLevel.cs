@@ -28,6 +28,7 @@ public class ArchipelagoClientTopLevel : Toplevel
     {
         if (_freighter.IsConnected)
         {
+            MessageBox.ErrorQuery("Login Error", "You're already connected, dumdum.", "Ok");
             return;
         }
 
@@ -35,7 +36,7 @@ public class ArchipelagoClientTopLevel : Toplevel
 
         if (loginWindow is null)
         {
-            MessageBox.ErrorQuery("Login Error", "Something is fucking broken.", "Ok");
+            MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
             return;
         }
 
@@ -53,11 +54,9 @@ public class ArchipelagoClientTopLevel : Toplevel
     {
         async Task HandleLoggingInAsync(Packet[] packets)
         {
-            var loginWindow = _currentWindow as LoginWindow;
-
-            if (loginWindow is null)
+            if (_currentWindow is not LoginWindow loginWindow)
             {
-                MessageBox.ErrorQuery("Login Error", "Something is fucking broken.", "Ok");
+                MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
                 return;
             }
 
