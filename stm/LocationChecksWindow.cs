@@ -20,6 +20,7 @@ public class LocationChecksWindow : Window
         _receiver = receiver;
         _freighter = freighter;
         SetupInterface();
+        Redraw(Frame);
     }
 
     private void SetupInterface()
@@ -27,17 +28,31 @@ public class LocationChecksWindow : Window
         ColorScheme = Colors.TopLevel;
         Title = "Location Checks";
 
-        var scrollView = new ScrollView();
+        var scrollView = new ScrollView()
+        {
+            X = 2,
+            Y = 2,
+            Width = Dim.Fill(),
+            Height = Dim.Fill(),
+            AutoHideScrollBars = false
+        };
 
+        int y = 0;
         foreach (long id in _connected.MissingLocations)
         {
-            scrollView.Add(CreateButtonForLocationCheckById(id));
+            scrollView.Add(CreateButtonForLocationCheckById(id, 0, y++));
         }
+
+        Add(scrollView);
     }
 
-    private View CreateButtonForLocationCheckById(long id)
+    private View CreateButtonForLocationCheckById(long id, int x, int y)
     {
-        var button = new Button(GetLocationNameFromId(id));
+        var button = new Button(GetLocationNameFromId(id))
+        {
+            X = x,
+            Y = y
+        };
 
         button.Clicked += () => SendLocationChecked(id);
 
