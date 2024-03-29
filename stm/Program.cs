@@ -3,10 +3,10 @@ using Terminal.Gui;
 
 Application.Init();
 
-var apTopLevel = new ArchipelagoClientTopLevel();
-Application.Top.Add(apTopLevel);
+var appTopLevel = new ArchipelagoClientTopLevel();
+Application.Top.Add(appTopLevel);
 Application.Run();
 
-await apTopLevel.DisconnectAsync();
+await appTopLevel.DisconnectAsync();
 
 Application.Shutdown();

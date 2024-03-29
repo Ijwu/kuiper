@@ -22,7 +22,11 @@ public class Freighter : ITalkToTheServer
 
     public async Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
-        await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", cancellationToken);
+        WebSocketState[] closeableStates = [WebSocketState.Open, WebSocketState.CloseReceived, WebSocketState.CloseSent];
+        if (closeableStates.Contains(_client.State))
+        {
+            await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", cancellationToken);
+        }
     }
 
     public async Task SendPacketsAsync(Packet[] packets, CancellationToken cancellationToken = default)

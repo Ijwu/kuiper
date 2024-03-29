@@ -101,10 +101,7 @@ public class ArchipelagoClientTopLevel : Toplevel
 
     public async Task DisconnectAsync()
     {
-        if (_loginHandler is not null)
-        {
-            _loginHandler.Dispose();
-        }
+        _loginHandler?.Dispose();
 
         if (_freighter.IsConnected)
         {
