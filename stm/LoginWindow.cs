@@ -4,10 +4,10 @@ namespace stm;
 
 public class LoginWindow : Window
 {
-    private TextField _slotText;
-    private TextField _urlText;
-    private TextField _passText;
-    private TextField _gameText;
+    private readonly TextField _slotText;
+    private readonly TextField _urlText;
+    private readonly TextField _passText;
+    private readonly TextField _gameText;
 
     public string? SlotName => _slotText.Text.ToString();
     public string? ServerUrl => _urlText.Text.ToString();

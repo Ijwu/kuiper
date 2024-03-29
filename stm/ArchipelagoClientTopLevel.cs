@@ -88,7 +88,7 @@ public class ArchipelagoClientTopLevel : Toplevel
                     _currentConnected = connected;
                     _loginHandler?.Dispose();
                     Remove(_currentWindow);
-                    _currentWindow = new LocationChecksWindow(_currentRoomInfo, connected, _currentDataPackage, _receivingBay);
+                    _currentWindow = new LocationChecksWindow(_currentRoomInfo, _currentConnected, _currentDataPackage, _receivingBay, _freighter);
                     Add(_currentWindow);
                 }
                 else if (packet is ConnectionRefused refused)

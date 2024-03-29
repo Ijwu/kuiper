@@ -5,8 +5,8 @@ namespace spaceport.schematics;
 public interface ITalkToTheServer : IDisposable
 {
     bool IsConnected { get; }
-    Task ConnectAsync(Uri serverUri, CancellationToken cancellationToken);
-    Task DisconnectAsync(CancellationToken cancellationToken);
-    Task SendPacketsAsync(Packet[] packets, CancellationToken cancellationToken);
-    Task<Packet[]> ReceivePacketsAsync(CancellationToken cancellationToken);
+    Task ConnectAsync(Uri serverUri, CancellationToken cancellationToken = default);
+    Task DisconnectAsync(CancellationToken cancellationToken = default);
+    Task SendPacketsAsync(Packet[] packets, CancellationToken cancellationToken = default);
+    Task<Packet[]> ReceivePacketsAsync(CancellationToken cancellationToken = default);
 }
