@@ -2,13 +2,13 @@
 
 namespace kbo.littlerocks;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "cmd")]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "cmd", IgnoreUnrecognizedTypeDiscriminators = true)]
 [JsonDerivedType(typeof(Connect), nameof(Connect))]
 [JsonDerivedType(typeof(RoomInfo), nameof(RoomInfo))]
 [JsonDerivedType(typeof(Connected), nameof(Connected))]
 [JsonDerivedType(typeof(ConnectionRefused), nameof(ConnectionRefused))]
 [JsonDerivedType(typeof(LocationInfo), nameof(LocationInfo))]
-[JsonDerivedType(typeof(PrintJson), "PrintJSON")]
+// [JsonDerivedType(typeof(PrintJson), "PrintJSON")]
 [JsonDerivedType(typeof(RoomUpdate), nameof(RoomUpdate))]
 [JsonDerivedType(typeof(DataPackage), nameof(DataPackage))]
 [JsonDerivedType(typeof(Bounced), nameof(Bounced))]
