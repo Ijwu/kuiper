@@ -93,12 +93,16 @@ public class ReceivingBay : IReceiveTrade
     private async Task StartReceiveLoop()
     {
         while (true)
-        {
-            if (_cts.Token.IsCancellationRequested)
-                _cts.Token.ThrowIfCancellationRequested();
-
-            Packet[] packets = await _freighter.ReceivePacketsAsync(_cts.Token);
-            await PacketsReceivedAsync(packets);
+        {        
+            try
+            {
+                Packet[] packets = await _freighter.ReceivePacketsAsync(_cts.Token);
+                await PacketsReceivedAsync(packets);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
 
             await Task.Delay(PacketReceiveDelayMs);
         }
@@ -108,7 +112,6 @@ public class ReceivingBay : IReceiveTrade
     {
         _cts.Cancel();
         _receiveLoopTask?.Wait();
-        _freighter.Dispose();
         _cts.Dispose();
 
         GC.SuppressFinalize(this);

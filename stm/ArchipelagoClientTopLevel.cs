@@ -9,7 +9,7 @@ namespace stm;
 public class ArchipelagoClientTopLevel : Toplevel
 {
     private readonly Freighter _freighter = new Freighter();
-    private readonly IReceiveTrade _receivingBay;
+    private IReceiveTrade? _receivingBay;
     private Window? _currentWindow;
     private IDisposable? _loginHandler;
 
@@ -18,7 +18,6 @@ public class ArchipelagoClientTopLevel : Toplevel
 
     public ArchipelagoClientTopLevel()
     {
-        _receivingBay = new ReceivingBay(_freighter);
         _currentWindow = new LoginWindow(OnLoginClickedAsync);
 
         Add(_currentWindow);
@@ -46,6 +45,7 @@ public class ArchipelagoClientTopLevel : Toplevel
         }
 
         string url = loginWindow.ServerUrl!;
+        _receivingBay = new ReceivingBay(_freighter);
         HookLoginHandler();
         await _freighter.ConnectAsync(new Uri(url));
         _receivingBay.StartReceiving();
@@ -93,7 +93,10 @@ public class ArchipelagoClientTopLevel : Toplevel
 
     private void HookLoginHandler()
     {
-        _loginHandler = _receivingBay.OnPacketsReceived(HandleLoggingInAsync);
+        if (_receivingBay is not null)
+        {
+            _loginHandler = _receivingBay.OnPacketsReceived(HandleLoggingInAsync);
+        }
     }
 
     public async Task DisconnectAsync()
@@ -105,6 +108,7 @@ public class ArchipelagoClientTopLevel : Toplevel
 
         if (_freighter.IsConnected)
         {
+            _receivingBay?.Dispose();
             await _freighter.DisconnectAsync();
         }
     }

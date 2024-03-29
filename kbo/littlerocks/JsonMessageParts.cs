@@ -1,6 +1,6 @@
 ﻿namespace kbo.littlerocks;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type", UnknownDerivedTypeHandling = )]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(Text), "text")]
 [JsonDerivedType(typeof(PlayerId), "player_id")]
 [JsonDerivedType(typeof(PlayerName), "player_name")]

@@ -26,6 +26,6 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(SetReply), nameof(SetReply))]
 [JsonDerivedType(typeof(SetNotify), nameof(SetNotify))]
 [JsonDerivedType(typeof(ReceivedItems), nameof(ReceivedItems))]
-public abstract record Packet
+public record Packet
 {
 }
