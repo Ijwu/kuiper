@@ -8,7 +8,7 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(Connected), nameof(Connected))]
 [JsonDerivedType(typeof(ConnectionRefused), nameof(ConnectionRefused))]
 [JsonDerivedType(typeof(LocationInfo), nameof(LocationInfo))]
-[JsonDerivedType(typeof(PrintJson), nameof(PrintJson))]
+[JsonDerivedType(typeof(PrintJson), "PrintJSON")]
 [JsonDerivedType(typeof(RoomUpdate), nameof(RoomUpdate))]
 [JsonDerivedType(typeof(DataPackage), nameof(DataPackage))]
 [JsonDerivedType(typeof(Bounced), nameof(Bounced))]
@@ -25,6 +25,7 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(Get), nameof(Get))]
 [JsonDerivedType(typeof(SetReply), nameof(SetReply))]
 [JsonDerivedType(typeof(SetNotify), nameof(SetNotify))]
+[JsonDerivedType(typeof(ReceivedItems), nameof(ReceivedItems))]
 public abstract record Packet
 {
 }

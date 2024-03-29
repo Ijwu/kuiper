@@ -6,6 +6,7 @@ public delegate void PacketsReceivedHandler(Packet[] packets);
 public delegate Task PacketsReceivedHandlerAsync(Packet[] packets);
 public interface IReceiveTrade : IDisposable
 {
+    void StartReceiving();
     IDisposable OnPacketsReceived(PacketsReceivedHandler handler);
     IDisposable OnPacketsReceived(PacketsReceivedHandlerAsync handler);
 }

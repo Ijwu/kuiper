@@ -14,7 +14,7 @@ public class LoginWindow : Window
     public string? Password => _passText.Text.ToString();
     public string? Game  => _gameText.Text.ToString();
 
-    public LoginWindow(Func<Task> loginClicked)
+    public LoginWindow(Action loginClicked)
     {
         ColorScheme = Colors.TopLevel;
 
@@ -24,7 +24,7 @@ public class LoginWindow : Window
 			Text = "Slot Name:" 
 		};
 
-        _slotText = new TextField("") {
+        _slotText = new TextField("a") {
 			X = Pos.Right (slotLabel) + 1,
 			Width = Dim.Fill(),
 		};
@@ -35,7 +35,7 @@ public class LoginWindow : Window
 			Y = Pos.Bottom(slotLabel) + 1
 		};
 
-        _gameText = new TextField("") {
+        _gameText = new TextField("Blasphemous") {
 			X = Pos.Left(_slotText),
 			Y = Pos.Top(gameLabel),
 			Width = Dim.Fill(),
@@ -47,7 +47,7 @@ public class LoginWindow : Window
 			Y = Pos.Bottom(gameLabel) + 1
 		};
 
-        _urlText = new TextField("") {
+        _urlText = new TextField("wss://archipelago.gg:63794") {
 			X = Pos.Left(_gameText),
 			Y = Pos.Top(urlLabel),
 			Width = Dim.Fill(),
@@ -72,7 +72,7 @@ public class LoginWindow : Window
 			IsDefault = true,
 		};
 
-		loginBtn.Clicked += () => loginClicked.Invoke();
+		loginBtn.Clicked += () => Application.MainLoop.Invoke(loginClicked);
 
         Add(slotLabel, _slotText, gameLabel, _gameText, urlLabel, _urlText, passLabel, _passText, loginBtn);
     }

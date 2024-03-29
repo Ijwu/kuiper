@@ -10,13 +10,17 @@
 [JsonDerivedType(typeof(LocationName), "location_name")]
 [JsonDerivedType(typeof(EntranceName), "entrance_name")]
 [JsonDerivedType(typeof(Color), "color")]
-public abstract record JsonMessagePart();
+public abstract record JsonMessagePart
+{
+
+}
 
 public record Text : JsonMessagePart
 {
     [JsonPropertyName("text")]
     public string? Value { get; set; }
 
+    [JsonConstructor]
     public Text(string? value)
     {
         Value = value;
@@ -25,14 +29,15 @@ public record Text : JsonMessagePart
 
 public record PlayerId : Text
 {
+    [JsonConstructor]
     public PlayerId(string? value) : base(value)
     {
     }
- 
 }
 
 public record PlayerName : Text
 {
+    [JsonConstructor]
     public PlayerName(string? value) : base(value)
     {
     }
@@ -46,6 +51,7 @@ public record ItemId : Text
     [JsonPropertyName("player")]
     public long? Player { get; set; }
 
+    [JsonConstructor]
     public ItemId(string? value, NetworkItemFlags? flags, long? player) : base(value)
     {
         Flags = flags;
@@ -55,6 +61,7 @@ public record ItemId : Text
 
 public record ItemName: ItemId
 {
+    [JsonConstructor]
     public ItemName(string? value, NetworkItemFlags? flags, long? player) : base(value, flags, player)
     {
     }
@@ -66,6 +73,7 @@ public record LocationId : Text
     [JsonPropertyName("player")]
     public long? Player { get; set; }
 
+    [JsonConstructor]
     public LocationId(string? value, long? player) : base(value)
     {
         Player = player;
@@ -74,6 +82,7 @@ public record LocationId : Text
 
 public record LocationName : LocationId
 {
+    [JsonConstructor]
     public LocationName(string? value, long? player) : base(value, player)
     {
     }
@@ -81,6 +90,7 @@ public record LocationName : LocationId
 
 public record EntranceName: Text
 {
+    [JsonConstructor]
     public EntranceName(string? value) : base(value)
     {
     }
@@ -92,6 +102,7 @@ public record Color : Text
     [JsonPropertyName("color")]
     public string? ColorName { get; set; }
 
+    [JsonConstructor]
     public Color(string? value, string? color) : base(value)
     {
         ColorName = color;

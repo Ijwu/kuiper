@@ -24,7 +24,7 @@ public class ArchipelagoClientTopLevel : Toplevel
         Add(_currentWindow);
     }
 
-    private async Task OnLoginClickedAsync()
+    private async void OnLoginClickedAsync()
     {
         if (_freighter.IsConnected)
         {
@@ -48,50 +48,51 @@ public class ArchipelagoClientTopLevel : Toplevel
         string url = loginWindow.ServerUrl!;
         HookLoginHandler();
         await _freighter.ConnectAsync(new Uri(url));
+        _receivingBay.StartReceiving();
+    }
+
+    async Task HandleLoggingInAsync(Packet[] packets)
+    {
+        if (_currentWindow is not LoginWindow loginWindow)
+        {
+            MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
+            return;
+        }
+
+        foreach (Packet packet in packets)
+        {
+            if (packet is RoomInfo roomInfo)
+            {
+                _currentRoomInfo = roomInfo;
+                await _freighter.SendPacketsAsync([new GetDataPackage(roomInfo.Games)]);
+            }
+            else if (packet is DataPackage dataPackage)
+            {
+                _currentDataPackage = dataPackage;
+                await _freighter.SendPacketsAsync([new Connect(
+                    loginWindow.Password,
+                    loginWindow.Game!, // Can't be null here, assumption is that validation has been completed.
+                    loginWindow.SlotName!,
+                    Guid.NewGuid(),
+                    new Version(5,0,0,0),
+                    ItemHandlingFlags.All,
+                    [],
+                    false
+                )]);
+            }
+            else if (packet is Connected connected)
+            {
+                
+            }
+            else if (packet is ConnectionRefused refused)
+            {
+                MessageBox.ErrorQuery("Login Error", string.Join('\n', refused.Errors), "Ok");
+            }
+        }
     }
 
     private void HookLoginHandler()
     {
-        async Task HandleLoggingInAsync(Packet[] packets)
-        {
-            if (_currentWindow is not LoginWindow loginWindow)
-            {
-                MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
-                return;
-            }
-
-            foreach (Packet packet in packets)
-            {
-                if (packet is RoomInfo roomInfo)
-                {
-                    _currentRoomInfo = roomInfo;
-                    await _freighter.SendPacketsAsync([new GetDataPackage(roomInfo.Games)]);
-                }
-                else if (packet is DataPackage dataPackage)
-                {
-                    _currentDataPackage = dataPackage;
-                    await _freighter.SendPacketsAsync([new Connect(
-                        loginWindow.Password,
-                        loginWindow.Game!, // Can't be null here, assumption is that validation has been completed.
-                        loginWindow.SlotName!,
-                        Guid.NewGuid(),
-                        new Version(5,0,0,0),
-                        ItemHandlingFlags.All,
-                        [],
-                        false
-                    )]);
-                }
-                else if (packet is Connected connected)
-                {
-                    
-                }
-                else if (packet is ConnectionRefused refused)
-                {
-                    MessageBox.ErrorQuery("Login Error", string.Join('\n', refused.Errors), "Ok");
-                }
-            }
-        }
-
         _loginHandler = _receivingBay.OnPacketsReceived(HandleLoggingInAsync);
     }
 

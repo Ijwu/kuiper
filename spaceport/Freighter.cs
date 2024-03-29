@@ -41,7 +41,6 @@ public class Freighter : ITalkToTheServer
         do
         {
             result = await _client.ReceiveAsync(buffer, cancellationToken);
-            System.Console.WriteLine($"[Freighter] Received {result.Count} bytes");
             ms.Write(buffer.Array!, buffer.Offset, result.Count);
         }
         while (!result.EndOfMessage);
