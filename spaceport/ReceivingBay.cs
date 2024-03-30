@@ -73,18 +73,24 @@ public class ReceivingBay : IReceiveTrade
 
     private void PacketsReceived(Packet[] packets)
     {
-        foreach (var handler in _packetsReceivedHandlers)
+        lock (_handlersLock)
         {
-            handler(packets);
+            foreach (var handler in _packetsReceivedHandlers)
+            {
+                handler(packets);
+            }
         }
     }
 
     private async Task PacketsReceivedAsync(Packet[] packets)
     {
         var tasks = new List<Task>();
-        foreach (var handler in _packetsReceivedHandlersAsync)
+        lock (_handlersAsyncLock)
         {
-            tasks.Add(handler(packets));
+            foreach (var handler in _packetsReceivedHandlersAsync)
+            {
+                tasks.Add(handler(packets));
+            }
         }
         PacketsReceived(packets);
         await Task.WhenAll(tasks);
@@ -111,7 +117,14 @@ public class ReceivingBay : IReceiveTrade
     public void Dispose()
     {
         _cts.Cancel();
-        _receiveLoopTask?.Wait();
+        try
+        {
+            _receiveLoopTask?.Wait();
+        }
+        catch (AggregateException)
+        {
+            // meh
+        }
         _cts.Dispose();
 
         GC.SuppressFinalize(this);

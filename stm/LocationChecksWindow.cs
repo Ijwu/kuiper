@@ -20,27 +20,28 @@ public class LocationChecksWindow : Window
         _receiver = receiver;
         _freighter = freighter;
         SetupInterface();
-        Redraw(Frame);
     }
 
     private void SetupInterface()
     {
-        ColorScheme = Colors.TopLevel;
+        ColorScheme = Colors.ColorSchemes["TopLevel"];
         Title = "Location Checks";
 
         var scrollView = new ScrollView()
         {
-            X = 2,
-            Y = 2,
+            X = 0,
+            Y = 0,
             Width = Dim.Fill(),
             Height = Dim.Fill(),
-            AutoHideScrollBars = false
+            AutoHideScrollBars = false,
+            ContentSize = new Size(GetLengthOfLongestLocationName(), _connected.MissingLocations.Length),
+            ShowVerticalScrollIndicator = true
         };
 
-        int y = 0;
+        int y = 1;
         foreach (long id in _connected.MissingLocations)
         {
-            scrollView.Add(CreateButtonForLocationCheckById(id, 0, y++));
+            scrollView.Add(CreateButtonForLocationCheckById(id, 1, y++));
         }
 
         Add(scrollView);
@@ -54,7 +55,10 @@ public class LocationChecksWindow : Window
             Y = y
         };
 
-        button.Clicked += () => SendLocationChecked(id);
+        button.Clicked += () => {
+            SendLocationChecked(id);
+            button.SuperView.Remove(button);
+        };
 
         return button;
     }
@@ -70,5 +74,11 @@ public class LocationChecksWindow : Window
         return _currentDataPackage!.Data.Games[currentGame].LocationNameToId.ToDictionary(kv => kv.Value, kv => kv.Key).TryGetValue(id, out var locationName)
             ? locationName
             : id.ToString();
+    }
+
+    private int GetLengthOfLongestLocationName()
+    {
+        string currentGame = _connected.SlotInfo[_connected.Slot].Game;
+        return _currentDataPackage!.Data.Games[currentGame].LocationNameToId.Max(x => x.Key.Length);
     }
 }

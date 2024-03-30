@@ -16,7 +16,7 @@ public class LoginWindow : Window
 
     public LoginWindow(Action loginClicked)
     {
-        ColorScheme = Colors.TopLevel;
+        ColorScheme = Colors.ColorSchemes["TopLevel"];
 
         Title = "Login";
 
