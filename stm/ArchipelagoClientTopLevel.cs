@@ -14,6 +14,7 @@ public class ArchipelagoClientTopLevel : Toplevel
     private LoginWindow? _loginWindow;
 #pragma warning restore IDE0044 // Add readonly modifier
     private LocationChecksWindow? _locationChecksWindow;
+    private GameInfoWindow? _gameInfoWindow;
     private IDisposable? _loginHandler;
 
     private RoomInfo? _currentRoomInfo;
@@ -23,7 +24,11 @@ public class ArchipelagoClientTopLevel : Toplevel
     public ArchipelagoClientTopLevel()
     {
         ColorScheme = Colors.ColorSchemes["TopLevel"];
-        _loginWindow = new LoginWindow(OnLoginClickedAsync);
+        _loginWindow = new LoginWindow(OnLoginClickedAsync)
+        {
+            X = Pos.Center(),
+            Y = Pos.Center()
+        };
 
         Add(_loginWindow);
     }
@@ -60,7 +65,7 @@ public class ArchipelagoClientTopLevel : Toplevel
     {
         async Task HandleLoggingInAsync(Packet[] packets)
         {
-            if (_loginWindow is not LoginWindow loginWindow)
+            if (_loginWindow is null)
             {
                 MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
                 return;
@@ -72,14 +77,20 @@ public class ArchipelagoClientTopLevel : Toplevel
                 {
                     _currentRoomInfo = roomInfo;
                     await _freighter.SendPacketsAsync([new GetDataPackage(roomInfo.Games)]);
+                    _gameInfoWindow = new GameInfoWindow(_currentRoomInfo)
+                    {
+                        X = Pos.Left(this),
+                        Y = Pos.Top(this)
+                    };
+                    Add(_gameInfoWindow);
                 }
                 else if (packet is DataPackage dataPackage)
                 {
                     _currentDataPackage = dataPackage;
                     await _freighter.SendPacketsAsync([new Connect(
-                        loginWindow.Password,
-                        loginWindow.Game!, // Can't be null here, assumption is that validation has been completed.
-                        loginWindow.SlotName!,
+                        _loginWindow.Password,
+                        _loginWindow.Game!, // Can't be null here, assumption is that validation has been completed.
+                        _loginWindow.SlotName!,
                         Guid.NewGuid(),
                         new Version(5,0,0,0),
                         ItemHandlingFlags.All,
@@ -90,9 +101,12 @@ public class ArchipelagoClientTopLevel : Toplevel
                 else if (packet is Connected connected)
                 {
                     _currentConnected = connected;
-                    _loginHandler?.Dispose();
                     Remove(_loginWindow);
-                    _locationChecksWindow = new LocationChecksWindow(_currentConnected, _currentDataPackage, _freighter);
+                    _locationChecksWindow = new LocationChecksWindow(_currentConnected, _currentDataPackage, _freighter)
+                    {
+                        X = Pos.Right(_gameInfoWindow),
+                        Y = Pos.Top(this)
+                    };
                     Add(_locationChecksWindow);
                 }
                 else if (packet is ConnectionRefused refused)

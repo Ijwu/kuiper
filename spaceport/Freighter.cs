@@ -25,7 +25,14 @@ public class Freighter : ITalkToTheServer
         WebSocketState[] closeableStates = [WebSocketState.Open, WebSocketState.CloseReceived, WebSocketState.CloseSent];
         if (closeableStates.Contains(_client.State))
         {
-            await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", cancellationToken);
+            try
+            {
+                await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "bye", cancellationToken);
+            }
+            catch (IOException)
+            {
+                // meh
+            }
         }
     }
 

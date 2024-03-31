@@ -105,7 +105,7 @@ public class ReceivingBay : IReceiveTrade
                 Packet[] packets = await _freighter.ReceivePacketsAsync(_cts.Token);
                 await PacketsReceivedAsync(packets);
             }
-            catch (OperationCanceledException)
+            catch (TaskCanceledException)
             {
                 return;
             }
