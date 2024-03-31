@@ -18,7 +18,7 @@ public class GameInfoWindow : Window
     private void SetupInterface()
     {
         Title = "Game Info";
-        Width = 40;
+        Width = 60;
         Height = 20;
 
         if (_roomInfo is null)
@@ -33,8 +33,22 @@ public class GameInfoWindow : Window
         var locationCheckPointsGroup = CreateInformationalGrouping("Points Per Check", _roomInfo.LocationCheckPoints.ToString(), 0, 3);
         var serverVersionGroup = CreateInformationalGrouping("Server Version", _roomInfo.Version.ToString(), 0, 4);
         var generatorVersionGroup = CreateInformationalGrouping("Generator Version", _roomInfo.GeneratorVersion.ToString(), 0, 5);
+        var gamesGroup = CreateInformationalGrouping("Games in Multiworld", string.Join(", ", _roomInfo.Games), 0, 6);
+        var permissionsGroup = CreateInformationalGrouping("Permissions", string.Join(", ", _roomInfo.Permissions.Select(perm => $"{perm.Key}={perm.Value}")), 0, 7);
         
-        Add(seedNameGroup, serverTagsGroup, hintCostGroup, locationCheckPointsGroup, serverVersionGroup, generatorVersionGroup);
+        var scrollView = new ScrollView()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill(),
+            ContentSize = new(80, 20),
+            AutoHideScrollBars = true,
+            ShowVerticalScrollIndicator = true,
+            ShowHorizontalScrollIndicator = true
+        };
+        scrollView.Add(seedNameGroup, serverTagsGroup, hintCostGroup, locationCheckPointsGroup, serverVersionGroup, generatorVersionGroup, gamesGroup, permissionsGroup);
+        Add(scrollView);
     }
 
     private View CreateInformationalGrouping(string label, string value, int x, int y)

@@ -35,7 +35,8 @@ public class LocationChecksWindow : Window
             Height = Dim.Fill(),
             AutoHideScrollBars = false,
             ContentSize = new Size(width, _connected.MissingLocations.Length),
-            ShowVerticalScrollIndicator = true
+            ShowVerticalScrollIndicator = true,
+            ShowHorizontalScrollIndicator = true
         };
 
         int y = 1;
