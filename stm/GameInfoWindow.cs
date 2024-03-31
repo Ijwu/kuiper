@@ -18,7 +18,7 @@ public class GameInfoWindow : Window
     private void SetupInterface()
     {
         Title = "Game Info";
-        Width = 80;
+        Width = 40;
         Height = 20;
 
         if (_roomInfo is null)
@@ -27,24 +27,32 @@ public class GameInfoWindow : Window
             return;
         }
 
-        var seedNameGroup = CreateInformationalGrouping("Seed Name", _roomInfo.SeedName);
-        seedNameGroup.X = 1;
-        seedNameGroup.Y = 1;
-        Add(seedNameGroup);
+        var seedNameGroup = CreateInformationalGrouping("Seed Name", _roomInfo.SeedName, 0, 0);
+        var serverTagsGroup = CreateInformationalGrouping("Server Tags", string.Join(", ", _roomInfo.Tags), 0, 1);
+        var hintCostGroup = CreateInformationalGrouping("Hint Cost", _roomInfo.HintCost.ToString(), 0, 2);
+        var locationCheckPointsGroup = CreateInformationalGrouping("Points Per Check", _roomInfo.LocationCheckPoints.ToString(), 0, 3);
+        var serverVersionGroup = CreateInformationalGrouping("Server Version", _roomInfo.Version.ToString(), 0, 4);
+        var generatorVersionGroup = CreateInformationalGrouping("Generator Version", _roomInfo.GeneratorVersion.ToString(), 0, 5);
+        
+        Add(seedNameGroup, serverTagsGroup, hintCostGroup, locationCheckPointsGroup, serverVersionGroup, generatorVersionGroup);
     }
 
-    private View CreateInformationalGrouping(string label, string value)
+    private View CreateInformationalGrouping(string label, string value, int x, int y)
     {
-        var container = new FrameView();
-
-        var caption = new Label(label)
+        var container = new View()
         {
-            X = 0, Y = 0
+            X = Pos.At(x),
+            Y = Pos.At(y),
+            Width = Dim.Fill(),
+            Height = Dim.Sized(3)
         };
+
+        var caption = new Label(0,0,label+":");
 
         var text = new Label(value)
         {
-            X = caption.X + 1, Y = 0
+            X = Pos.Right(caption) + 1,
+            Y = 0
         };
 
         container.Add(caption, text);

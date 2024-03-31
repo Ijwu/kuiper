@@ -15,8 +15,8 @@ public class ArchipelagoClientTopLevel : Toplevel
 #pragma warning restore IDE0044 // Add readonly modifier
     private LocationChecksWindow? _locationChecksWindow;
     private GameInfoWindow? _gameInfoWindow;
+    private readonly MenuBar _menuBar;    
     private IDisposable? _loginHandler;
-
     private RoomInfo? _currentRoomInfo;
     private DataPackage? _currentDataPackage;
     private Connected? _currentConnected;
@@ -30,7 +30,32 @@ public class ArchipelagoClientTopLevel : Toplevel
             Y = Pos.Center()
         };
 
-        Add(_loginWindow);
+        _menuBar = new MenuBar([
+            new("_Application", (MenuItem[])[
+                new("_Quit", "Quit the application.", () => Application.MainLoop.Invoke(async () => { await DisconnectAsync(); Application.RequestStop();}))
+            ])
+        ]);
+        Add(_menuBar, _loginWindow);
+    }
+
+    private MenuBarItem? CreateWindowsMenuBarItem()
+    {
+        if (_gameInfoWindow is null)
+        {
+            MessageBox.ErrorQuery("UI Error", "Something is fucking broken. This time it's my fault.", "Ok");
+            return null;
+        }
+
+        if (_locationChecksWindow is null)
+        {
+            MessageBox.ErrorQuery("UI Error", "Something is fucking broken. This time it's my fault.", "Ok");
+            return null;
+        }
+
+        return new("_Windows", (MenuItem[])[
+                new("_Game Info", "Toggle Game Info Window", () => _gameInfoWindow.Visible = !_gameInfoWindow.Visible),
+                new("_Location Checks", "Toggle Location Check Window", () => _locationChecksWindow.Visible = !_locationChecksWindow.Visible)
+            ]);
     }
 
     private async void OnLoginClickedAsync()
@@ -80,7 +105,7 @@ public class ArchipelagoClientTopLevel : Toplevel
                     _gameInfoWindow = new GameInfoWindow(_currentRoomInfo)
                     {
                         X = Pos.Left(this),
-                        Y = Pos.Top(this)
+                        Y = Pos.Bottom(_menuBar)
                     };
                     Add(_gameInfoWindow);
                 }
@@ -105,9 +130,10 @@ public class ArchipelagoClientTopLevel : Toplevel
                     _locationChecksWindow = new LocationChecksWindow(_currentConnected, _currentDataPackage, _freighter)
                     {
                         X = Pos.Right(_gameInfoWindow),
-                        Y = Pos.Top(this)
+                        Y = Pos.Top(_gameInfoWindow)
                     };
                     Add(_locationChecksWindow);
+                    _menuBar.Menus = [.._menuBar.Menus, CreateWindowsMenuBarItem()];
                 }
                 else if (packet is ConnectionRefused refused)
                 {

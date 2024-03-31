@@ -24,7 +24,7 @@ public class LocationChecksWindow : Window
         Title = "Location Checks";
 
         int width = GetLengthOfLongestLocationName();
-        Width = 120;
+        Width = 80;
         Height = 20;
 
         var scrollView = new ScrollView()
