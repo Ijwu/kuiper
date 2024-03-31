@@ -6,26 +6,26 @@ namespace stm;
 
 public class LocationChecksWindow : Window
 {
-    private readonly RoomInfo? _roomInfo;
     private readonly Connected _connected;
     private readonly DataPackage? _currentDataPackage;
-    private readonly IReceiveTrade _receiver;
     private readonly ITalkToTheServer _freighter;
 
-    public LocationChecksWindow(RoomInfo? roomInfo, Connected connected, DataPackage? currentDataPackage, IReceiveTrade receiver, ITalkToTheServer freighter)
+    public LocationChecksWindow(Connected connected, DataPackage? currentDataPackage, ITalkToTheServer freighter)
     {
-        _roomInfo = roomInfo;
         _connected = connected;
         _currentDataPackage = currentDataPackage;
-        _receiver = receiver;
         _freighter = freighter;
         SetupInterface();
     }
 
     private void SetupInterface()
     {
-        ColorScheme = Colors.ColorSchemes["TopLevel"];
+        ColorScheme = Colors.ColorSchemes["Base"];
         Title = "Location Checks";
+
+        int width = GetLengthOfLongestLocationName();
+        Width = 120;
+        Height = 20;
 
         var scrollView = new ScrollView()
         {
@@ -34,7 +34,7 @@ public class LocationChecksWindow : Window
             Width = Dim.Fill(),
             Height = Dim.Fill(),
             AutoHideScrollBars = false,
-            ContentSize = new Size(GetLengthOfLongestLocationName(), _connected.MissingLocations.Length),
+            ContentSize = new Size(width, _connected.MissingLocations.Length),
             ShowVerticalScrollIndicator = true
         };
 

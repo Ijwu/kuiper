@@ -10,7 +10,10 @@ public class ArchipelagoClientTopLevel : Toplevel
 {
     private readonly Freighter _freighter = new Freighter();
     private IReceiveTrade? _receivingBay;
-    private Window? _currentWindow;
+#pragma warning disable IDE0044 // Add readonly modifier - suppressed since one day it will be re-assigned
+    private LoginWindow? _loginWindow;
+#pragma warning restore IDE0044 // Add readonly modifier
+    private LocationChecksWindow? _locationChecksWindow;
     private IDisposable? _loginHandler;
 
     private RoomInfo? _currentRoomInfo;
@@ -19,9 +22,10 @@ public class ArchipelagoClientTopLevel : Toplevel
 
     public ArchipelagoClientTopLevel()
     {
-        _currentWindow = new LoginWindow(OnLoginClickedAsync);
+        ColorScheme = Colors.ColorSchemes["TopLevel"];
+        _loginWindow = new LoginWindow(OnLoginClickedAsync);
 
-        Add(_currentWindow);
+        Add(_loginWindow);
     }
 
     private async void OnLoginClickedAsync()
@@ -32,7 +36,7 @@ public class ArchipelagoClientTopLevel : Toplevel
             return;
         }
 
-        var loginWindow = _currentWindow as LoginWindow;
+        var loginWindow = _loginWindow as LoginWindow;
 
         if (loginWindow is null)
         {
@@ -56,7 +60,7 @@ public class ArchipelagoClientTopLevel : Toplevel
     {
         async Task HandleLoggingInAsync(Packet[] packets)
         {
-            if (_currentWindow is not LoginWindow loginWindow)
+            if (_loginWindow is not LoginWindow loginWindow)
             {
                 MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
                 return;
@@ -87,9 +91,9 @@ public class ArchipelagoClientTopLevel : Toplevel
                 {
                     _currentConnected = connected;
                     _loginHandler?.Dispose();
-                    Remove(_currentWindow);
-                    _currentWindow = new LocationChecksWindow(_currentRoomInfo, _currentConnected, _currentDataPackage, _receivingBay, _freighter);
-                    Add(_currentWindow);
+                    Remove(_loginWindow);
+                    _locationChecksWindow = new LocationChecksWindow(_currentConnected, _currentDataPackage, _freighter);
+                    Add(_locationChecksWindow);
                 }
                 else if (packet is ConnectionRefused refused)
                 {
