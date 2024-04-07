@@ -1,4 +1,4 @@
-﻿namespace kbo;
+﻿namespace kbo.bigrocks;
 
 public record Get : Packet
 {

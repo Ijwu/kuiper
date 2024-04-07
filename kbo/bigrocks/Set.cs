@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace kbo;
+namespace kbo.bigrocks;
 
 public record Set : Packet
 {
