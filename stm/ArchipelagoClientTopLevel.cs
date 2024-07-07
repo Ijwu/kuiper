@@ -15,6 +15,7 @@ public class ArchipelagoClientTopLevel : Toplevel
 #pragma warning restore IDE0044 // Add readonly modifier
     private LocationChecksWindow? _locationChecksWindow;
     private GameInfoWindow? _gameInfoWindow;
+    private PacketLogWindow? _packetLogWindow;
     private readonly MenuBar _menuBar;    
     private IDisposable? _loginHandler;
     private RoomInfo? _currentRoomInfo;
@@ -35,7 +36,10 @@ public class ArchipelagoClientTopLevel : Toplevel
                 new("_Quit", "Quit the application.", () => Application.MainLoop.Invoke(async () => { await DisconnectAsync(); Application.RequestStop();}))
             ])
         ]);
+
+        // var packetBuilder = new PacketBuilderWindow(_freighter){Y = 1};
         Add(_menuBar, _loginWindow);
+        // Add(_menuBar, packetBuilder);
     }
 
     private MenuBarItem? CreateWindowsMenuBarItem()
@@ -66,9 +70,7 @@ public class ArchipelagoClientTopLevel : Toplevel
             return;
         }
 
-        var loginWindow = _loginWindow as LoginWindow;
-
-        if (loginWindow is null)
+        if (_loginWindow is not LoginWindow loginWindow)
         {
             MessageBox.ErrorQuery("Login Error", "Something is fucking broken. This time it's my fault.", "Ok");
             return;
@@ -130,9 +132,16 @@ public class ArchipelagoClientTopLevel : Toplevel
                     _locationChecksWindow = new LocationChecksWindow(_currentConnected, _currentDataPackage, _freighter)
                     {
                         X = Pos.Right(_gameInfoWindow),
-                        Y = Pos.Top(_gameInfoWindow)
+                        Y = Pos.Bottom(_menuBar)
                     };
-                    Add(_locationChecksWindow);
+                    
+                    _packetLogWindow = new PacketLogWindow(_receivingBay)
+                    {
+                        X = Pos.Right(_locationChecksWindow),
+                        Y = Pos.Bottom(_menuBar)
+                    };
+
+                    Add(_locationChecksWindow, _packetLogWindow);
                     _menuBar.Menus = [.._menuBar.Menus, CreateWindowsMenuBarItem()];
                 }
                 else if (packet is ConnectionRefused refused)

@@ -26,7 +26,7 @@ public class LoginWindow : Window
 			Text = "Slot Name:" 
 		};
 
-        _slotText = new TextField("a") {
+        _slotText = new TextField("1") {
 			X = Pos.Right (slotLabel) + 1,
 			Width = Dim.Fill(),
 		};
@@ -49,7 +49,7 @@ public class LoginWindow : Window
 			Y = Pos.Bottom(gameLabel) + 1
 		};
 
-        _urlText = new TextField("wss://archipelago.gg:63794") {
+        _urlText = new TextField("ws://127.0.0.1:38281") {
 			X = Pos.Left(_gameText),
 			Y = Pos.Top(urlLabel),
 			Width = Dim.Fill(),
