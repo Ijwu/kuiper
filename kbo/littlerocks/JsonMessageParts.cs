@@ -1,20 +1,5 @@
 ﻿namespace kbo.littlerocks;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(Text), "text")]
-[JsonDerivedType(typeof(PlayerId), "player_id")]
-[JsonDerivedType(typeof(PlayerName), "player_name")]
-[JsonDerivedType(typeof(ItemId), "item_id")]
-[JsonDerivedType(typeof(ItemName), "item_name")]
-[JsonDerivedType(typeof(LocationId), "location_id")]
-[JsonDerivedType(typeof(LocationName), "location_name")]
-[JsonDerivedType(typeof(EntranceName), "entrance_name")]
-[JsonDerivedType(typeof(Color), "color")]
-public abstract record JsonMessagePart
-{
-
-}
-
 /*
  example PrintJSON for reference
 "[
@@ -31,114 +16,125 @@ public abstract record JsonMessagePart
 ]"
 
 */
-
-public record Text : JsonMessagePart
+public class JsonMessagePart
 {
-    [JsonPropertyName("text")]
-    public string? Value { get; set; }
-
-    public Text(string? value)
+    [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", IgnoreUnrecognizedTypeDiscriminators = true, UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+    [JsonDerivedType(typeof(PlayerId), "player_id")]
+    [JsonDerivedType(typeof(PlayerName), "player_name")]
+    [JsonDerivedType(typeof(ItemId), "item_id")]
+    [JsonDerivedType(typeof(ItemName), "item_name")]
+    [JsonDerivedType(typeof(LocationId), "location_id")]
+    [JsonDerivedType(typeof(LocationName), "location_name")]
+    [JsonDerivedType(typeof(EntranceName), "entrance_name")]
+    [JsonDerivedType(typeof(Color), "color")]
+    public record Text
     {
-        Value = value;
+        [JsonPropertyName("text")]
+        public string? Value { get; set; }
+
+        public Text(string? value)
+        {
+            Value = value;
+        }
+
+        [JsonConstructor]
+        internal Text() { }
     }
 
-    [JsonConstructor]
-    internal Text() { }
-}
-
-public record PlayerId : Text
-{
-    public PlayerId(string? value) : base(value)
+    public record PlayerId : Text
     {
+        public PlayerId(string? value) : base(value)
+        {
+        }
+
+        [JsonConstructor]
+        internal PlayerId() { }
     }
 
-    [JsonConstructor]
-    internal PlayerId() { }
-}
-
-public record PlayerName : Text
-{
-    public PlayerName(string? value) : base(value)
+    public record PlayerName : Text
     {
+        public PlayerName(string? value) : base(value)
+        {
+        }
+
+        [JsonConstructor]
+        internal PlayerName() { }
     }
 
-    [JsonConstructor]
-    internal PlayerName() { }
-}
-
-public record ItemId : Text
-{
-    [JsonPropertyName("flags")]
-    public NetworkItemFlags? Flags { get; set; }
-
-    [JsonPropertyName("player")]
-    public long? Player { get; set; }
-
-    public ItemId(string? value, NetworkItemFlags? flags, long? player) : base(value)
+    public record ItemId : Text
     {
-        Flags = flags;
-        Player = player;
+        [JsonPropertyName("flags")]
+        public NetworkItemFlags? Flags { get; set; }
+
+        [JsonPropertyName("player")]
+        public long? Player { get; set; }
+
+        public ItemId(string? value, NetworkItemFlags? flags, long? player) : base(value)
+        {
+            Flags = flags;
+            Player = player;
+        }
+
+        [JsonConstructor]
+        internal ItemId() { }
     }
 
-    [JsonConstructor]
-    internal ItemId() { }
-}
-
-public record ItemName : ItemId
-{
-    public ItemName(string? value, NetworkItemFlags? flags, long? player) : base(value, flags, player)
+    public record ItemName : ItemId
     {
+        public ItemName(string? value, NetworkItemFlags? flags, long? player) : base(value, flags, player)
+        {
+        }
+
+        [JsonConstructor]
+        internal ItemName() { }
     }
 
-    [JsonConstructor]
-    internal ItemName() { }
-}
-
-public record LocationId : Text
-{
-
-    [JsonPropertyName("player")]
-    public long? Player { get; set; }
-
-    public LocationId(string? value, long? player) : base(value)
+    public record LocationId : Text
     {
-        Player = player;
+
+        [JsonPropertyName("player")]
+        public long? Player { get; set; }
+
+        public LocationId(string? value, long? player) : base(value)
+        {
+            Player = player;
+        }
+
+        [JsonConstructor]
+        internal LocationId() { }
     }
 
-    [JsonConstructor]
-    internal LocationId() { }
-}
-
-public record LocationName : LocationId
-{
-    public LocationName(string? value, long? player) : base(value, player)
+    public record LocationName : LocationId
     {
+        public LocationName(string? value, long? player) : base(value, player)
+        {
+        }
+
+        [JsonConstructor]
+        internal LocationName() { }
     }
 
-    [JsonConstructor]
-    internal LocationName() { }
-}
-
-public record EntranceName : Text
-{
-    public EntranceName(string? value) : base(value)
+    public record EntranceName : Text
     {
+        public EntranceName(string? value) : base(value)
+        {
+        }
+
+        [JsonConstructor]
+        internal EntranceName() { }
     }
 
-    [JsonConstructor]
-    internal EntranceName() { }
-}
-
-public record Color : Text
-{
-    [JsonPropertyName("color")]
-    public string? ColorName { get; set; }
-
-    public Color(string? value, string? color) : base(value)
+    public record Color : Text
     {
-        ColorName = color;
-    }
+        [JsonPropertyName("color")]
+        public string? ColorName { get; set; }
 
-    [JsonConstructor]
-    internal Color() { }
+        public Color(string? value, string? color) : base(value)
+        {
+            ColorName = color;
+        }
+
+        [JsonConstructor]
+        internal Color() { }
+    }
 }
