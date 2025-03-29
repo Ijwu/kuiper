@@ -27,7 +27,8 @@ public class JsonMessagePartSerializationTests
         """;
 
         // Act
-        PrintJson deserializedPacket = JsonSerializer.Deserialize<PrintJson>(json)!;
+        JsonSerializerOptions options = new() { AllowOutOfOrderMetadataProperties = true };
+        PrintJson deserializedPacket = JsonSerializer.Deserialize<PrintJson>(json, options)!;
         JsonMessagePart.Text messagePart = deserializedPacket!.Data.First();
 
         // Assert
@@ -35,7 +36,7 @@ public class JsonMessagePartSerializationTests
         {
             Assert.That(deserializedPacket, Is.Not.Null);
             Assert.That(deserializedPacket, Is.AssignableTo<Packet>());
-            Assert.That(deserializedPacket, Is.TypeOf<PrintJson>());
+            Assert.That(deserializedPacket, Is.TypeOf<TutorialPrintJson>());
             Assert.That(messagePart.Value, Is.EqualTo(messageString));
         });
     }
@@ -68,7 +69,8 @@ public class JsonMessagePartSerializationTests
         """;
 
         // Act
-        PrintJson deserializedPacket = JsonSerializer.Deserialize<PrintJson>(json)!;
+        JsonSerializerOptions options = new() { AllowOutOfOrderMetadataProperties = true };
+        PrintJson deserializedPacket = JsonSerializer.Deserialize<PrintJson>(json, options)!;
         var data = deserializedPacket!.Data;
 
         // Assert
@@ -76,8 +78,7 @@ public class JsonMessagePartSerializationTests
         {
             Assert.That(deserializedPacket, Is.Not.Null);
             Assert.That(deserializedPacket, Is.AssignableTo<Packet>());
-            Assert.That(deserializedPacket, Is.TypeOf<PrintJson>());
-            Assert.That(deserializedPacket.Type, Is.EqualTo("ItemSend"));
+            Assert.That(deserializedPacket, Is.TypeOf<ItemSendPrintJson>());
             
             Assert.That(data[0], Is.TypeOf<JsonMessagePart.PlayerId>());
             var first = (data[0] as JsonMessagePart.PlayerId)!;
