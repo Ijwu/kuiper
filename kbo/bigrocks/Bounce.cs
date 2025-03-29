@@ -14,9 +14,9 @@ public record Bounce : Packet
     public string[] Tags { get; set; }
 
     [JsonPropertyName("data")]
-    public Dictionary<string, JsonNode> Data { get; set; }
+    public Dictionary<string, object> Data { get; set; }
 
-    public Bounce(string[] games, long[] slots, string[] tags, Dictionary<string, JsonNode> data)
+    public Bounce(string[] games, long[] slots, string[] tags, Dictionary<string, object> data)
     {
         Games = games;
         Slots = slots;

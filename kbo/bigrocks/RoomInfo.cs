@@ -16,7 +16,7 @@ public record RoomInfo : Packet
     public string[] Tags { get; set; }
 
     [JsonPropertyName("password")]
-    public bool HasPassword { get; set; }
+    public bool Password { get; set; }
 
     [JsonPropertyName("permissions")]
     public Dictionary<string, CommandPermission> Permissions { get; set; }
@@ -42,7 +42,7 @@ public record RoomInfo : Packet
     public RoomInfo(Version version,
                     Version generatorVersion,
                     string[] tags,
-                    bool hasPassword,
+                    bool password,
                     Dictionary<string, CommandPermission> permissions,
                     long hintCost,
                     long locationCheckPoints,
@@ -54,7 +54,7 @@ public record RoomInfo : Packet
         Version = version;
         GeneratorVersion = generatorVersion;
         Tags = tags;
-        HasPassword = hasPassword;
+        Password = password;
         Permissions = permissions;
         HintCost = hintCost;
         LocationCheckPoints = locationCheckPoints;

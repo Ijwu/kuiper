@@ -8,15 +8,19 @@ public record SetReply : Packet
     public string Key { get; set; }
 
     [JsonPropertyName("value")]
-    public JsonNode Value { get; set; }
+    public object Value { get; set; }
 
     [JsonPropertyName("original_value")]
-    public JsonNode? OriginalValue { get; set; }
+    public object OriginalValue { get; set; }
 
-    public SetReply(string key, JsonNode value, JsonNode? originalValue = null)
+    [JsonPropertyName("slot")]
+    public long Slot { get; set; }
+
+    public SetReply(string key, object value, object originalValue, long slot)
     {
         Key = key;
         Value = value;
         OriginalValue = originalValue;
+        Slot = slot;
     }
 }

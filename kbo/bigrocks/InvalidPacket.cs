@@ -6,7 +6,7 @@ public record InvalidPacket : Packet
     public string Type { get; set; }
 
     [JsonPropertyName("original_cmd")]
-    public string? OriginalCmd { get; set; }
+    public string? OriginalCommand { get; set; }
 
     [JsonPropertyName("text")]
     public string Text { get; set; }
@@ -15,6 +15,6 @@ public record InvalidPacket : Packet
     {
         Type = type;
         Text = text;
-        OriginalCmd = originalCmd;
+        OriginalCommand = originalCmd;
     }
 }
