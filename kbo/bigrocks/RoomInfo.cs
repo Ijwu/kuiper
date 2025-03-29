@@ -30,9 +30,6 @@ public record RoomInfo : Packet
     [JsonPropertyName("games")]
     public string[] Games { get; set; }
 
-    [JsonPropertyName("datapackage_versions")]
-    public Dictionary<string, long> DataPackageVersions { get; set; }
-
     [JsonPropertyName("datapackage_checksums")]
     public Dictionary<string, string> DataPackageChecksums { get; set; }
 
@@ -42,10 +39,16 @@ public record RoomInfo : Packet
     [JsonPropertyName("time")]
     public double Time { get; set; }
 
-    public RoomInfo(Version version, Version generatorVersion, string[] tags, bool hasPassword,
-                    Dictionary<string, CommandPermission> permissions, long hintCost, long locationCheckPoints,
-                    string[] games, Dictionary<string, long> dataPackageVersions,
-                    Dictionary<string, string> dataPackageChecksums, string seedName,
+    public RoomInfo(Version version,
+                    Version generatorVersion,
+                    string[] tags,
+                    bool hasPassword,
+                    Dictionary<string, CommandPermission> permissions,
+                    long hintCost,
+                    long locationCheckPoints,
+                    string[] games,
+                    Dictionary<string, string> dataPackageChecksums,
+                    string seedName,
                     double time)
     {
         Version = version;
@@ -56,7 +59,6 @@ public record RoomInfo : Packet
         HintCost = hintCost;
         LocationCheckPoints = locationCheckPoints;
         Games = games;
-        DataPackageVersions = dataPackageVersions;
         DataPackageChecksums = dataPackageChecksums;
         SeedName = seedName;
         Time = time;

@@ -26,9 +26,14 @@ public record Connected : Packet
     [JsonPropertyName("hint_points")]
     public long HintPoints { get; set; }
 
-    public Connected(long team, long slot, NetworkPlayer[] players, long[] missingLocations,
-                     long[] checkedLocations, Dictionary<string, object>? slotData,
-                     Dictionary<long, NetworkSlot> slotInfo, long hintPoints)
+    public Connected(long team,
+                     long slot,
+                     NetworkPlayer[] players,
+                     long[] missingLocations,
+                     long[] checkedLocations,
+                     Dictionary<string, object>? slotData,
+                     Dictionary<long, NetworkSlot> slotInfo,
+                     long hintPoints)
     {
         Team = team;
         Slot = slot;

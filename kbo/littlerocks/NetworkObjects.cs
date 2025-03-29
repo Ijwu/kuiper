@@ -67,9 +67,9 @@ public record NetworkItem : NetworkObject
     public long Player { get; set; }
 
     [JsonPropertyName("flags")]
-    public long Flags { get; set; }
+    public NetworkItemFlags Flags { get; set; }
 
-    public NetworkItem(long item, long location, long player, long flags)
+    public NetworkItem(long item, long location, long player, NetworkItemFlags flags)
     {
         Item = item;
         Location = location;
