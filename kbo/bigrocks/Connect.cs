@@ -29,8 +29,13 @@ public record Connect : Packet
     [JsonPropertyName("slot_data")]
     public bool SlotData { get; set; }
 
-    public Connect(string? password, string game, string name, Guid uuid,
-                   Version version, ItemHandlingFlags itemsHandling, string[] tags, 
+    public Connect(string? password,
+                   string game,
+                   string name,
+                   Guid uuid,
+                   Version version,
+                   ItemHandlingFlags itemsHandling,
+                   string[] tags,
                    bool slotData)
     {
         Password = password;

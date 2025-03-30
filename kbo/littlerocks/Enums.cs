@@ -4,11 +4,11 @@ namespace kbo.littlerocks;
 
 public enum ClientStatus
 {
-    ClientUnknown = 0,
-    ClientConnected = 5,
-    ClientReady = 10,
-    ClientPlaying = 20,
-    ClientGoal = 30
+    Unknown = 0,
+    Connected = 5,
+    Ready = 10,
+    Playing = 20,
+    Goal = 30
 }
 
 public enum HintStatus
