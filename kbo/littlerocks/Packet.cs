@@ -3,17 +3,22 @@
 namespace kbo.littlerocks;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "cmd", IgnoreUnrecognizedTypeDiscriminators = true)]
-[JsonDerivedType(typeof(Connect), nameof(Connect))]
+// Server to Client
 [JsonDerivedType(typeof(RoomInfo), nameof(RoomInfo))]
-[JsonDerivedType(typeof(Connected), nameof(Connected))]
 [JsonDerivedType(typeof(ConnectionRefused), nameof(ConnectionRefused))]
+[JsonDerivedType(typeof(Connected), nameof(Connected))]
+[JsonDerivedType(typeof(ReceivedItems), nameof(ReceivedItems))]
 [JsonDerivedType(typeof(LocationInfo), nameof(LocationInfo))]
-[JsonDerivedType(typeof(PrintJson), "PrintJSON")]
-[JsonDerivedType(typeof(Retrieved), nameof(Retrieved))]
 [JsonDerivedType(typeof(RoomUpdate), nameof(RoomUpdate))]
+[JsonDerivedType(typeof(PrintJson), "PrintJSON")]
 [JsonDerivedType(typeof(DataPackage), nameof(DataPackage))]
 [JsonDerivedType(typeof(Bounced), nameof(Bounced))]
 [JsonDerivedType(typeof(InvalidPacket), nameof(InvalidPacket))]
+[JsonDerivedType(typeof(Retrieved), nameof(Retrieved))]
+[JsonDerivedType(typeof(SetReply), nameof(SetReply))]
+
+// Client to Server
+[JsonDerivedType(typeof(Connect), nameof(Connect))]
 [JsonDerivedType(typeof(ConnectUpdate), nameof(ConnectUpdate))]
 [JsonDerivedType(typeof(Sync), nameof(Sync))]
 [JsonDerivedType(typeof(LocationChecks), nameof(LocationChecks))]
@@ -24,9 +29,7 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(Bounce), nameof(Bounce))]
 [JsonDerivedType(typeof(Set), nameof(Set))]
 [JsonDerivedType(typeof(Get), nameof(Get))]
-[JsonDerivedType(typeof(SetReply), nameof(SetReply))]
 [JsonDerivedType(typeof(SetNotify), nameof(SetNotify))]
-[JsonDerivedType(typeof(ReceivedItems), nameof(ReceivedItems))]
 public record Packet
 {
 }
