@@ -6,9 +6,9 @@ public record LocationScouts : Packet
     public long[] Locations { get; set; }
 
     [JsonPropertyName("create_as_hint")]
-    public int CreateAsHint { get; set; }
+    public long CreateAsHint { get; set; }
 
-    public LocationScouts(long[] locations, int createAsHint)
+    public LocationScouts(long[] locations, long createAsHint)
     {
         Locations = locations;
         CreateAsHint = createAsHint;

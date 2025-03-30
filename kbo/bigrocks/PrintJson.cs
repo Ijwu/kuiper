@@ -36,7 +36,7 @@ public record ItemPrintJson : PrintJson
     /// Destination player's ID.
     /// </summary>
     [JsonPropertyName("receiving")]
-    public int Receiving { get; set; }
+    public long Receiving { get; set; }
 
     /// <summary>
     /// Source player's ID, location ID, item ID and item flags.
@@ -44,7 +44,7 @@ public record ItemPrintJson : PrintJson
     [JsonPropertyName("item")]
     public NetworkItem Item { get; set; }
 
-    public ItemPrintJson(JsonMessagePart.Text[] data, int receiving, NetworkItem item) : base(data)
+    public ItemPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item) : base(data)
     {
         Receiving = receiving;
         Item = item;
@@ -57,9 +57,9 @@ public record ItemCheatPrintJson : ItemPrintJson
     /// Team of the triggering player.
     /// </summary>
     [JsonPropertyName("team")]
-    public int Team { get; set; }
+    public long Team { get; set; }
 
-    public ItemCheatPrintJson(JsonMessagePart.Text[] data, int receiving, NetworkItem item, int team) : base(data, receiving, item)
+    public ItemCheatPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item, long team) : base(data, receiving, item)
     {
         Team = team;
     }
@@ -67,7 +67,7 @@ public record ItemCheatPrintJson : ItemPrintJson
 
 public record ItemSendPrintJson : ItemPrintJson
 {
-    public ItemSendPrintJson(JsonMessagePart.Text[] data, int receiving, NetworkItem item) : base(data, receiving, item)
+    public ItemSendPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item) : base(data, receiving, item)
     {
 
     }
@@ -81,7 +81,7 @@ public record HintPrintJson : ItemPrintJson
     [JsonPropertyName("found")]
     public bool Found { get; set; }
 
-    public HintPrintJson(JsonMessagePart.Text[] data, int receiving, NetworkItem item, bool found) : base(data, receiving, item)
+    public HintPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item, bool found) : base(data, receiving, item)
     {
         Found = found;
     }
@@ -93,15 +93,15 @@ public record SlotPrintJson : PrintJson
     /// Team of the triggering player.
     /// </summary>
     [JsonPropertyName("team")]
-    public int Team { get; set; }
+    public long Team { get; set; }
 
     /// <summary>
     /// Slot of the triggering player.
     /// </summary>
     [JsonPropertyName("slot")]
-    public int Slot { get; set; }
+    public long Slot { get; set; }
 
-    public SlotPrintJson(JsonMessagePart.Text[] data, int team, int slot) : base(data)
+    public SlotPrintJson(JsonMessagePart.Text[] data, long team, long slot) : base(data)
     {
         Team = team;
         Slot = slot;
@@ -110,7 +110,7 @@ public record SlotPrintJson : PrintJson
 
 public record PartPrintJson : SlotPrintJson
 {
-    public PartPrintJson(JsonMessagePart.Text[] data, int slot, int team) : base(data, slot, team)
+    public PartPrintJson(JsonMessagePart.Text[] data, long slot, long team) : base(data, slot, team)
     {
     }
 }
@@ -122,7 +122,7 @@ public record TagsPrintJson : SlotPrintJson
     /// </summary>
     [JsonPropertyName("tags")]
     public string[] Tags { get; set; }
-    public TagsPrintJson(JsonMessagePart.Text[] data, int slot, int team, string[] tags) : base(data, slot, team)
+    public TagsPrintJson(JsonMessagePart.Text[] data, long slot, long team, string[] tags) : base(data, slot, team)
     {
         Tags = tags;
     }
@@ -130,35 +130,35 @@ public record TagsPrintJson : SlotPrintJson
 
 public record JoinPrintJson : TagsPrintJson
 {
-    public JoinPrintJson(JsonMessagePart.Text[] data, int slot, int team, string[] tags) : base(data, slot, team, tags)
+    public JoinPrintJson(JsonMessagePart.Text[] data, long slot, long team, string[] tags) : base(data, slot, team, tags)
     {
     }
 }
 
 public record TagsChangedPrintJson : TagsPrintJson
 {
-    public TagsChangedPrintJson(JsonMessagePart.Text[] data, int slot, int team, string[] tags) : base(data, slot, team, tags)
+    public TagsChangedPrintJson(JsonMessagePart.Text[] data, long slot, long team, string[] tags) : base(data, slot, team, tags)
     {
     }
 }
 
 public record GoalPrintJson : SlotPrintJson
 {
-    public GoalPrintJson(JsonMessagePart.Text[] data, int slot, int team) : base(data, slot, team)
+    public GoalPrintJson(JsonMessagePart.Text[] data, long slot, long team) : base(data, slot, team)
     {
     }
 }
 
 public record ReleasePrintJson : SlotPrintJson
 {
-    public ReleasePrintJson(JsonMessagePart.Text[] data, int slot, int team) : base(data, slot, team)
+    public ReleasePrintJson(JsonMessagePart.Text[] data, long slot, long team) : base(data, slot, team)
     {
     }
 }
 
 public record CollectPrintJson : SlotPrintJson
 {
-    public CollectPrintJson(JsonMessagePart.Text[] data, int slot, int team) : base(data, slot, team)
+    public CollectPrintJson(JsonMessagePart.Text[] data, long slot, long team) : base(data, slot, team)
     {
     }
 }
@@ -171,7 +171,7 @@ public record ChatPrintJson : SlotPrintJson
     [JsonPropertyName("message")]
     public string Message { get; set; }
 
-    public ChatPrintJson(JsonMessagePart.Text[] data, int slot, int team, string message) : base(data, slot, team)
+    public ChatPrintJson(JsonMessagePart.Text[] data, long slot, long team, string message) : base(data, slot, team)
     {
         Message = message;
     }
@@ -197,9 +197,9 @@ public record CountdownPrintJson : PrintJson
     /// Amount of seconds remaining on the countdown.
     /// </summary>
     [JsonPropertyName("countdown")]
-    public int Countdown { get; set; }
+    public long Countdown { get; set; }
 
-    public CountdownPrintJson(JsonMessagePart.Text[] data, int countdown) : base(data)
+    public CountdownPrintJson(JsonMessagePart.Text[] data, long countdown) : base(data)
     {
         Countdown = countdown;
     }
