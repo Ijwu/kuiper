@@ -8,7 +8,7 @@ public record Set : Packet
     public string Key { get; set; }
 
     [JsonPropertyName("default")]
-    public JsonNode Default { get; set; }
+    public object Default { get; set; }
 
     [JsonPropertyName("want_reply")]
     public bool WantReply { get; set; }
@@ -16,7 +16,7 @@ public record Set : Packet
     [JsonPropertyName("operations")]
     public DataStorageOperation[] Operations { get; set; }
 
-    public Set(string key, JsonNode @default, bool wantReply, DataStorageOperation[] operations)
+    public Set(string key, object @default, bool wantReply, DataStorageOperation[] operations)
     {
         Key = key;
         Default = @default;
