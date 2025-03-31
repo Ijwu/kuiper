@@ -28,8 +28,8 @@ namespace kbo.littlerocks;
 [JsonDerivedType(typeof(Say), nameof(Say))]
 [JsonDerivedType(typeof(GetDataPackage), nameof(GetDataPackage))]
 [JsonDerivedType(typeof(Bounce), nameof(Bounce))]
-[JsonDerivedType(typeof(Set), nameof(Set))]
 [JsonDerivedType(typeof(Get), nameof(Get))]
+[JsonDerivedType(typeof(Set), nameof(Set))]
 [JsonDerivedType(typeof(SetNotify), nameof(SetNotify))]
 public record Packet
 {
