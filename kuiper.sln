@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spaceport", "spaceport\spac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stm", "stm\stm.csproj", "{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "telescope", "telescope\telescope.csproj", "{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +35,15 @@ Global
 		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A8E8D2F-D423-456C-8D8F-60DD0A271E1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {93AA82D1-07D9-40D4-AB36-6DC820E658E4}
 	EndGlobalSection
 EndGlobal

@@ -57,7 +57,7 @@ public class Freighter : ITalkToTheServer
         while (!result.EndOfMessage);
 
         ms.Seek(0, SeekOrigin.Begin);
-        Packet[]? packets = await JsonSerializer.DeserializeAsync<Packet[]>(ms, cancellationToken: cancellationToken);
+        Packet[]? packets = await JsonSerializer.DeserializeAsync<Packet[]>(ms, JsonSerializerOptionsStore.Deserialization, cancellationToken: cancellationToken);
         return packets ?? [];
     }
 
