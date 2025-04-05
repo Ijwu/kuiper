@@ -7,7 +7,7 @@ public record Retrieved : Packet
     [JsonPropertyName("keys")]
     public Dictionary<string, JsonNode> Keys { get; set; }
 
-    public Retrieved(Dictionary<string, JsonNode> keys)
+    public Retrieved(Dictionary<string, JsonNode> keys) : base("Retrieved")
     {
         Keys = keys;
     }

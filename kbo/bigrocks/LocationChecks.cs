@@ -5,7 +5,7 @@ public record LocationChecks : Packet
     [JsonPropertyName("locations")]
     public long[] Locations { get; set; }
 
-    public LocationChecks(long[] locations)
+    public LocationChecks(long[] locations) : base("LocationChecks")
     {
         Locations = locations;
     }

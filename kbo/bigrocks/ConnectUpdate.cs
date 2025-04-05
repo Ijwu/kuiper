@@ -8,7 +8,7 @@ public record ConnectUpdate : Packet
     [JsonPropertyName("tags")]      
     public string[] Tags { get; set; }
 
-    public ConnectUpdate(ItemHandlingFlags itemsHandling, string[] tags)
+    public ConnectUpdate(ItemHandlingFlags itemsHandling, string[] tags) : base("ConnectUpdate")
     {
         ItemsHandling = itemsHandling;
         Tags = tags;

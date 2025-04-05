@@ -25,7 +25,7 @@ public record RoomUpdate : Packet
                       long[]? checkedLocations,
                       long? hintCost,
                       long? locationCheckPoints,
-                      Dictionary<string, CommandPermission>? permissions)
+                      Dictionary<string, CommandPermission>? permissions) : base("RoomUpdate")
     {
         HintPoints = hintPoints;
         Players = players;

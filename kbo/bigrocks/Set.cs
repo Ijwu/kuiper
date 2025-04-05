@@ -14,7 +14,7 @@ public record Set : Packet
     [JsonPropertyName("operations")]
     public DataStorageOperation[] Operations { get; set; }
 
-    public Set(string key, object @default, bool wantReply, DataStorageOperation[] operations)
+    public Set(string key, object @default, bool wantReply, DataStorageOperation[] operations) : base("set")
     {
         Key = key;
         Default = @default;

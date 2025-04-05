@@ -33,7 +33,7 @@ public record Connected : Packet
                      long[] checkedLocations,
                      Dictionary<string, object>? slotData,
                      Dictionary<long, NetworkSlot> slotInfo,
-                     long hintPoints)
+                     long hintPoints) : base("Connected")
     {
         Team = team;
         Slot = slot;

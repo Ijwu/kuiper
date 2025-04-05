@@ -49,7 +49,7 @@ public record RoomInfo : Packet
                     string[] games,
                     Dictionary<string, string> dataPackageChecksums,
                     string seedName,
-                    double time)
+                    double time) : base("RoomInfo")
     {
         Version = version;
         GeneratorVersion = generatorVersion;

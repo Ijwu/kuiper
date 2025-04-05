@@ -6,5 +6,10 @@ namespace kbo.littlerocks;
 public record Packet
 {
     [JsonPropertyName("cmd")]
-    public string Cmd { get; set; } = string.Empty;
+    public string Cmd { get; set; }
+
+    public Packet(string cmd)
+    {
+        Cmd = cmd;
+    }
 }

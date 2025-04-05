@@ -14,7 +14,7 @@ public record SetReply : Packet
     [JsonPropertyName("slot")]
     public long Slot { get; set; }
 
-    public SetReply(string key, object value, object originalValue, long slot)
+    public SetReply(string key, object value, object originalValue, long slot) : base("SetReply")
     {
         Key = key;
         Value = value;

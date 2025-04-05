@@ -11,7 +11,7 @@
         [JsonPropertyName("status")]
         public HintStatus? Status { get; set; }
 
-        public UpdateHint(long player, long location, HintStatus? status)
+        public UpdateHint(long player, long location, HintStatus? status) : base("UpdateHint")
         {
             Player = player;
             Location = location;

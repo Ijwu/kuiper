@@ -8,7 +8,7 @@ public record LocationScouts : Packet
     [JsonPropertyName("create_as_hint")]
     public long CreateAsHint { get; set; }
 
-    public LocationScouts(long[] locations, long createAsHint)
+    public LocationScouts(long[] locations, long createAsHint) : base("LocationScouts")
     {
         Locations = locations;
         CreateAsHint = createAsHint;

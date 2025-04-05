@@ -36,7 +36,7 @@ public record Connect : Packet
                    Version version,
                    ItemHandlingFlags itemsHandling,
                    string[] tags,
-                   bool slotData)
+                   bool slotData) : base("Connect")
     {
         Password = password;
         Game = game;

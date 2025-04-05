@@ -8,7 +8,7 @@ public record ReceivedItems : Packet
     [JsonPropertyName("items")]
     public NetworkItem[] Items { get; set; }
 
-    public ReceivedItems(long index, NetworkItem[] items)
+    public ReceivedItems(long index, NetworkItem[] items) : base("ReceivedItems")
     {
         Index = index;
         Items = items;

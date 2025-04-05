@@ -11,7 +11,7 @@ public record InvalidPacket : Packet
     [JsonPropertyName("text")]
     public string Text { get; set; }
 
-    public InvalidPacket(string type, string text, string? originalCmd = null)
+    public InvalidPacket(string type, string text, string? originalCmd = null) : base("InvalidPacket")
     {
         Type = type;
         Text = text;

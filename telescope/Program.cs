@@ -12,7 +12,7 @@ await freighter.ConnectAsync(new Uri("ws://localhost:38281"));
 
 IReceiveTrade receivingBay = new ReceivingBay(freighter);
 
-async Task PacketHandlerAsync(Packet[] packets)
+void PacketHandler(Packet[] packets)
 {
     foreach (Packet packet in packets)
     {
@@ -23,7 +23,7 @@ async Task PacketHandlerAsync(Packet[] packets)
     }
 }
 
-var handler = receivingBay.OnPacketsReceived(PacketHandlerAsync);
+var handler = receivingBay.OnPacketsReceived(PacketHandler);
 
 receivingBay.StartReceiving();
 

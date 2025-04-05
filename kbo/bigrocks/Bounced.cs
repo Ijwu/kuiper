@@ -14,7 +14,7 @@ public record Bounced : Packet
     [JsonPropertyName("data")]
     public Dictionary<string, object> Data { get; set; }
 
-    public Bounced(string[] games, long[] slots, string[] tags, Dictionary<string, object> data)
+    public Bounced(string[] games, long[] slots, string[] tags, Dictionary<string, object> data) : base("Bounced")
     {
         Games = games;
         Slots = slots;

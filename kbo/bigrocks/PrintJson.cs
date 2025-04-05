@@ -24,7 +24,7 @@ public record PrintJson : Packet
     [JsonPropertyName("data")]
     public JsonMessagePart.Text[] Data { get; set; }
 
-    public PrintJson(JsonMessagePart.Text[] data)
+    public PrintJson(JsonMessagePart.Text[] data) : base("PrintJSON")
     {
         Data = data;
     }
