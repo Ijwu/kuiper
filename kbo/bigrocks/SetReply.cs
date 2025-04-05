@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Nodes;
-
-namespace kbo.bigrocks;
+﻿namespace kbo.bigrocks;
 
 public record SetReply : Packet
 {

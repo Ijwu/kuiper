@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace kbo.littlerocks;
+﻿namespace kbo.littlerocks;
 
 public enum ClientStatus
 {

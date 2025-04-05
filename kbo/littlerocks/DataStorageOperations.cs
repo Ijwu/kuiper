@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Nodes;
-
-namespace kbo;
+﻿namespace kbo;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "operation")]
 [JsonDerivedType(typeof(Replace), "replace")]
