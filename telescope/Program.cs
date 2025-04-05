@@ -36,5 +36,14 @@ await freighter.SendPacketsAsync([new Connect(null,
                                         ["DeathLink"],
                                         true)]);
 
-Console.WriteLine("Press any key to exit...");
-Console.ReadKey();
+while (true)
+{
+    // Wait for packets to be received
+    await Task.Delay(1000);
+    // Check if the connection is still open
+    if (!freighter.IsConnected)
+    {
+        Console.WriteLine("Connection closed.");
+        break;
+    }
+}
