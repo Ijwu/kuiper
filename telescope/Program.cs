@@ -18,7 +18,7 @@ void PacketHandler(Packet[] packets)
     {
         Console.WriteLine(packet.GetType().Name);
         Console.WriteLine(
-            JsonSerializer.Serialize(packet, new JsonSerializerOptions { WriteIndented = true })
+            JsonSerializer.Serialize(packet, packet.GetType(), new JsonSerializerOptions { WriteIndented = true })
         );
     }
 }

@@ -35,29 +35,25 @@ namespace kbo.plantesimals
 
         public override Packet Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // Parse the JSON document to inspect the discriminator.
             using (var document = JsonDocument.ParseValue(ref reader))
             {
                 var root = document.RootElement;
 
-                // Assume the outer discriminator is named "type"
-                if (!root.TryGetProperty("cmd", out var typeProperty))
+                if (!root.TryGetProperty("cmd", out JsonElement typeProperty))
                 {
-                    throw new JsonException("Missing discriminator property 'cmd'.");
+                    throw new JsonException("Missing packet property 'cmd'.");
                 }
 
                 string? typeDiscriminator = typeProperty.GetString();
                 Packet result;
 
-                // Get type from typemap using disciriminator value
-                if (_typeMap.TryGetValue(typeDiscriminator, out var type))
+                if (_typeMap.TryGetValue(typeDiscriminator, out Type? type))
                 {
-                    // Deserialize the JSON to the specific type
                     result = (Packet)JsonSerializer.Deserialize(root.GetRawText(), type, options)!;
                 }
                 else
                 {
-                    throw new JsonException($"Unknown discriminator value '{typeDiscriminator}'.");
+                    throw new JsonException($"Unknown packet type '{typeDiscriminator}'.");
                 }
 
                 return result;
@@ -66,7 +62,6 @@ namespace kbo.plantesimals
 
         public override void Write(Utf8JsonWriter writer, Packet value, JsonSerializerOptions options)
         {
-            // Use runtime type to serialize the correct type.
             JsonSerializer.Serialize(writer, value, value.GetType(), options);
         }
     }
