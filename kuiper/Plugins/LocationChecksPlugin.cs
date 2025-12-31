@@ -1,6 +1,7 @@
 using kbo.bigrocks;
 using kbo.littlerocks;
 
+using kuiper.Pickle;
 using kuiper.Services;
 using kuiper.Services.Abstract;
 
@@ -12,13 +13,17 @@ namespace kuiper.Plugins
         private readonly ILocationCheckService _locationChecks;
         private readonly WebSocketConnectionManager _connectionManager;
         private readonly IHintPointsService _hintPoints;
+        private readonly IServerAnnouncementService _announcementService;
+        private readonly MultiData _multiData;
 
-        public LocationChecksPlugin(ILogger<LocationChecksPlugin> logger, ILocationCheckService locationChecks, WebSocketConnectionManager connectionManager, IHintPointsService hintPoints)
+        public LocationChecksPlugin(ILogger<LocationChecksPlugin> logger, ILocationCheckService locationChecks, WebSocketConnectionManager connectionManager, IHintPointsService hintPoints, IServerAnnouncementService announcementService, MultiData multiData)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _locationChecks = locationChecks ?? throw new ArgumentNullException(nameof(locationChecks));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _hintPoints = hintPoints ?? throw new ArgumentNullException(nameof(hintPoints));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
+            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
         }
 
         public async Task ReceivePacket(Packet packet, string connectionId)
@@ -92,9 +97,15 @@ namespace kuiper.Plugins
                         continue;
                     }
 
-                    foreach (var targetConnectionId in targetConnectionIds)
+                    foreach (var connection in targetConnectionIds)
                     {
-                        await _connectionManager.SendJsonToConnectionAsync(targetConnectionId, new[] { responsePacket });
+                        await _connectionManager.SendJsonToConnectionAsync(connection, new[] { responsePacket });
+                    }
+
+                    // Announce item sends
+                    foreach (var item in player.Value)
+                    {
+                        await _announcementService.AnnounceItemSentAsync(slotId, item.Player, GetItemName(slotId, item.Item), item.Item, item.Location);
                     }
                 }
             }
@@ -102,6 +113,27 @@ namespace kuiper.Plugins
             {
                 _logger.LogError(ex, "Error handling LocationChecks packet from {ConnectionId}", connectionId);
             }
+        }
+
+        private string GetItemName(long sourceSlotId, long itemId)
+        {
+            try
+            {
+                if (_multiData.SlotInfo.TryGetValue((int)sourceSlotId, out var slot))
+                {
+                    var game = slot.Game;
+                    if (_multiData.DataPackage.TryGetValue(game, out var package))
+                    {
+                        var name = package.ItemNameToId.FirstOrDefault(kvp => kvp.Value == itemId).Key;
+                        return string.IsNullOrWhiteSpace(name) ? itemId.ToString() : name;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to resolve item name for {ItemId}; using id.", itemId);
+            }
+            return itemId.ToString();
         }
     }
 }

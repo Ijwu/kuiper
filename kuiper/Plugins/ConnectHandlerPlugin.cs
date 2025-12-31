@@ -16,14 +16,16 @@ namespace kuiper.Plugins
         private readonly WebSocketConnectionManager _connectionManager;
         private readonly ILocationCheckService _locationCheckService;
         private readonly IHintPointsService _hintPointsService;
+        private readonly IServerAnnouncementService _announcementService;
 
-        public ConnectHandlerPlugin(ILogger<ConnectHandlerPlugin> logger, MultiData multiData, WebSocketConnectionManager connectionManager, ILocationCheckService locationCheckService, IHintPointsService hintPointsService)
+        public ConnectHandlerPlugin(ILogger<ConnectHandlerPlugin> logger, MultiData multiData, WebSocketConnectionManager connectionManager, ILocationCheckService locationCheckService, IHintPointsService hintPointsService, IServerAnnouncementService announcementService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _locationCheckService = locationCheckService ?? throw new ArgumentNullException(nameof(locationCheckService));
             _hintPointsService = hintPointsService;
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
         public async Task ReceivePacket(Packet packet, string connectionId)
@@ -176,6 +178,11 @@ namespace kuiper.Plugins
                 // Send Connected only to the connecting client
                 await SendPacketToClientAsync(connectedPacket, connectionId);
                 _logger.LogInformation("Sent Connected packet for client {Name} (ConnectionId: {ConnectionId})", connectPacket.Name ?? "Unknown", connectionId);
+
+                if (matchedSlotId.HasValue)
+                {
+                    await _announcementService.AnnouncePlayerConnectedAsync(matchedSlotId.Value, connectPacket.Name ?? _multiData.SlotInfo[matchedSlotId.Value].Name);
+                }
             }
             catch (Exception ex)
             {

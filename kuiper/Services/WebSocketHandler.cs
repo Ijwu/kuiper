@@ -20,22 +20,26 @@ namespace kuiper.Services
         private readonly WebSocketConnectionManager _connectionManager;
         private readonly MultiData _multiData;
         private readonly PluginManager _pluginManager;
+        private readonly IServerAnnouncementService _announcementService;
 
         public WebSocketHandler(
             ILogger<WebSocketHandler> logger,
             WebSocketConnectionManager connectionManager,
             MultiData multiData,
-            PluginManager pluginManager)
+            PluginManager pluginManager,
+            IServerAnnouncementService announcementService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
         public async Task HandleConnectionAsync(string connectionId, PlayerData player)
         {
             var buffer = new byte[1024 * 4];
+            long? slotId = null;
 
             try
             {
@@ -71,14 +75,25 @@ namespace kuiper.Services
                     result = await player.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 }
 
+                slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
                 _logger.LogDebug("Connection was closed. Connection Id: {ConnectionId}", connectionId);
                 await _connectionManager.RemoveConnectionAsync(connectionId);
                 await player.Socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+
+                if (slotId.HasValue)
+                {
+                    await AnnounceDisconnectAsync(slotId.Value);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error handling WebSocket connection {ConnectionId}", connectionId);
+                slotId = slotId ?? await _connectionManager.GetSlotForConnectionAsync(connectionId);
                 await _connectionManager.RemoveConnectionAsync(connectionId);
+                if (slotId.HasValue)
+                {
+                    await AnnounceDisconnectAsync(slotId.Value);
+                }
             }
         }
 
@@ -122,6 +137,12 @@ namespace kuiper.Services
             {
                 _logger.LogError(ex, "Error deserializing or broadcasting packet");
             }
+        }
+
+        private async Task AnnounceDisconnectAsync(long slotId)
+        {
+            var name = _multiData.SlotInfo.TryGetValue((int)slotId, out var info) ? info.Name : $"Player {slotId}";
+            await _announcementService.AnnouncePlayerDisconnectedAsync(slotId, name);
         }
 
         private Dictionary<string, CommandPermission> GetPermissions()
