@@ -68,6 +68,7 @@ pluginManager.RegisterPlugin<LocationChecksPlugin>();
 pluginManager.RegisterPlugin<DataPackagePlugin>();
 pluginManager.RegisterPlugin<DataStorageGetPlugin>();
 pluginManager.RegisterPlugin<DataStorageSlotDataPlugin>();
+pluginManager.RegisterPlugin<DataStorageSetPlugin>();
 pluginManager.RegisterPlugin<LocationScoutsPlugin>();
 pluginManager.RegisterPlugin<SyncPlugin>();
 pluginManager.RegisterPlugin<ReleasePlugin>();
