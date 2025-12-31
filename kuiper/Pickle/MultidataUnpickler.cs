@@ -123,13 +123,13 @@ namespace kuiper.Pickle
             return new Version(intArray[0], intArray[1], intArray[2]);
         }
 
-        private static Dictionary<long, Hint[]> GetPrecollectedHints(object unpickledPrecollectedHints)
+        private static Dictionary<long, MultiDataHint[]> GetPrecollectedHints(object unpickledPrecollectedHints)
         {
-            var ret = new Dictionary<long, Hint[]>();
+            var ret = new Dictionary<long, MultiDataHint[]>();
             foreach (DictionaryEntry kvp in (Hashtable)unpickledPrecollectedHints)
             {
                 HashSet<object> hashset = (HashSet<object>)kvp.Value;
-                var value = Array.ConvertAll(hashset.ToArray(), item => (Hint)item);//todo: this is probably wrong
+                var value = Array.ConvertAll(hashset.ToArray(), item => (MultiDataHint)item);//todo: this is probably wrong
                 ret.Add((int)kvp.Key, value);
             }
             return ret;

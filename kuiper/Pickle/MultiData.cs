@@ -13,7 +13,7 @@ namespace kuiper.Pickle
         public Dictionary<string, object> ServerOptions { get; set; }
         public Dictionary<long, Dictionary<long, string>> ErHintData { get; set; }
         public Dictionary<long, long[]> PrecollectedItems { get; set; }
-        public Dictionary<long, Hint[]> PrecollectedHints { get; set; }
+        public Dictionary<long, MultiDataHint[]> PrecollectedHints { get; set; }
         public Version Version { get; set; }
         public string[] Tags { get; set; }
         public MinimumVersions MinimumVersions { get; set; }
@@ -59,14 +59,14 @@ namespace kuiper.Pickle
         public long[] GroupMembers { get; set; }
     }
 
-    public record Hint
+    public record MultiDataHint
     {
         public long ReceivingPlayer { get; set; }
         public long FindingPlayer { get; set; }
         public long Location { get; set; }
         public long Item { get; set; }
         public bool Found { get; set; }
-        public string Entrance {  get; set; }
+        public string Entrance { get; set; }
         public long ItemFlags { get; set; }
         public HintStatus Status { get; set; }
     }
