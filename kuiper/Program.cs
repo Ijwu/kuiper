@@ -79,6 +79,9 @@ pluginManager.RegisterPlugin<BouncePlugin>();
 
 pluginManager.Initialize(app.Services);
 
+// Preload precollected items as checks
+await PreloadPrecollectedItemsAsync(app.Services, logger);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -114,3 +117,31 @@ app.Map("/", async context =>
 });
 
 app.Run();
+
+static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)
+{
+    try
+    {
+        using var scope = services.CreateScope();
+        var multiData = scope.ServiceProvider.GetRequiredService<MultiData>();
+        var locationCheckService = scope.ServiceProvider.GetRequiredService<ILocationCheckService>();
+
+        if (multiData.PrecollectedItems is null || multiData.PrecollectedItems.Count == 0)
+            return;
+
+        foreach (var kvp in multiData.PrecollectedItems)
+        {
+            var slot = kvp.Key;
+            foreach (var locationId in kvp.Value)
+            {
+                await locationCheckService.AddCheckAsync(slot, locationId);
+            }
+        }
+
+        logger.LogInformation("Preloaded precollected items for {SlotCount} slots", multiData.PrecollectedItems.Count);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to preload precollected items");
+    }
+}
