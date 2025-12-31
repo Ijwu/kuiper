@@ -69,10 +69,13 @@ pluginManager.RegisterPlugin<DataPackagePlugin>();
 pluginManager.RegisterPlugin<DataStorageGetPlugin>();
 pluginManager.RegisterPlugin<DataStorageSlotDataPlugin>();
 pluginManager.RegisterPlugin<DataStorageSetPlugin>();
+pluginManager.RegisterPlugin<DataStorageRaceModePlugin>();
+pluginManager.RegisterPlugin<DataStorageNameGroupsPlugin>();
 pluginManager.RegisterPlugin<LocationScoutsPlugin>();
 pluginManager.RegisterPlugin<SyncPlugin>();
 pluginManager.RegisterPlugin<ReleasePlugin>();
 pluginManager.RegisterPlugin<ChatPlugin>();
+pluginManager.RegisterPlugin<BouncePlugin>();
 
 pluginManager.Initialize(app.Services);
 

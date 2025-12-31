@@ -120,5 +120,10 @@ namespace kuiper.Services
             _connectionSlotMap.TryRemove(connectionId, out _);
             return Task.CompletedTask;
         }
+
+        public IReadOnlyCollection<string> GetAllConnectionIds()
+        {
+            return _connections.Keys.ToArray();
+        }
     }
 }
