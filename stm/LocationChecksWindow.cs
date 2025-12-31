@@ -1,4 +1,6 @@
 ﻿using kbo.bigrocks;
+using kbo.littlerocks;
+
 using spaceport.schematics;
 using Terminal.Gui;
 
@@ -71,7 +73,7 @@ public class LocationChecksWindow : Window
 
     private string GetLocationNameFromId(long id)
     {
-        string currentGame = _connected.SlotInfo[_connected.Slot].Game;
+        string currentGame = ((NetworkSlot)_connected.SlotInfo[_connected.Slot]).Game;
         return _currentDataPackage!.Data.Games[currentGame].LocationNameToId.ToDictionary(kv => kv.Value, kv => kv.Key).TryGetValue(id, out var locationName)
             ? locationName
             : id.ToString();
@@ -79,7 +81,7 @@ public class LocationChecksWindow : Window
 
     private int GetLengthOfLongestLocationName()
     {
-        string currentGame = _connected.SlotInfo[_connected.Slot].Game;
+        string currentGame = ((NetworkSlot)_connected.SlotInfo[_connected.Slot]).Game;
         return _currentDataPackage!.Data.Games[currentGame].LocationNameToId.Max(x => x.Key.Length);
     }
 }

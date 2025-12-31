@@ -9,7 +9,7 @@ public record Connected : Packet
     public long Slot { get; set; }
 
     [JsonPropertyName("players")]
-    public NetworkPlayer[] Players { get; set; }
+    public NetworkObject[] Players { get; set; }
 
     [JsonPropertyName("missing_locations")]
     public long[] MissingLocations { get; set; }
@@ -21,18 +21,18 @@ public record Connected : Packet
     public Dictionary<string, object>? SlotData { get; set; }
 
     [JsonPropertyName("slot_info")]
-    public Dictionary<long, NetworkSlot> SlotInfo { get; set; }
+    public Dictionary<long, NetworkObject> SlotInfo { get; set; }
 
     [JsonPropertyName("hint_points")]
     public long HintPoints { get; set; }
 
     public Connected(long team,
                      long slot,
-                     NetworkPlayer[] players,
+                     NetworkObject[] players,
                      long[] missingLocations,
                      long[] checkedLocations,
                      Dictionary<string, object>? slotData,
-                     Dictionary<long, NetworkSlot> slotInfo,
+                     Dictionary<long, NetworkObject> slotInfo,
                      long hintPoints) : base("Connected")
     {
         Team = team;

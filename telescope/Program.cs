@@ -8,7 +8,7 @@ using spaceport.schematics;
 
 ITalkToTheServer freighter = new Freighter();
 
-await freighter.ConnectAsync(new Uri("ws://localhost:38281"));
+await freighter.ConnectAsync(new Uri("ws://localhost:5272"));
 
 IReceiveTrade receivingBay = new ReceivingBay(freighter);
 
@@ -17,9 +17,24 @@ void PacketHandler(Packet[] packets)
     foreach (Packet packet in packets)
     {
         Console.WriteLine(packet.GetType().Name);
-        Console.WriteLine(
-            JsonSerializer.Serialize(packet, packet.GetType(), new JsonSerializerOptions { WriteIndented = true })
-        );
+        if (packet is PrintJson printJson)
+        {
+            foreach (var part in printJson.Data)
+            {
+                Console.WriteLine(part.GetType());
+                Console.WriteLine(part as JsonMessagePart.ItemId);
+                if (part is JsonMessagePart.ItemId itemId)
+                {
+                    Console.WriteLine("ITEMID PLAYER: " + itemId.Player);
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine(
+                JsonSerializer.Serialize(packet, packet.GetType(), new JsonSerializerOptions { WriteIndented = true })
+            );
+        }
     }
 }
 
@@ -28,8 +43,8 @@ var handler = receivingBay.OnPacketsReceived(PacketHandler);
 receivingBay.StartReceiving();
 
 await freighter.SendPacketsAsync([new Connect(null,
-                                        "Blasphemous",
-                                        "1",
+                                        "Clique",
+                                        "P1",
                                         Guid.NewGuid(),
                                         new Version(6,5,0),
                                         ItemHandlingFlags.All,
