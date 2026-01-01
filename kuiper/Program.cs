@@ -1,8 +1,10 @@
+using Microsoft.Extensions.Hosting;
 using kuiper;
 using kuiper.Pickle;
 using kuiper.Plugins;
 using kuiper.Services;
 using kuiper.Services.Abstract;
+using kuiper.Commands;
 
 using Razorvine.Pickle;
 
@@ -46,6 +48,12 @@ builder.Services.AddSingleton<ILocationCheckService, LocationCheckService>();
 builder.Services.AddSingleton<IHintPointsService, HintPointsService>();
 builder.Services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
 
+builder.Services.AddSingleton<CommandRegistry>();
+builder.Services.AddSingleton<IConsoleCommand, HelpCommand>();
+builder.Services.AddSingleton<IConsoleCommand, SayCommand>();
+builder.Services.AddSingleton<IConsoleCommand, QuitCommand>();
+builder.Services.AddSingleton<IConsoleCommand, DumpStorageCommand>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -79,6 +87,7 @@ pluginManager.RegisterPlugin<BouncePlugin>();
 
 pluginManager.Initialize(app.Services);
 
+StartCommandLoop(app.Services, logger, app.Lifetime);
 // Preload precollected items as checks
 //await PreloadPrecollectedItemsAsync(app.Services, logger);
 
@@ -117,6 +126,60 @@ app.Map("/", async context =>
 });
 
 app.Run();
+
+static void StartCommandLoop(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger, IHostApplicationLifetime lifetime)
+{
+    Task.Run(async () =>
+    {
+        try
+        {
+            using var scope = services.CreateScope();
+            var registry = scope.ServiceProvider.GetRequiredService<CommandRegistry>();
+            var commands = scope.ServiceProvider.GetServices<IConsoleCommand>();
+            foreach (var cmd in commands)
+            {
+                registry.Register(cmd);
+            }
+
+            logger.LogInformation("Command loop started. Type 'help' for commands.");
+
+            while (!lifetime.ApplicationStopping.IsCancellationRequested)
+            {
+                var line = await Task.Run(() => Console.ReadLine(), lifetime.ApplicationStopping);
+                if (line is null)
+                {
+                    await Task.Delay(100, lifetime.ApplicationStopping);
+                    continue;
+                }
+
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                    continue;
+
+                var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var commandName = parts[0];
+                var args = parts.Skip(1).ToArray();
+
+                if (registry.TryGet(commandName, out var command))
+                {
+                    await command.ExecuteAsync(args, scope.ServiceProvider, lifetime.ApplicationStopping);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown command. Type 'help' for list.");
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // shutting down
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Command loop failed");
+        }
+    });
+}
 
 static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)
 {
