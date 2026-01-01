@@ -66,15 +66,16 @@ namespace kuiper.Plugins
 
                 await _storage.SaveAsync(setPacket.Key, value);
 
+                var slot = await _connectionManager.GetSlotForConnectionAsync(connectionId) ?? 0;
+
                 // respond to requester if asked
                 if (setPacket.WantReply)
                 {
-                    var slot = await _connectionManager.GetSlotForConnectionAsync(connectionId) ?? 0;
                     var reply = new SetReply(setPacket.Key, value, original, slot);
                     await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { reply });
                 }
 
-                await NotifySubscribersAsync(setPacket.Key, value, connectionId);
+                await NotifySubscribersAsync(setPacket.Key, value, original, slot);
             }
             catch (Exception ex)
             {
@@ -193,16 +194,16 @@ namespace kuiper.Plugins
             return current;
         }
 
-        private async Task NotifySubscribersAsync(string key, object value, string senderConnectionId)
+        private async Task NotifySubscribersAsync(string key, object value, object originalValue, long slot)
         {
             var jsonNode = JsonSerializer.SerializeToNode(value) ?? JsonValue.Create(value);
-            var retrieved = new Retrieved(new Dictionary<string, JsonNode> { { key, jsonNode! } });
+            var setReply = new SetReply(key, value, originalValue, slot);
 
             foreach (var kvp in _subscriptions)
             {
                 if (kvp.Value.Contains(key))
                 {
-                    await _connectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { retrieved });
+                    await _connectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { setReply });
                 }
             }
         }

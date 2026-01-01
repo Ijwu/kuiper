@@ -42,6 +42,8 @@ namespace kuiper.Plugins
             {
                 var itemData = _multiData.Locations[slotId][loc];
 
+                if (itemData[1] != slotId) continue;
+
                 var item = new NetworkItem(itemData[0], loc, itemData[1], (NetworkItemFlags)itemData[2]); ;
 
                 items.Add(item);

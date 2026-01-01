@@ -12,8 +12,8 @@ using Serilog.Events;
 Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
 Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
 
-//string multidataFile = @"C:\ProgramData\Archipelago\output\AP_53145387379812464824.archipelago";
-string multidataFile = @"C:\ProgramData\Archipelago\output\clique.archipelago";
+string multidataFile = @"C:\ProgramData\Archipelago\output\hk3players.archipelago";
+//string multidataFile = @"C:\ProgramData\Archipelago\output\clique.archipelago";
 
 var fs = new FileStream(multidataFile, FileMode.Open);
 var multiData = MultidataUnpickler.Unpickle(fs);
@@ -80,7 +80,7 @@ pluginManager.RegisterPlugin<BouncePlugin>();
 pluginManager.Initialize(app.Services);
 
 // Preload precollected items as checks
-await PreloadPrecollectedItemsAsync(app.Services, logger);
+//await PreloadPrecollectedItemsAsync(app.Services, logger);
 
 if (app.Environment.IsDevelopment())
 {
