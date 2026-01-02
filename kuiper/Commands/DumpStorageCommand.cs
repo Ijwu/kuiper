@@ -22,7 +22,7 @@ namespace kuiper.Commands
             var value = await storage.LoadAsync<object>(key);
             if (value is null)
             {
-                Console.WriteLine($"Key '{key}' not found.");
+                Console.WriteLine($"Key '{key}' not found or null.");
                 return;
             }
 

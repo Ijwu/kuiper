@@ -1,4 +1,6 @@
-﻿namespace kbo.bigrocks;
+﻿using System.Text.Json.Nodes;
+
+namespace kbo.bigrocks;
 
 public record Set : Packet
 {
@@ -6,7 +8,7 @@ public record Set : Packet
     public string Key { get; set; }
 
     [JsonPropertyName("default")]
-    public object Default { get; set; }
+    public JsonNode Default { get; set; }
 
     [JsonPropertyName("want_reply")]
     public bool WantReply { get; set; }
@@ -14,7 +16,7 @@ public record Set : Packet
     [JsonPropertyName("operations")]
     public DataStorageOperation[] Operations { get; set; }
 
-    public Set(string key, object @default, bool wantReply, DataStorageOperation[] operations) : base("set")
+    public Set(string key, JsonNode @default, bool wantReply, DataStorageOperation[] operations) : base("set")
     {
         Key = key;
         Default = @default;

@@ -32,8 +32,8 @@ namespace kuiper.Plugins
                 case SetNotify notify:
                     HandleSetNotify(connectionId, notify);
                     break;
-                case Set setPacket:
-                    await HandleSetAsync(connectionId, setPacket);
+                case Set set:
+                    await HandleSetAsync(connectionId, set);
                     break;
             }
         }
@@ -54,28 +54,27 @@ namespace kuiper.Plugins
         {
             try
             {
-                object? current = await _storage.LoadAsync<object>(setPacket.Key);
-                var original = current ?? setPacket.Default;
+                var existing = await _storage.LoadAsync<JsonNode>(setPacket.Key);
+                var defaultNode = setPacket.Default;
+                var originalNode = existing ?? defaultNode;
 
-                object value = current ?? setPacket.Default;
-
+                var valueNode = existing ?? defaultNode;
                 foreach (var op in setPacket.Operations ?? Array.Empty<DataStorageOperation>())
                 {
-                    value = ApplyOperation(value, op, setPacket.Default);
+                    valueNode = ApplyOperation(valueNode, op, defaultNode);
                 }
 
-                await _storage.SaveAsync(setPacket.Key, value);
+                await _storage.SaveAsync(setPacket.Key, valueNode);
 
                 var slot = await _connectionManager.GetSlotForConnectionAsync(connectionId) ?? 0;
 
-                // respond to requester if asked
                 if (setPacket.WantReply)
                 {
-                    var reply = new SetReply(setPacket.Key, value, original, slot);
+                    var reply = new SetReply(setPacket.Key, valueNode, originalNode, slot);
                     await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { reply });
                 }
 
-                await NotifySubscribersAsync(setPacket.Key, value, original, slot);
+                await NotifySubscribersAsync(setPacket.Key, valueNode, originalNode, slot);
             }
             catch (Exception ex)
             {
@@ -83,120 +82,109 @@ namespace kuiper.Plugins
             }
         }
 
-        private object ApplyOperation(object current, DataStorageOperation op, object @default)
+        private JsonNode ApplyOperation(JsonNode current, DataStorageOperation op, JsonNode defaultNode)
         {
-            switch (op)
+            return op switch
             {
-                case Replace r:
-                    return r.Value;
-                case Default:
-                    return current ?? @default;
-                case Add add:
-                    return ApplyNumeric(current, add.Value, (a, b) => a + b);
-                case Mul mul:
-                    return ApplyNumeric(current, mul.Value, (a, b) => a * b);
-                case Pow pow:
-                    return ApplyNumeric(current, pow.Value, (a, b) => Math.Pow(a, b));
-                case Mod mod:
-                    return ApplyNumeric(current, mod.Value, (a, b) => b == 0 ? a : a % b);
-                case Floor:
-                    return ApplyNumeric(current, 0, (a, _) => Math.Floor(a));
-                case Ceil:
-                    return ApplyNumeric(current, 0, (a, _) => Math.Ceiling(a));
-                case Max max:
-                    return ApplyNumeric(current, max.Value, Math.Max);
-                case Min min:
-                    return ApplyNumeric(current, min.Value, Math.Min);
-                case And and:
-                    return ApplyBitwise(current, and.Value, (a, b) => a & b);
-                case Or or:
-                    return ApplyBitwise(current, or.Value, (a, b) => a | b);
-                case Xor xor:
-                    return ApplyBitwise(current, xor.Value, (a, b) => a ^ b);
-                case LeftShift ls:
-                    return ApplyBitwise(current, ls.Value, (a, b) => a << b);
-                case RightShift rs:
-                    return ApplyBitwise(current, rs.Value, (a, b) => a >> b);
-                case Remove rem:
-                    return ApplyRemove(current, rem.Value);
-                case Pop pop:
-                    return ApplyPop(current, pop.Value);
-                case Update upd:
-                    return ApplyUpdate(current, upd.Value);
-                default:
-                    return current;
-            }
+                Replace r => ToNode(r.Value),
+                Default => current ?? defaultNode,
+                Add add => ApplyNumeric(current, add.Value, (a, b) => a + b),
+                Mul mul => ApplyNumeric(current, mul.Value, (a, b) => a * b),
+                Pow pow => ApplyNumeric(current, pow.Value, (a, b) => Math.Pow(a, b)),
+                Mod mod => ApplyNumeric(current, mod.Value, (a, b) => b == 0 ? a : a % b),
+                Floor => ApplyNumeric(current, 0, (a, _) => Math.Floor(a)),
+                Ceil => ApplyNumeric(current, 0, (a, _) => Math.Ceiling(a)),
+                Max max => ApplyNumeric(current, max.Value, Math.Max),
+                Min min => ApplyNumeric(current, min.Value, Math.Min),
+                And and => ApplyBitwise(current, and.Value, (a, b) => a & b),
+                Or or => ApplyBitwise(current, or.Value, (a, b) => a | b),
+                Xor xor => ApplyBitwise(current, xor.Value, (a, b) => a ^ b),
+                LeftShift ls => ApplyBitwise(current, ls.Value, (a, b) => a << b),
+                RightShift rs => ApplyBitwise(current, rs.Value, (a, b) => a >> b),
+                Remove rem => ApplyRemove(current, rem.Value),
+                Pop pop => ApplyPop(current, pop.Value),
+                Update upd => ApplyUpdate(current, upd.Value),
+                _ => current
+            };
         }
 
-        private object ApplyNumeric(object current, object operand, Func<double, double, double> op)
+        private JsonNode ApplyNumeric(JsonNode current, object operand, Func<double, double, double> op)
         {
             if (!TryToDouble(current, out var a)) return current;
             if (!TryToDouble(operand, out var b)) return current;
-            var result = op(a, b);
-            return CastBack(current, result);
+            return JsonValue.Create(op(a, b))!;
         }
 
-        private object ApplyBitwise(object current, object operand, Func<long, int, long> op)
+        private JsonNode ApplyBitwise(JsonNode current, object operand, Func<long, int, long> op)
         {
             if (!TryToLong(current, out var a)) return current;
             if (!TryToInt(operand, out var b)) return current;
-            var result = op(a, b);
-            return CastBack(current, result);
+            return JsonValue.Create(op(a, b))!;
         }
 
-        private object ApplyRemove(object current, object key)
+        private JsonNode ApplyRemove(JsonNode current, object key)
         {
-            switch (current)
+            if (current is JsonObject obj)
             {
-                case IDictionary<object, object> dict:
-                    dict.Remove(key);
-                    return current;
-                case IDictionary<string, object> sdict:
-                    if (key is string sk) sdict.Remove(sk);
-                    return current;
+                obj.Remove(key?.ToString() ?? string.Empty);
             }
             return current;
         }
 
-        private object ApplyPop(object current, object key)
+        private JsonNode ApplyPop(JsonNode current, object key)
         {
-            switch (current)
+            if (current is JsonArray arr)
             {
-                case IList<object> list when list.Count > 0:
-                    list.RemoveAt(list.Count - 1);
-                    return current;
-                case IDictionary<object, object> dict:
-                    dict.Remove(key);
-                    return current;
-                case IDictionary<string, object> sdict when key is string sk:
-                    sdict.Remove(sk);
-                    return current;
-            }
-            return current;
-        }
-
-        private object ApplyUpdate(object current, object updates)
-        {
-            if (current is IDictionary<string, object> sdict && updates is IDictionary<string, object> supdates)
-            {
-                foreach (var kvp in supdates)
+                if (arr.Count > 0)
                 {
-                    sdict[kvp.Key] = kvp.Value;
+                    arr.RemoveAt(arr.Count - 1);
+                }
+                return arr;
+            }
+
+            if (current is JsonObject obj)
+            {
+                obj.Remove(key?.ToString() ?? string.Empty);
+            }
+            return current;
+        }
+
+        private JsonNode ApplyUpdate(JsonNode current, object updates)
+        {
+            if (current is JsonObject obj)
+            {
+                if (updates is JsonObject updatesObj)
+                {
+                    foreach (var kvp in updatesObj)
+                    {
+                        obj[kvp.Key] = kvp.Value?.DeepClone();
+                    }
+                }
+                else if (updates is IDictionary<string, object> sdict)
+                {
+                    foreach (var kvp in sdict)
+                    {
+                        obj[kvp.Key] = ToNode(kvp.Value);
+                    }
+                }
+                else if (updates is IDictionary<object, object> dict)
+                {
+                    foreach (var kvp in dict)
+                    {
+                        obj[kvp.Key?.ToString() ?? string.Empty] = ToNode(kvp.Value);
+                    }
                 }
             }
-            else if (current is IDictionary<object, object> dict && updates is IDictionary<object, object> updatesObj)
-            {
-                foreach (var kvp in updatesObj)
-                {
-                    dict[kvp.Key] = kvp.Value;
-                }
-            }
             return current;
         }
 
-        private async Task NotifySubscribersAsync(string key, object value, object originalValue, long slot)
+        private static JsonNode ToNode(object? value)
         {
-            var jsonNode = JsonSerializer.SerializeToNode(value) ?? JsonValue.Create(value);
+            return JsonSerializer.SerializeToNode(value) ?? JsonValue.Create(value)!;
+        }
+
+        private async Task NotifySubscribersAsync(string key, JsonNode value, JsonNode originalValue, long slot)
+        {
             var setReply = new SetReply(key, value, originalValue, slot);
 
             foreach (var kvp in _subscriptions)
@@ -206,6 +194,20 @@ namespace kuiper.Plugins
                     await _connectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { setReply });
                 }
             }
+        }
+
+        private static bool TryToDouble(JsonNode input, out double value)
+        {
+            if (input is JsonValue jv)
+            {
+                if (jv.TryGetValue<double>(out var d)) { value = d; return true; }
+                if (jv.TryGetValue<long>(out var l)) { value = l; return true; }
+                if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
+                if (jv.TryGetValue<decimal>(out var m)) { value = (double)m; return true; }
+                if (jv.TryGetValue<string>(out var s) && double.TryParse(s, out var parsed)) { value = parsed; return true; }
+            }
+            value = 0;
+            return false;
         }
 
         private static bool TryToDouble(object input, out double value)
@@ -218,25 +220,23 @@ namespace kuiper.Plugins
                 case long l: value = l; return true;
                 case decimal m: value = (double)m; return true;
                 case string s when double.TryParse(s, out var parsed): value = parsed; return true;
+                case JsonNode node when TryToDouble(node, out var v): value = v; return true;
                 default:
                     value = 0;
                     return false;
             }
         }
 
-        private static bool TryToLong(object input, out long value)
+        private static bool TryToLong(JsonNode input, out long value)
         {
-            switch (input)
+            if (input is JsonValue jv)
             {
-                case long l: value = l; return true;
-                case int i: value = i; return true;
-                case short s: value = s; return true;
-                case byte b: value = b; return true;
-                case string str when long.TryParse(str, out var parsed): value = parsed; return true;
-                default:
-                    value = 0;
-                    return false;
+                if (jv.TryGetValue<long>(out var l)) { value = l; return true; }
+                if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
+                if (jv.TryGetValue<string>(out var s) && long.TryParse(s, out var parsed)) { value = parsed; return true; }
             }
+            value = 0;
+            return false;
         }
 
         private static bool TryToInt(object input, out int value)
@@ -248,34 +248,11 @@ namespace kuiper.Plugins
                 case byte b: value = b; return true;
                 case long l when l >= int.MinValue && l <= int.MaxValue: value = (int)l; return true;
                 case string str when int.TryParse(str, out var parsed): value = parsed; return true;
+                case JsonNode node when TryToLong(node, out var v) && v >= int.MinValue && v <= int.MaxValue: value = (int)v; return true;
                 default:
                     value = 0;
                     return false;
             }
-        }
-
-        private static object CastBack(object original, double result)
-        {
-            return original switch
-            {
-                int => (int)result,
-                long => (long)result,
-                float => (float)result,
-                decimal => (decimal)result,
-                _ => result
-            };
-        }
-
-        private static object CastBack(object original, long result)
-        {
-            return original switch
-            {
-                int => (int)result,
-                long => result,
-                short => (short)result,
-                byte => (byte)result,
-                _ => result
-            };
         }
     }
 }

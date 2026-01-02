@@ -1,4 +1,6 @@
-﻿namespace kbo;
+﻿using System.Text.Json.Nodes;
+
+namespace kbo;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "operation")]
 [JsonDerivedType(typeof(Replace), "replace")]
@@ -27,9 +29,9 @@ public abstract record DataStorageOperation
 public record DataStorageOperationWithValue : DataStorageOperation
 {
     [JsonPropertyName("value")]
-    public object Value { get; set; }
+    public JsonNode Value { get; set; }
 
-    public DataStorageOperationWithValue(object value)
+    public DataStorageOperationWithValue(JsonNode value)
     {
         Value = value;
     }
@@ -37,7 +39,7 @@ public record DataStorageOperationWithValue : DataStorageOperation
 
 public record Replace : DataStorageOperationWithValue
 {
-    public Replace(object value) : base(value)
+    public Replace(JsonNode value) : base(value)
     {
     }
 }
@@ -49,28 +51,28 @@ public record Default : DataStorageOperation
 
 public record Add : DataStorageOperationWithValue
 {
-    public Add(object value) : base(value)
+    public Add(JsonNode value) : base(value)
     {
     }
 }
 
 public record Mul : DataStorageOperationWithValue
 {
-    public Mul(object value) : base(value)
+    public Mul(JsonNode value) : base(value)
     {
     }
 }
 
 public record Pow : DataStorageOperationWithValue
 {
-    public Pow(object value) : base(value)
+    public Pow(JsonNode value) : base(value)
     {
     }
 }
 
 public record Mod : DataStorageOperationWithValue
 {
-    public Mod(object value) : base(value)
+    public Mod(JsonNode value) : base(value)
     {
     }
 }
@@ -87,70 +89,70 @@ public record Ceil : DataStorageOperation
 
 public record Max : DataStorageOperationWithValue
 {
-    public Max(object value) : base(value)
+    public Max(JsonNode value) : base(value)
     {
     }
 }
 
 public record Min : DataStorageOperationWithValue
 {
-    public Min(object value) : base(value)
+    public Min(JsonNode value) : base(value)
     {
     }
 }
 
 public record And : DataStorageOperationWithValue
 {
-    public And(object value) : base(value)
+    public And(JsonNode value) : base(value)
     {
     }
 }
 
 public record Or : DataStorageOperationWithValue
 {
-    public Or(object value) : base(value)
+    public Or(JsonNode value) : base(value)
     {
     }
 }
 
 public record Xor : DataStorageOperationWithValue
 {
-    public Xor(object value) : base(value)
+    public Xor(JsonNode value) : base(value)
     {
     }
 }
 
 public record LeftShift : DataStorageOperationWithValue
 {
-    public LeftShift(object value) : base(value)
+    public LeftShift(JsonNode value) : base(value)
     {
     }
 }
 
 public record RightShift : DataStorageOperationWithValue
 {
-    public RightShift(object value) : base(value)
+    public RightShift(JsonNode value) : base(value)
     {
     }
 }
 
 public record Remove : DataStorageOperationWithValue
 {
-    public Remove(object value) : base(value)
+    public Remove(JsonNode value) : base(value)
     {
     }
 }
 
 public record Pop : DataStorageOperationWithValue
 {
-    public Pop(object value) : base(value)
+    public Pop(JsonNode value) : base(value)
     {
     }
 }
 
 public record Update : DataStorageOperationWithValue
 {
-    public Update(object value) : base(value)
+    public Update(JsonNode value) : base(value)
     {
     }
 }

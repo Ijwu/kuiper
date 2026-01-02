@@ -14,7 +14,7 @@ using Serilog.Events;
 Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
 Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
 
-string multidataFile = @"C:\ProgramData\Archipelago\output\hk3players.archipelago";
+string multidataFile = @"C:\ProgramData\Archipelago\output\hk1player.archipelago";
 //string multidataFile = @"C:\ProgramData\Archipelago\output\clique.archipelago";
 
 var fs = new FileStream(multidataFile, FileMode.Open);
