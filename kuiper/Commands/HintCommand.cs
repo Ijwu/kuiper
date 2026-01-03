@@ -1,8 +1,8 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using kuiper.Pickle;
 using kuiper.Services;
 using kuiper.Services.Abstract;
+using Microsoft.Extensions.DependencyInjection;
 using kbo;
 using kbo.bigrocks;
 using kbo.littlerocks;
@@ -15,15 +15,6 @@ namespace kuiper.Commands
 
         public string Description => "Create a hint for a slot by item name: hint <slotId> <item name>";
 
-        private readonly MultiData _multiData;
-        private readonly IHintService _hintService;
-
-        public HintCommand(MultiData multiData, IHintService hintService)
-        {
-            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
-            _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
-        }
-
         public async Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             if (args.Length < 2)
@@ -32,20 +23,25 @@ namespace kuiper.Commands
                 return;
             }
 
+            var multiData = services.GetRequiredService<MultiData>();
+            var hintService = services.GetRequiredService<IHintService>();
+            var storage = services.GetRequiredService<IStorageService>();
+            var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
+
             if (!long.TryParse(args[0], out var slotId))
             {
                 Console.WriteLine("Invalid slot id.");
                 return;
             }
 
-            if (!_multiData.SlotInfo.TryGetValue((int)slotId, out var slotInfo))
+            if (!multiData.SlotInfo.TryGetValue((int)slotId, out var slotInfo))
             {
                 Console.WriteLine($"Unknown slot {slotId}.");
                 return;
             }
 
             var game = slotInfo.Game;
-            if (!_multiData.DataPackage.TryGetValue(game, out var package))
+            if (!multiData.DataPackage.TryGetValue(game, out var package))
             {
                 Console.WriteLine($"No datapackage for game {game}.");
                 return;
@@ -71,7 +67,7 @@ namespace kuiper.Commands
             var itemName = matches.Single().Key;
             var itemId = matches.Single().Value;
 
-            if (!_multiData.Locations.TryGetValue(slotId, out var locations))
+            if (!multiData.Locations.TryGetValue(slotId, out var locations))
             {
                 Console.WriteLine($"No locations for slot {slotId}.");
                 return;
@@ -91,27 +87,25 @@ namespace kuiper.Commands
 
             var locationName = package.LocationNameToId.FirstOrDefault(kvp => kvp.Value == locId).Key ?? locId.ToString();
 
-            var existingHints = await _hintService.GetHintsAsync(slotId);
+            var existingHints = await hintService.GetHintsAsync(slotId);
             var existing = existingHints.FirstOrDefault(h => h.Location == locId && h.Item == itemId && h.ReceivingPlayer == receivingPlayer);
             if (existing is not null)
             {
-                var status = await _hintService.GetHintStatusAsync(slotId, existing);
+                var status = await hintService.GetHintStatusAsync(slotId, existing);
                 Console.WriteLine($"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {status}.");
                 return;
             }
 
             var hint = new Hint(receivingPlayer, slotId, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
-            await _hintService.AddHintAsync(slotId, hint, HintStatus.Unspecified);
+            await hintService.AddHintAsync(slotId, hint, HintStatus.Unspecified);
 
             Console.WriteLine($"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).");
 
-            await NotifySubscribersAsync(slotId, hint, services, itemName, locationName);
+            await NotifySubscribersAsync(slotId, hintService, storage, connectionManager);
         }
 
-        private static async Task NotifySubscribersAsync(long slotId, Hint hint, IServiceProvider services, string itemName, string locationName)
+        private static async Task NotifySubscribersAsync(long slotId, IHintService hintService, IStorageService storage, WebSocketConnectionManager connectionManager)
         {
-            var storage = services.GetRequiredService<IStorageService>();
-            var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
             const string notifyPrefix = "#setnotify:";
             var readKey = $"_read_hints_0_{slotId}";
 
@@ -126,7 +120,7 @@ namespace kuiper.Commands
                 if (!subscriptions.Any(k => string.Equals(k, readKey, StringComparison.OrdinalIgnoreCase)))
                     continue;
 
-                var hints = await services.GetRequiredService<IHintService>().GetHintsAsync(slotId);
+                var hints = await hintService.GetHintsAsync(slotId);
                 var node = JsonSerializer.SerializeToNode(hints);
                 if (node == null)
                     continue;
