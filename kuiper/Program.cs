@@ -80,6 +80,7 @@ pluginManager.RegisterPlugin<DataStorageSlotDataPlugin>();
 pluginManager.RegisterPlugin<DataStorageSetPlugin>();
 pluginManager.RegisterPlugin<DataStorageRaceModePlugin>();
 pluginManager.RegisterPlugin<DataStorageNameGroupsPlugin>();
+pluginManager.RegisterPlugin<DataStorageHintsPlugin>();
 pluginManager.RegisterPlugin<LocationScoutsPlugin>();
 pluginManager.RegisterPlugin<SyncPlugin>();
 pluginManager.RegisterPlugin<ReleasePlugin>();
