@@ -85,7 +85,7 @@ namespace kuiper.Commands
             }
 
             var hint = new Hint(receivingPlayer, slotId, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
-            await hintService.AddHintAsync(slotId, hint, HintStatus.Unspecified);
+            await hintService.AddHintAsync(slotId, hint, HintStatus.Priority);
 
             await NotifySubscribersAsync(slotId, hintService, storage, connectionManager);
 
