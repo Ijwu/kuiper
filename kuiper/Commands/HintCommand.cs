@@ -1,6 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using kuiper.Pickle;
+using kuiper.Services;
 using kuiper.Services.Abstract;
 using kbo;
+using kbo.bigrocks;
 using kbo.littlerocks;
 
 namespace kuiper.Commands
@@ -100,6 +104,36 @@ namespace kuiper.Commands
             await _hintService.AddHintAsync(slotId, hint, HintStatus.Unspecified);
 
             Console.WriteLine($"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).");
+
+            await NotifySubscribersAsync(slotId, hint, services, itemName, locationName);
+        }
+
+        private static async Task NotifySubscribersAsync(long slotId, Hint hint, IServiceProvider services, string itemName, string locationName)
+        {
+            var storage = services.GetRequiredService<IStorageService>();
+            var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
+            const string notifyPrefix = "#setnotify:";
+            var readKey = $"_read_hints_0_{slotId}";
+
+            var keys = await storage.ListKeysAsync();
+            foreach (var key in keys)
+            {
+                if (!key.StartsWith(notifyPrefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var connectionId = key.Substring(notifyPrefix.Length);
+                var subscriptions = await storage.LoadAsync<string[]>(key) ?? Array.Empty<string>();
+                if (!subscriptions.Any(k => string.Equals(k, readKey, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                var hints = await services.GetRequiredService<IHintService>().GetHintsAsync(slotId);
+                var node = JsonSerializer.SerializeToNode(hints);
+                if (node == null)
+                    continue;
+
+                var reply = new SetReply(readKey, node, node, slotId);
+                await connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { reply });
+            }
         }
 
         private static List<KeyValuePair<string, long>> ResolveItemMatches(Dictionary<string, long> itemNameToId, string query)

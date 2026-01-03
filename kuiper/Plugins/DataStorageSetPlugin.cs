@@ -18,6 +18,8 @@ namespace kuiper.Plugins
         private readonly IStorageService _storage;
         private readonly ConcurrentDictionary<string, HashSet<string>> _subscriptions = new(StringComparer.OrdinalIgnoreCase);
 
+        private const string NotifyStoragePrefix = "#setnotify:";
+
         public DataStorageSetPlugin(ILogger<DataStorageSetPlugin> logger, WebSocketConnectionManager connectionManager, IStorageService storage)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -25,12 +27,14 @@ namespace kuiper.Plugins
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
+        private string NotifyKey(string connectionId) => NotifyStoragePrefix + connectionId;
+
         public async Task ReceivePacket(Packet packet, string connectionId)
         {
             switch (packet)
             {
                 case SetNotify notify:
-                    HandleSetNotify(connectionId, notify);
+                    await HandleSetNotifyAsync(connectionId, notify);
                     break;
                 case Set set:
                     await HandleSetAsync(connectionId, set);
@@ -38,15 +42,24 @@ namespace kuiper.Plugins
             }
         }
 
-        private void HandleSetNotify(string connectionId, SetNotify notify)
+        private async Task HandleSetNotifyAsync(string connectionId, SetNotify notify)
         {
             if (notify.Keys is { Length: > 0 })
             {
-                _subscriptions[connectionId] = notify.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var stored = await _storage.LoadAsync<string[]>(NotifyKey(connectionId)) ?? Array.Empty<string>();
+                var combined = new HashSet<string>(stored, StringComparer.OrdinalIgnoreCase);
+                foreach (var k in notify.Keys)
+                {
+                    combined.Add(k);
+                }
+
+                _subscriptions[connectionId] = combined;
+                await _storage.SaveAsync(NotifyKey(connectionId), combined.ToArray());
             }
             else
             {
                 _subscriptions.TryRemove(connectionId, out _);
+                await _storage.DeleteAsync(NotifyKey(connectionId));
             }
         }
 
