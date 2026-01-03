@@ -6,6 +6,6 @@ internal class SlotTypeObjectConstructor : IObjectConstructor
 {
     public object construct(object[] args)
     {
-        return (SlotType)args[0];
+        return (MultiDataSlotType)args[0];
     }
 }

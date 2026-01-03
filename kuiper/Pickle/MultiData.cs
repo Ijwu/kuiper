@@ -19,7 +19,7 @@ namespace kuiper.Pickle
         public MinimumVersions MinimumVersions { get; set; }
         public string SeedName { get; set; }
         public List<Dictionary<long, long[]>> Spheres { get; set; }
-        public Dictionary<string, GamesPackage> DataPackage { get; set; }
+        public Dictionary<string, MultiDataGamesPackage> DataPackage { get; set; }
         public long RaceMode { get; set; }
 
         internal DataPackage ToDataPackage()
@@ -36,7 +36,7 @@ namespace kuiper.Pickle
         }
     }
 
-    public record GamesPackage
+    public record MultiDataGamesPackage
     {
         public Dictionary<string, string[]> ItemNameGroups { get; set; }
         public Dictionary<string, long> ItemNameToId { get; set; }
@@ -55,7 +55,7 @@ namespace kuiper.Pickle
     {
         public string Name { get; set; }
         public string Game { get; set; }
-        public SlotType Type { get; set; }
+        public MultiDataSlotType Type { get; set; }
         public long[] GroupMembers { get; set; }
     }
 
@@ -68,18 +68,18 @@ namespace kuiper.Pickle
         public bool Found { get; set; }
         public string Entrance { get; set; }
         public long ItemFlags { get; set; }
-        public HintStatus Status { get; set; }
+        public MultiDataHintStatus Status { get; set; }
     }
 
     [Flags]
-    public enum SlotType
+    public enum MultiDataSlotType
     {
         Spectator = 0,
         Player = 1,
         Group = 2
     }
 
-    public enum HintStatus: int
+    public enum MultiDataHintStatus: int
     {
         Unspecified = 0,
         NoPriority = 10,

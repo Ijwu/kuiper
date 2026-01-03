@@ -37,9 +37,9 @@ namespace kuiper.Pickle
             return md;
         }
 
-        private static Dictionary<string, GamesPackage> GetDataPackage(object unpickledDataPackage)
+        private static Dictionary<string, MultiDataGamesPackage> GetDataPackage(object unpickledDataPackage)
         {
-            var ret = new Dictionary<string, GamesPackage>();
+            var ret = new Dictionary<string, MultiDataGamesPackage>();
             foreach (DictionaryEntry kvp in (Hashtable)unpickledDataPackage)
             {
                 var table = (Hashtable)kvp.Value;
@@ -70,7 +70,7 @@ namespace kuiper.Pickle
                     locationNameToId.Add((string)kvp2.Key, (int)kvp2.Value);
                 }
                 var checksum = (string)table["checksum"];
-                ret.Add((string)kvp.Key, new GamesPackage
+                ret.Add((string)kvp.Key, new MultiDataGamesPackage
                 {
                     ItemNameGroups = itemNameGroups,
                     ItemNameToId = itemNameToId,

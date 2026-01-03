@@ -11,7 +11,7 @@ internal class MultiDataNetworkSlotObjectConstructor : IObjectConstructor
         {
             Name = (string)args[0],
             Game = (string)args[1],
-            Type = (SlotType)args[2],
+            Type = (MultiDataSlotType)args[2],
             GroupMembers = groupMembers
         };
     }
