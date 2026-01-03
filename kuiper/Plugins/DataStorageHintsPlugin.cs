@@ -12,7 +12,7 @@ namespace kuiper.Plugins
 {
     public class DataStorageHintsPlugin : IPlugin
     {
-        private static readonly Regex HintKeyRegex = new("^_hints_0_(?<slot>\\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex HintKeyRegex = new("^_read_hints_0_(?<slot>\\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private readonly ILogger<DataStorageHintsPlugin> _logger;
         private readonly WebSocketConnectionManager _connectionManager;

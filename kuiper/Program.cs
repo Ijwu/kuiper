@@ -54,6 +54,7 @@ builder.Services.AddSingleton<IConsoleCommand, HelpCommand>();
 builder.Services.AddSingleton<IConsoleCommand, SayCommand>();
 builder.Services.AddSingleton<IConsoleCommand, QuitCommand>();
 builder.Services.AddSingleton<IConsoleCommand, DumpStorageCommand>();
+builder.Services.AddSingleton<IConsoleCommand, HintCommand>();
 
 builder.Services.AddCors(options =>
 {
