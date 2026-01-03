@@ -55,6 +55,7 @@ builder.Services.AddSingleton<IConsoleCommand, SayCommand>();
 builder.Services.AddSingleton<IConsoleCommand, QuitCommand>();
 builder.Services.AddSingleton<IConsoleCommand, DumpStorageCommand>();
 builder.Services.AddSingleton<IConsoleCommand, HintCommand>();
+builder.Services.AddSingleton<IConsoleCommand, AuthorizeCommandSlot>();
 
 builder.Services.AddCors(options =>
 {
@@ -88,6 +89,7 @@ pluginManager.RegisterPlugin<ReleasePlugin>();
 pluginManager.RegisterPlugin<ChatPlugin>();
 pluginManager.RegisterPlugin<BouncePlugin>();
 pluginManager.RegisterPlugin<CreateHintsPlugin>();
+pluginManager.RegisterPlugin<SayCommandPlugin>();
 
 pluginManager.Initialize(app.Services);
 
