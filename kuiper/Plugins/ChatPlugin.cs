@@ -30,6 +30,9 @@ namespace kuiper.Plugins
             if (packet is not Say sayPacket)
                 return;
 
+            if (sayPacket.Text.StartsWith("!"))
+                return;
+
             try
             {
                 var slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
