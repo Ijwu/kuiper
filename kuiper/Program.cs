@@ -47,6 +47,7 @@ builder.Services.AddSingleton<IStorageService, InMemoryStorageService>();
 builder.Services.AddSingleton<ILocationCheckService, LocationCheckService>();
 builder.Services.AddSingleton<IHintPointsService, HintPointsService>();
 builder.Services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
+builder.Services.AddSingleton<IHintService, HintService>();
 
 builder.Services.AddSingleton<CommandRegistry>();
 builder.Services.AddSingleton<IConsoleCommand, HelpCommand>();
@@ -84,6 +85,7 @@ pluginManager.RegisterPlugin<SyncPlugin>();
 pluginManager.RegisterPlugin<ReleasePlugin>();
 pluginManager.RegisterPlugin<ChatPlugin>();
 pluginManager.RegisterPlugin<BouncePlugin>();
+pluginManager.RegisterPlugin<CreateHintsPlugin>();
 
 pluginManager.Initialize(app.Services);
 
