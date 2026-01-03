@@ -168,7 +168,11 @@ static void StartCommandLoop(IServiceProvider services, Microsoft.Extensions.Log
 
                 if (registry.TryGet(commandName, out var command))
                 {
-                    await command.ExecuteAsync(args, scope.ServiceProvider, lifetime.ApplicationStopping);
+                    var result = await command.ExecuteAsync(args, scope.ServiceProvider, lifetime.ApplicationStopping);
+                    if (!string.IsNullOrWhiteSpace(result))
+                    {
+                        Console.WriteLine(result);
+                    }
                 }
                 else
                 {

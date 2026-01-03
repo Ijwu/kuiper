@@ -9,7 +9,7 @@ namespace kuiper.Commands
 
         public string Description => "List available commands";
 
-        public Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             var registry = services.GetRequiredService<CommandRegistry>();
             var sb = new StringBuilder();
@@ -18,8 +18,7 @@ namespace kuiper.Commands
             {
                 sb.AppendLine($"  {cmd.Name} - {cmd.Description}");
             }
-            Console.WriteLine(sb.ToString());
-            return Task.CompletedTask;
+            return Task.FromResult(sb.ToString().TrimEnd());
         }
     }
 }

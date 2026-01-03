@@ -9,11 +9,11 @@ namespace kuiper.Commands
 
         public string Description => "Shut down the server";
 
-        public Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             var lifetime = services.GetRequiredService<IHostApplicationLifetime>();
             lifetime.StopApplication();
-            return Task.CompletedTask;
+            return Task.FromResult("Shutting down...");
         }
     }
 }

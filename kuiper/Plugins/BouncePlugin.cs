@@ -49,9 +49,6 @@ namespace kuiper.Plugins
                 var recipients = _connectionManager.GetAllConnectionIds();
                 foreach (var connectionId in recipients)
                 {
-                    if (connectionId == senderConnectionId)
-                        continue;
-
                     var slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
                     var receiverTags = _connectionTags.TryGetValue(connectionId, out var tags) ? tags : Array.Empty<string>();
                     var receiverGame = slotId.HasValue && _multiData.SlotInfo.TryGetValue((int)slotId.Value, out var slot) ? slot.Game : null;

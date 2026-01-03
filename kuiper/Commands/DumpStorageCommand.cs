@@ -10,7 +10,7 @@ namespace kuiper.Commands
 
         public string Description => "Pretty print the current value of a data storage key: dumpkey <key>";
 
-        public async Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             var storage = services.GetRequiredService<IStorageService>();
 
@@ -20,35 +20,32 @@ namespace kuiper.Commands
                 var list = keys?.ToArray() ?? Array.Empty<string>();
                 if (list.Length == 0)
                 {
-                    Console.WriteLine("No keys found.");
+                    return "No keys found.";
                 }
-                else
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("Keys:");
+                foreach (var k in list)
                 {
-                    Console.WriteLine("Keys:");
-                    foreach (var k in list)
-                    {
-                        Console.WriteLine(" - " + k);
-                    }
+                    sb.AppendLine(" - " + k);
                 }
-                return;
+                return sb.ToString().TrimEnd();
             }
 
             var key = args[0];
             var value = await storage.LoadAsync<object>(key);
             if (value is null)
             {
-                Console.WriteLine($"Key '{key}' not found or null.");
-                return;
+                return $"Key '{key}' not found or null.";
             }
 
             try
             {
                 var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
-                Console.WriteLine(json);
+                return json;
             }
             catch
             {
-                Console.WriteLine(value?.ToString() ?? "(null)");
+                return value?.ToString() ?? "(null)";
             }
         }
     }

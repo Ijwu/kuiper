@@ -4,6 +4,6 @@ namespace kuiper.Commands
     {
         string Name { get; }
         string Description { get; }
-        Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken);
+        Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken);
     }
 }

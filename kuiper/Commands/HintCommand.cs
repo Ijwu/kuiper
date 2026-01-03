@@ -15,12 +15,11 @@ namespace kuiper.Commands
 
         public string Description => "Create a hint for a slot by item name: hint <slotId> <item name>";
 
-        public async Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: hint <slotId> <item name>");
-                return;
+                return "Usage: hint <slotId> <item name>";
             }
 
             var multiData = services.GetRequiredService<MultiData>();
@@ -30,38 +29,30 @@ namespace kuiper.Commands
 
             if (!long.TryParse(args[0], out var slotId))
             {
-                Console.WriteLine("Invalid slot id.");
-                return;
+                return "Invalid slot id.";
             }
 
             if (!multiData.SlotInfo.TryGetValue((int)slotId, out var slotInfo))
             {
-                Console.WriteLine($"Unknown slot {slotId}.");
-                return;
+                return $"Unknown slot {slotId}.";
             }
 
             var game = slotInfo.Game;
             if (!multiData.DataPackage.TryGetValue(game, out var package))
             {
-                Console.WriteLine($"No datapackage for game {game}.");
-                return;
+                return $"No datapackage for game {game}.";
             }
 
             var query = string.Join(' ', args.Skip(1));
             var matches = ResolveItemMatches(package.ItemNameToId, query);
             if (matches.Count == 0)
             {
-                Console.WriteLine($"Item '{query}' not found for game {game}.");
-                return;
+                return $"Item '{query}' not found for game {game}.";
             }
             if (matches.Count > 1)
             {
-                Console.WriteLine("Multiple matches found:");
-                foreach (var m in matches)
-                {
-                    Console.WriteLine(" - " + m.Key);
-                }
-                return;
+                var multi = string.Join(Environment.NewLine, matches.Select(m => " - " + m.Key));
+                return "Multiple matches found:" + Environment.NewLine + multi;
             }
 
             var itemName = matches.Single().Key;
@@ -69,15 +60,13 @@ namespace kuiper.Commands
 
             if (!multiData.Locations.TryGetValue(slotId, out var locations))
             {
-                Console.WriteLine($"No locations for slot {slotId}.");
-                return;
+                return $"No locations for slot {slotId}.";
             }
 
             var match = locations.FirstOrDefault(kvp => kvp.Value.Length >= 3 && kvp.Value[0] == itemId);
             if (match.Key == 0 && match.Value == null)
             {
-                Console.WriteLine($"No location contains item '{itemName}' (id {itemId}) for slot {slotId}.");
-                return;
+                return $"No location contains item '{itemName}' (id {itemId}) for slot {slotId}.";
             }
 
             var locId = match.Key;
@@ -92,16 +81,15 @@ namespace kuiper.Commands
             if (existing is not null)
             {
                 var status = await hintService.GetHintStatusAsync(slotId, existing);
-                Console.WriteLine($"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {status}.");
-                return;
+                return $"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {status}.";
             }
 
             var hint = new Hint(receivingPlayer, slotId, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
             await hintService.AddHintAsync(slotId, hint, HintStatus.Unspecified);
 
-            Console.WriteLine($"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).");
-
             await NotifySubscribersAsync(slotId, hintService, storage, connectionManager);
+
+            return $"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).";
         }
 
         private static async Task NotifySubscribersAsync(long slotId, IHintService hintService, IStorageService storage, WebSocketConnectionManager connectionManager)

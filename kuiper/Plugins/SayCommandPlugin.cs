@@ -73,7 +73,8 @@ namespace kuiper.Plugins
             {
                 using var scope = _scopeFactory.CreateScope();
                 var services = scope.ServiceProvider;
-                var output = await ExecuteWithCapturedOutputAsync(() => command.ExecuteAsync(args, services, CancellationToken.None));
+                var result = await command.ExecuteAsync(args, services, CancellationToken.None);
+                var output = string.IsNullOrWhiteSpace(result) ? "(no output)" : result;
                 await SendOutputAsync(connectionId, output);
             }
             catch (Exception ex)
@@ -81,32 +82,6 @@ namespace kuiper.Plugins
                 _logger.LogError(ex, "Failed to execute command {Command}", commandName);
                 await SendOutputAsync(connectionId, $"Command '{commandName}' failed: {ex.Message}");
             }
-        }
-
-        private async Task<string> ExecuteWithCapturedOutputAsync(Func<Task> action)
-        {
-            var writer = new StringWriter();
-            lock (ConsoleLock)
-            {
-                var originalOut = Console.Out;
-                Console.SetOut(writer);
-                try
-                {
-                    action().GetAwaiter().GetResult();
-                }
-                finally
-                {
-                    Console.SetOut(originalOut);
-                }
-            }
-            // ensure async context for consistency
-            await Task.Yield();
-            var output = writer.ToString();
-            if (string.IsNullOrWhiteSpace(output))
-            {
-                return "(no output)";
-            }
-            return output.TrimEnd();
         }
 
         private async Task SendOutputAsync(string connectionId, string output)

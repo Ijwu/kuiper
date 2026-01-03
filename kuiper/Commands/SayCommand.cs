@@ -9,12 +9,11 @@ namespace kuiper.Commands
 
         public string Description => "Broadcast a server message: say <message>";
 
-        public async Task ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Usage: say <message>");
-                return;
+                return "Usage: say <message>";
             }
 
             var announcer = services.GetRequiredService<IServerAnnouncementService>();
@@ -22,7 +21,10 @@ namespace kuiper.Commands
             if (!string.IsNullOrWhiteSpace(message))
             {
                 await announcer.BroadcastServerMessageAsync(message);
+                return "Broadcast sent.";
             }
+
+            return "";
         }
     }
 }
