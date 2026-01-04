@@ -11,14 +11,14 @@ namespace kuiper.Plugins
     {
         private readonly ILogger<SyncPlugin> _logger;
         private readonly WebSocketConnectionManager _connectionManager;
-        private readonly ILocationCheckService _locationChecks;
+        private readonly IReceivedItemService _receivedItems;
         private readonly MultiData _multiData;
 
-        public SyncPlugin(ILogger<SyncPlugin> logger, WebSocketConnectionManager connectionManager, ILocationCheckService locationChecks, MultiData multiData)
+        public SyncPlugin(ILogger<SyncPlugin> logger, WebSocketConnectionManager connectionManager, IReceivedItemService receivedItems, MultiData multiData)
         {
             _logger = logger;
             _connectionManager = connectionManager;
-            _locationChecks = locationChecks;
+            _receivedItems = receivedItems;
             _multiData = multiData;
         }
 
@@ -37,22 +37,11 @@ namespace kuiper.Plugins
 
             List<NetworkItem> items = new();
 
-            foreach (var slotLocations in _multiData.Locations)
+            var receivedItems = await _receivedItems.GetReceivedItemsAsync(slotId);
+            foreach (var (item, sendingSlot) in receivedItems)
             {
-                var sourceSlot = slotLocations.Key;
-                var checks = await _locationChecks.GetChecksAsync(sourceSlot);
-
-                foreach (var loc in checks)
-                {
-                    if (!slotLocations.Value.TryGetValue(loc, out var itemData))
-                        continue;
-
-                    if (itemData[1] != slotId)
-                        continue;
-
-                    var item = new NetworkItem(itemData[0], loc, sourceSlot, (NetworkItemFlags)itemData[2]);
-                    items.Add(item);
-                }
+                item.Player = sendingSlot;
+                items.Add(item);
             }
 
             var responsePacket = new ReceivedItems(0, items.ToArray());

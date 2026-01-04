@@ -218,7 +218,7 @@ static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Micro
             foreach (var itemId in itemIds)
             {
                 var item = new NetworkItem(itemId, 0, slot, NetworkItemFlags.None);
-                await receivedItemService.AddReceivedItemAsync(item.Player, item);
+                await receivedItemService.AddReceivedItemAsync(item.Player, 0, item);
                 totalChecks++;   
             }
         }

@@ -103,7 +103,9 @@ namespace kuiper.Plugins
                     var receivedSoFar = (await _receivedItems.GetReceivedItemsAsync(player.Key)).Count();
                     var index = Math.Max(0, receivedSoFar - player.Value.Count);
 
-                    var responsePacket = new ReceivedItems(index, player.Value.ToArray());
+                    List<NetworkItem> itemListForPlayer = [..player.Value.Select(x => new NetworkItem(x.Item, x.Location, x.Player, x.Flags))];
+                    itemListForPlayer.ForEach(x => x.Player = slotId);
+                    var responsePacket = new ReceivedItems(index, itemListForPlayer.ToArray());
 
                     var targetConnectionIds = await _connectionManager.GetConnectionIdsForSlotAsync(player.Key);
                     if (targetConnectionIds.Count == 0)

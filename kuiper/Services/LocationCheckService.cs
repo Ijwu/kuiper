@@ -36,7 +36,7 @@ namespace kuiper.Services
                 var item = new NetworkItem(itemData[0], locationId, itemData[1], (NetworkItemFlags)itemData[2]);
 
                 // Record received item for the receiving player
-                await _receivedItems.AddReceivedItemAsync(item.Player, item);
+                await _receivedItems.AddReceivedItemAsync(item.Player, slot, item);
 
                 return item;
             }

@@ -15,25 +15,36 @@ namespace kuiper.Services
 
         private static string KeyForSlot(long slotId) => KeyPrefix + slotId;
 
-        public async Task AddReceivedItemAsync(long slot, NetworkItem item)
+        public async Task AddReceivedItemAsync(long receivingSlot, long sendingSlot, NetworkItem item)
         {
             if (item == null) return;
 
-            var key = KeyForSlot(slot);
-            var existing = (await _storage.LoadAsync<NetworkItem[]>(key)) ?? Array.Empty<NetworkItem>();
+            var key = KeyForSlot(receivingSlot);
+            var existing = (await _storage.LoadAsync<StoredReceivedItem[]>(key)) ?? Array.Empty<StoredReceivedItem>();
             // avoid duplicates by location
-            if (existing.Any(i => i.Location == item.Location) && item.Location != 0)
+            if (existing.Any(i => i.Item.Location == item.Location) && item.Location != 0)
                 return;
 
-            var updated = existing.Concat(new[] { item }).ToArray();
+            var updated = existing.Concat(new[] { new StoredReceivedItem(sendingSlot, item) }).ToArray();
             await _storage.SaveAsync(key, updated);
         }
 
-        public async Task<IEnumerable<NetworkItem>> GetReceivedItemsAsync(long slot)
+        public async Task<IEnumerable<(NetworkItem, long)>> GetReceivedItemsAsync(long slot)
         {
             var key = KeyForSlot(slot);
-            var items = await _storage.LoadAsync<NetworkItem[]>(key);
-            return items ?? Array.Empty<NetworkItem>();
+            var items = await _storage.LoadAsync<StoredReceivedItem[]>(key);
+            return items?.Select(i => (i.Item, i.SendingSlot)) ?? Array.Empty<(NetworkItem, long)>();
+        }
+
+        public record StoredReceivedItem
+        {
+            public long SendingSlot { get; init; }
+            public NetworkItem Item { get; init; }
+            public StoredReceivedItem(long sendingSlot, NetworkItem item)
+            {
+                SendingSlot = sendingSlot;
+                Item = item;
+            }
         }
     }
 }

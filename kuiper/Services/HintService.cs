@@ -62,7 +62,7 @@ namespace kuiper.Services
             a.FindingPlayer == b.FindingPlayer &&
             a.Location == b.Location;
 
-        private record StoredHint
+        public record StoredHint
         {
             public Hint Hint { get; init; }
             public HintStatus Status { get; init; }
