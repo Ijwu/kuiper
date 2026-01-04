@@ -6,7 +6,7 @@ public record RoomUpdate : Packet
     public long? HintPoints { get; set; }
 
     [JsonPropertyName("players")]
-    public NetworkPlayer[]? Players { get; set; }
+    public NetworkObject[]? Players { get; set; }
 
     [JsonPropertyName("checked_locations")]
     public long[]? CheckedLocations { get; set; }
@@ -21,7 +21,7 @@ public record RoomUpdate : Packet
     public Dictionary<string, CommandPermission>? Permissions { get; set; }
 
     public RoomUpdate(long? hintPoints,
-                      NetworkPlayer[]? players,
+                      NetworkObject[]? players,
                       long[]? checkedLocations,
                       long? hintCost,
                       long? locationCheckPoints,

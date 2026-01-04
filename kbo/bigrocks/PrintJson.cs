@@ -42,9 +42,9 @@ public record ItemPrintJson : PrintJson
     /// Source player's ID, location ID, item ID and item flags.
     /// </summary>
     [JsonPropertyName("item")]
-    public NetworkItem Item { get; set; }
+    public NetworkObject Item { get; set; }
 
-    public ItemPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item) : base(data)
+    public ItemPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkObject item) : base(data)
     {
         Receiving = receiving;
         Item = item;
@@ -59,7 +59,7 @@ public record ItemCheatPrintJson : ItemPrintJson
     [JsonPropertyName("team")]
     public long Team { get; set; }
 
-    public ItemCheatPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item, long team) : base(data, receiving, item)
+    public ItemCheatPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkObject item, long team) : base(data, receiving, item)
     {
         Team = team;
     }
@@ -67,7 +67,7 @@ public record ItemCheatPrintJson : ItemPrintJson
 
 public record ItemSendPrintJson : ItemPrintJson
 {
-    public ItemSendPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item) : base(data, receiving, item)
+    public ItemSendPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkObject item) : base(data, receiving, item)
     {
 
     }
@@ -81,7 +81,7 @@ public record HintPrintJson : ItemPrintJson
     [JsonPropertyName("found")]
     public bool Found { get; set; }
 
-    public HintPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkItem item, bool found) : base(data, receiving, item)
+    public HintPrintJson(JsonMessagePart.Text[] data, long receiving, NetworkObject item, bool found) : base(data, receiving, item)
     {
         Found = found;
     }
