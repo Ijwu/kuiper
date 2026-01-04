@@ -35,18 +35,24 @@ namespace kuiper.Plugins
             }
             var slotId = slotIdNullable.Value;
 
-            var totalChecks = await _locationChecks.GetChecksAsync(slotId);
-
             List<NetworkItem> items = new();
-            foreach (var loc in totalChecks)
+
+            foreach (var slotLocations in _multiData.Locations)
             {
-                var itemData = _multiData.Locations[slotId][loc];
+                var sourceSlot = slotLocations.Key;
+                var checks = await _locationChecks.GetChecksAsync(sourceSlot);
 
-                if (itemData[1] != slotId) continue;
+                foreach (var loc in checks)
+                {
+                    if (!slotLocations.Value.TryGetValue(loc, out var itemData))
+                        continue;
 
-                var item = new NetworkItem(itemData[0], loc, itemData[1], (NetworkItemFlags)itemData[2]); ;
+                    if (itemData[1] != slotId)
+                        continue;
 
-                items.Add(item);
+                    var item = new NetworkItem(itemData[0], loc, sourceSlot, (NetworkItemFlags)itemData[2]);
+                    items.Add(item);
+                }
             }
 
             var responsePacket = new ReceivedItems(0, items.ToArray());

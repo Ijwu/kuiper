@@ -86,9 +86,27 @@ namespace kuiper.Plugins
                 // Send back items grouped by player
                 foreach (var player in itemsByPlayer)
                 {
-                    var totalChecks = await _locationChecks.GetChecksAsync(player.Key);
+                    // Calculate index based on total items received by this player from all slots
+                    int itemIndex = 0;
+                    foreach (var slotLocations in _multiData.Locations)
+                    {
+                        var sourceSlot = slotLocations.Key;
+                        var checks = await _locationChecks.GetChecksAsync(sourceSlot);
 
-                    var responsePacket = new ReceivedItems(totalChecks.Count(), items.ToArray());
+                        foreach (var loc in checks)
+                        {
+                            if (!slotLocations.Value.TryGetValue(loc, out var itemData))
+                                continue;
+
+                            // Count items destined for this player
+                            if (itemData[1] == player.Key)
+                            {
+                                itemIndex++;
+                            }
+                        }
+                    }
+
+                    var responsePacket = new ReceivedItems(itemIndex, player.Value.ToArray());
 
                     var targetConnectionIds = await _connectionManager.GetConnectionIdsForSlotAsync(player.Key);
                     if (targetConnectionIds.Count == 0)
