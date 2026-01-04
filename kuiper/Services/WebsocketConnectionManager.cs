@@ -2,6 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace kuiper.Services
 {
@@ -69,7 +70,12 @@ namespace kuiper.Services
         /// </summary>
         public async Task SendJsonToConnectionAsync<T>(string connectionId, T obj)
         {
-            var json = JsonSerializer.Serialize(obj);
+            JsonSerializerOptions options = new()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var json = JsonSerializer.Serialize(obj, options);
             await SendToConnectionAsync(connectionId, json);
         }
 

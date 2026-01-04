@@ -9,11 +9,13 @@ namespace kuiper.Services
     {
         private readonly IStorageService _storage;
         private readonly MultiData _multiData;
+        private readonly IReceivedItemService _receivedItems;
 
-        public LocationCheckService(IStorageService storage, MultiData multiData)
+        public LocationCheckService(IStorageService storage, MultiData multiData, IReceivedItemService receivedItems)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
+            _receivedItems = receivedItems ?? throw new ArgumentNullException(nameof(receivedItems));
         }
 
         private string KeyForSlot(long slot) => $"#checks:slot:{slot}";
@@ -32,6 +34,9 @@ namespace kuiper.Services
                 var itemData = _multiData.Locations[slot][locationId];
 
                 var item = new NetworkItem(itemData[0], locationId, itemData[1], (NetworkItemFlags)itemData[2]);
+
+                // Record received item for the receiving player
+                await _receivedItems.AddReceivedItemAsync(item.Player, item);
 
                 return item;
             }

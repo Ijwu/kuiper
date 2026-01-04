@@ -10,6 +10,7 @@ using Razorvine.Pickle;
 
 using Serilog;
 using Serilog.Events;
+using kbo.littlerocks;
 
 Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
 Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
@@ -45,6 +46,7 @@ builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
 
 builder.Services.AddSingleton<IStorageService, InMemoryStorageService>();
 builder.Services.AddSingleton<ILocationCheckService, LocationCheckService>();
+builder.Services.AddSingleton<IReceivedItemService, ReceivedItemService>();
 builder.Services.AddSingleton<IHintPointsService, HintPointsService>();
 builder.Services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
 builder.Services.AddSingleton<IHintService, HintService>();
@@ -96,7 +98,7 @@ pluginManager.Initialize(app.Services);
 
 StartCommandLoop(app.Services, logger, app.Lifetime);
 // Preload precollected items as checks
-//await PreloadPrecollectedItemsAsync(app.Services, logger);
+await PreloadPrecollectedItemsAsync(app.Services, logger);
 
 if (app.Environment.IsDevelopment())
 {
@@ -199,20 +201,29 @@ static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Micro
         using var scope = services.CreateScope();
         var multiData = scope.ServiceProvider.GetRequiredService<MultiData>();
         var locationCheckService = scope.ServiceProvider.GetRequiredService<ILocationCheckService>();
+        var receivedItemService = scope.ServiceProvider.GetRequiredService<IReceivedItemService>();
 
         if (multiData.PrecollectedItems is null || multiData.PrecollectedItems.Count == 0)
             return;
 
+        int totalChecks = 0;
         foreach (var kvp in multiData.PrecollectedItems)
         {
             var slot = kvp.Key;
-            foreach (var locationId in kvp.Value)
+            var itemIds = kvp.Value;
+
+            if (!multiData.Locations.TryGetValue(slot, out var slotLocations))
+                continue;
+
+            foreach (var itemId in itemIds)
             {
-                await locationCheckService.AddCheckAsync(slot, locationId);
+                var item = new NetworkItem(itemId, 0, slot, NetworkItemFlags.None);
+                await receivedItemService.AddReceivedItemAsync(item.Player, item);
+                totalChecks++;   
             }
         }
 
-        logger.LogInformation("Preloaded precollected items for {SlotCount} slots", multiData.PrecollectedItems.Count);
+        logger.LogInformation("Preloaded {TotalChecks} precollected items for {SlotCount} slots", totalChecks, multiData.PrecollectedItems.Count);
     }
     catch (Exception ex)
     {
