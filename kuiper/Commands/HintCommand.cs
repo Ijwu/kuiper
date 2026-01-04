@@ -80,12 +80,13 @@ namespace kuiper.Commands
             var existing = existingHints.FirstOrDefault(h => h.Location == locId && h.Item == itemId && h.ReceivingPlayer == receivingPlayer);
             if (existing is not null)
             {
-                var status = await hintService.GetHintStatusAsync(slotId, existing);
-                return $"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {status}.";
+                var statusExisting = await hintService.GetHintStatusAsync(slotId, existing);
+                return $"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {statusExisting}.";
             }
 
+            var status = itemFlags.HasFlag(NetworkItemFlags.Trap) ? HintStatus.Avoid : HintStatus.Priority;
             var hint = new Hint(receivingPlayer, slotId, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
-            await hintService.AddHintAsync(slotId, hint, HintStatus.Priority);
+            await hintService.AddHintAsync(slotId, hint, status);
 
             await NotifySubscribersAsync(slotId, hintService, storage, connectionManager);
 

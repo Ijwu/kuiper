@@ -54,9 +54,10 @@ namespace kuiper.Plugins
                 var itemId = data[0];
                 var receivingPlayer = data[1];
                 var itemFlags = (NetworkItemFlags)data[2];
+                var status = itemFlags.HasFlag(NetworkItemFlags.Trap) ? HintStatus.Avoid : hintStatus;
 
                 var hint = new Hint(receivingPlayer, targetSlotId, loc, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
-                await _hintService.AddHintAsync(targetSlotId, hint, hintStatus);
+                await _hintService.AddHintAsync(targetSlotId, hint, status);
             }
         }
     }
