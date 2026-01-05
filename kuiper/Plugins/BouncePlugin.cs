@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using kuiper.Services.Abstract;
 
 using kbo.bigrocks;
 using kbo.littlerocks;
@@ -10,54 +11,42 @@ namespace kuiper.Plugins
 {
     /// <summary>
     /// Handles Bounce packets by forwarding them as Bounced to matching clients (games/slots/tags).
-    /// Tracks client tags from Connect/ConnectUpdate.
     /// </summary>
     public class BouncePlugin : IPlugin
     {
         private readonly ILogger<BouncePlugin> _logger;
         private readonly WebSocketConnectionManager _connectionManager;
         private readonly MultiData _multiData;
-        private readonly ConcurrentDictionary<string, string[]> _connectionTags = new();
+        private readonly IStorageService _storage;
+        private const string TagsKeyPrefix = "#connection_tags:";
 
-        public BouncePlugin(ILogger<BouncePlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData)
+        public BouncePlugin(ILogger<BouncePlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IStorageService storage)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
         public async Task ReceivePacket(Packet packet, string connectionId)
         {
-            switch (packet)
-            {
-                case Connect connect:
-                    _connectionTags[connectionId] = connect.Tags ?? Array.Empty<string>();
-                    break;
-                case ConnectUpdate update:
-                    _connectionTags[connectionId] = update.Tags ?? Array.Empty<string>();
-                    break;
-                case Bounce bounce:
-                    await ForwardBounceAsync(bounce, connectionId);
-                    break;
-            }
-        }
-
-        private async Task ForwardBounceAsync(Bounce bounce, string senderConnectionId)
-        {
+            if (packet is not Bounce bounce)
+                return;
+        
             try
             {
                 var recipients = _connectionManager.GetAllConnectionIds();
-                foreach (var connectionId in recipients)
+                foreach (var connId in recipients)
                 {
-                    var slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-                    var receiverTags = _connectionTags.TryGetValue(connectionId, out var tags) ? tags : Array.Empty<string>();
+                    var slotId = await _connectionManager.GetSlotForConnectionAsync(connId);
+                    var receiverTags = await _storage.LoadAsync<string[]>(TagsKeyPrefix + connId) ?? Array.Empty<string>();
                     var receiverGame = slotId.HasValue && _multiData.SlotInfo.TryGetValue((int)slotId.Value, out var slot) ? slot.Game : null;
 
                     if (!MatchesFilters(bounce, slotId, receiverGame, receiverTags))
                         continue;
 
                     var bounced = new Bounced(bounce.Games ?? [], bounce.Slots ?? [], bounce.Tags ?? [], bounce.Data ?? new());
-                    await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { bounced });
+                    await _connectionManager.SendJsonToConnectionAsync(connId, new Packet[] { bounced });
                 }
             }
             catch (Exception ex)

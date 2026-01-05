@@ -60,6 +60,7 @@ builder.Services.AddSingleton<IConsoleCommand, HintCommand>();
 builder.Services.AddSingleton<IConsoleCommand, AuthorizeCommandSlot>();
 builder.Services.AddSingleton<IConsoleCommand, BackupStorageCommand>();
 builder.Services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
+builder.Services.AddSingleton<IConsoleCommand, ListSlotsCommand>();
 
 builder.Services.AddCors(options =>
 {
@@ -95,6 +96,7 @@ pluginManager.RegisterPlugin<BouncePlugin>();
 pluginManager.RegisterPlugin<CreateHintsPlugin>();
 pluginManager.RegisterPlugin<SayCommandPlugin>();
 pluginManager.RegisterPlugin<UpdateHintPlugin>();
+pluginManager.RegisterPlugin<ConnectionTagsPlugin>();
 
 pluginManager.Initialize(app.Services);
 
