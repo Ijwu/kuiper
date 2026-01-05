@@ -58,6 +58,8 @@ builder.Services.AddSingleton<IConsoleCommand, QuitCommand>();
 builder.Services.AddSingleton<IConsoleCommand, DumpStorageCommand>();
 builder.Services.AddSingleton<IConsoleCommand, HintCommand>();
 builder.Services.AddSingleton<IConsoleCommand, AuthorizeCommandSlot>();
+builder.Services.AddSingleton<IConsoleCommand, BackupStorageCommand>();
+builder.Services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
 
 builder.Services.AddCors(options =>
 {
