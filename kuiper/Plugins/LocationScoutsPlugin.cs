@@ -1,8 +1,10 @@
-﻿using kbo.bigrocks;
+﻿using kbo;
+using kbo.bigrocks;
 using kbo.littlerocks;
 
 using kuiper.Pickle;
 using kuiper.Services;
+using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
@@ -11,12 +13,14 @@ namespace kuiper.Plugins
         private readonly ILogger<LocationScoutsPlugin> _logger;
         private readonly WebSocketConnectionManager _connectionManager;
         private readonly MultiData _multiData;
+        private readonly IHintService _hintService;
 
-        public LocationScoutsPlugin(ILogger<LocationScoutsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData)
+        public LocationScoutsPlugin(ILogger<LocationScoutsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService)
         {
             _logger = logger;
             _connectionManager = connectionManager;
             _multiData = multiData;
+            _hintService = hintService;
         }
 
         public async Task ReceivePacket(Packet packet, string connectionId)
@@ -47,10 +51,48 @@ namespace kuiper.Plugins
                 var responsePacket = new LocationInfo(scouts);
                 await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { responsePacket });
                 _logger.LogInformation("Sent {Length} scouted locations to connection {ConnectionId}", scouts.Length, connectionId);
+
+                await CreateHintsIfRequestedAsync(locationScoutsPacket.CreateAsHint, slotId.Value, scouts);
             }
             else
             {
                 _logger.LogDebug("No valid locations in LocationScoutsPacket from connection {ConnectionId}", connectionId);
+            }
+        }
+
+        private async Task CreateHintsIfRequestedAsync(long createAsHint, long findingPlayer, NetworkItem[] scoutedItems)
+        {
+            if (createAsHint == 0)
+                return;
+
+            int hintsCreated = 0;
+
+            foreach (var item in scoutedItems)
+            {
+                if (createAsHint == 2)
+                {
+                    bool exists = await _hintService.HintExistsForLocationAsync(item.Location);
+                    if (exists)
+                        continue;
+                }
+
+                var hint = new Hint(
+                    receivingPlayer: item.Player,
+                    findingPlayer: findingPlayer,
+                    location: item.Location,
+                    item: item.Item,
+                    found: false,
+                    entrance: string.Empty,
+                    itemFlags: item.Flags
+                );
+
+                await _hintService.AddHintAsync(item.Player, hint, HintStatus.Unspecified);
+                hintsCreated++;
+            }
+
+            if (hintsCreated > 0)
+            {
+                _logger.LogInformation("Created {Count} hints from location scouts (CreateAsHint={Mode})", hintsCreated, createAsHint);
             }
         }
     }

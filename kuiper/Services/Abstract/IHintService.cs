@@ -11,5 +11,7 @@ namespace kuiper.Services.Abstract
         Task AddHintAsync(long slotId, Hint hint, HintStatus status);
 
         Task UpdateHintAsync(long slotId, Hint hint, HintStatus status);
+
+        Task<bool> HintExistsForLocationAsync(long location);
     }
 }

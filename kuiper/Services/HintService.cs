@@ -62,6 +62,23 @@ namespace kuiper.Services
             a.FindingPlayer == b.FindingPlayer &&
             a.Location == b.Location;
 
+        public async Task<bool> HintExistsForLocationAsync(long location)
+        {
+            var keys = await _storage.ListKeysAsync();
+            var hintKeys = keys.Where(k => k.StartsWith(KeyPrefix));
+
+            foreach (var key in hintKeys)
+            {
+                var stored = await _storage.LoadAsync<StoredHint[]>(key);
+                if (stored != null && stored.Any(h => h.Hint.Location == location))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public record StoredHint
         {
             public Hint Hint { get; init; }
