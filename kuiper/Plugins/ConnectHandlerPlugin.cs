@@ -86,16 +86,26 @@ namespace kuiper.Plugins
                     _logger.LogDebug(ex, "Error mapping connection to slot; continuing without mapping.");
                 }
                 
-                // Build player list from MultiData
-                NetworkPlayer[] players;
-                try
+                // Build player list from connections
+                var allConnectionIds = _connectionManager.GetAllConnectionIds();
+                var players = new List<NetworkPlayer>();
+                foreach (var connId in allConnectionIds)
                 {
-                    players = _multiData.SlotInfo.Select(kvp => new NetworkPlayer(0, (int)kvp.Key, kvp.Value.Name, kvp.Value.Name)).ToArray();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to build player list for Connected packet; sending empty list.");
-                    players = Array.Empty<NetworkPlayer>();
+                    try
+                    {
+                        var slotId = await _connectionManager.GetSlotForConnectionAsync(connId);
+                        string playerName = "Unknown";
+                        if (slotId.HasValue && _multiData.SlotInfo != null && _multiData.SlotInfo.TryGetValue((int)slotId.Value, out var slotInfo))
+                        {
+                            playerName = slotInfo.Name;
+                        }
+                        var player = new NetworkPlayer(0, slotId ?? 0, playerName, playerName);
+                        players.Add(player);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Error building player entry for connection {ConnectionId}; skipping.", connId);
+                    }
                 }
 
                 // Determine hint points (fallback to 0)
@@ -114,10 +124,10 @@ namespace kuiper.Plugins
                 }
 
                 // SlotData: attempt to use per-slot data from MultiData.SlotData if we can identify the connecting slot
-                Dictionary<string, object> slotDataForClient = new();
+                Dictionary<string, object>? slotDataForClient = null;
                 try
                 {
-                    if (matchedSlotId.HasValue && _multiData.SlotData != null)
+                    if (matchedSlotId.HasValue && _multiData.SlotData != null && connectPacket.SlotData)
                     {
                         if (_multiData.SlotData.TryGetValue(matchedSlotId.Value, out var sd))
                         {
@@ -128,7 +138,7 @@ namespace kuiper.Plugins
                 catch (Exception ex)
                 {
                     _logger.LogDebug(ex, "Error extracting SlotData for client; falling back to empty SlotData.");
-                    slotDataForClient = new Dictionary<string, object>();
+                    slotDataForClient = null;
                 }
 
                 // SlotInfo: map local SlotInfo to library NetworkSlot dictionary
@@ -173,7 +183,7 @@ namespace kuiper.Plugins
                 }
 
                 // Send Connected response populated with players and other fields
-                var connectedPacket = new Connected(0, (long)(matchedSlotId ?? 0), players, missingChecks, locationsChecked, slotDataForClient, slotInfoDict, hintPoints);
+                var connectedPacket = new Connected(0, (long)(matchedSlotId ?? 0), players.ToArray(), missingChecks, locationsChecked, slotDataForClient, slotInfoDict, hintPoints);
 
                 // Send Connected only to the connecting client
                 await SendPacketToClientAsync(connectedPacket, connectionId);
