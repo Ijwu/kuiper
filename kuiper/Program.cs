@@ -5,6 +5,8 @@ using kuiper.Plugins;
 using kuiper.Services;
 using kuiper.Services.Abstract;
 using kuiper.Commands;
+using kuiper.Extensions;
+using kuiper.Middleware; // Add this
 
 using Razorvine.Pickle;
 
@@ -53,30 +55,8 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddSingleton<WebSocketConnectionManager>();
-builder.Services.AddSingleton<MultiData>(multiData);
-builder.Services.AddSingleton<PluginManager>();
-builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
-
-builder.Services.AddSingleton<IStorageService, InMemoryStorageService>();
-builder.Services.AddSingleton<ILocationCheckService, LocationCheckService>();
-builder.Services.AddSingleton<IReceivedItemService, ReceivedItemService>();
-builder.Services.AddSingleton<IHintPointsService, HintPointsService>();
-builder.Services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
-builder.Services.AddSingleton<IHintService, HintService>();
-
-builder.Services.AddSingleton<CommandRegistry>();
-builder.Services.AddSingleton<IConsoleCommand, HelpCommand>();
-builder.Services.AddSingleton<IConsoleCommand, SayCommand>();
-builder.Services.AddSingleton<IConsoleCommand, QuitCommand>();
-builder.Services.AddSingleton<IConsoleCommand, DumpStorageCommand>();
-builder.Services.AddSingleton<IConsoleCommand, HintCommand>();
-builder.Services.AddSingleton<IConsoleCommand, AuthorizeCommandSlot>();
-builder.Services.AddSingleton<IConsoleCommand, BackupStorageCommand>();
-builder.Services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
-builder.Services.AddSingleton<IConsoleCommand, ListSlotsCommand>();
-
-builder.Services.AddHostedService<CommandLoopService>();
+builder.Services.AddKuiperServices(multiData)
+                .AddKuiperCommands();
 
 builder.Services.AddCors(options =>
 {
@@ -95,24 +75,7 @@ var logger = app.Logger;
 // Resolve PluginManager and initialize plugin instances. Register plugin types before calling Initialize.
 var pluginManager = app.Services.GetRequiredService<PluginManager>();
 // Register built-in plugins
-pluginManager.RegisterPlugin<ConnectHandlerPlugin>();
-pluginManager.RegisterPlugin<LocationChecksPlugin>();
-pluginManager.RegisterPlugin<DataPackagePlugin>();
-pluginManager.RegisterPlugin<DataStorageGetPlugin>();
-pluginManager.RegisterPlugin<DataStorageSlotDataPlugin>();
-pluginManager.RegisterPlugin<DataStorageSetPlugin>();
-pluginManager.RegisterPlugin<DataStorageRaceModePlugin>();
-pluginManager.RegisterPlugin<DataStorageNameGroupsPlugin>();
-pluginManager.RegisterPlugin<DataStorageHintsPlugin>();
-pluginManager.RegisterPlugin<LocationScoutsPlugin>();
-pluginManager.RegisterPlugin<SyncPlugin>();
-pluginManager.RegisterPlugin<ReleasePlugin>();
-pluginManager.RegisterPlugin<ChatPlugin>();
-pluginManager.RegisterPlugin<BouncePlugin>();
-pluginManager.RegisterPlugin<CreateHintsPlugin>();
-pluginManager.RegisterPlugin<SayCommandPlugin>();
-pluginManager.RegisterPlugin<UpdateHintPlugin>();
-pluginManager.RegisterPlugin<ConnectionTagsPlugin>();
+pluginManager.RegisterBuiltInPlugins();
 
 pluginManager.Initialize(app.Services);
 
@@ -127,31 +90,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseWebSockets();
 
-app.Map("/", async context =>
-{
-    if (context.WebSockets.IsWebSocketRequest)
-    {
-        var connectionManager = context.RequestServices.GetRequiredService<WebSocketConnectionManager>();
-        var webSocketHandler = context.RequestServices.GetRequiredService<IWebSocketHandler>();
-
-        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        var connectionId = Guid.NewGuid().ToString();
-
-        logger.LogInformation("Incoming Connection. Connection ID: {ConnectionId}", connectionId);
-
-        var newPlayer = new PlayerData
-        {
-            Socket = webSocket
-        };
-
-        await connectionManager.AddConnectionAsync(connectionId, newPlayer);
-        await webSocketHandler.HandleConnectionAsync(connectionId, newPlayer);
-    }
-    else
-    {
-        context.Response.StatusCode = 400;
-    }
-});
+app.UseMiddleware<KuiperWebSocketMiddleware>();
 
 app.Run();
 
