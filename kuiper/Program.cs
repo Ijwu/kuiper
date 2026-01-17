@@ -76,6 +76,8 @@ builder.Services.AddSingleton<IConsoleCommand, BackupStorageCommand>();
 builder.Services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
 builder.Services.AddSingleton<IConsoleCommand, ListSlotsCommand>();
 
+builder.Services.AddHostedService<CommandLoopService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -114,7 +116,6 @@ pluginManager.RegisterPlugin<ConnectionTagsPlugin>();
 
 pluginManager.Initialize(app.Services);
 
-StartCommandLoop(app.Services, logger, app.Lifetime);
 // Preload precollected items as checks
 await PreloadPrecollectedItemsAsync(app.Services, logger);
 
@@ -153,64 +154,6 @@ app.Map("/", async context =>
 });
 
 app.Run();
-
-static void StartCommandLoop(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger, IHostApplicationLifetime lifetime)
-{
-    Task.Run(async () =>
-    {
-        try
-        {
-            using var scope = services.CreateScope();
-            var registry = scope.ServiceProvider.GetRequiredService<CommandRegistry>();
-            var commands = scope.ServiceProvider.GetServices<IConsoleCommand>();
-            foreach (var cmd in commands)
-            {
-                registry.Register(cmd);
-            }
-
-            logger.LogInformation("Command loop started. Type 'help' for commands.");
-
-            while (!lifetime.ApplicationStopping.IsCancellationRequested)
-            {
-                var line = await Task.Run(() => Console.ReadLine(), lifetime.ApplicationStopping);
-                if (line is null)
-                {
-                    await Task.Delay(100, lifetime.ApplicationStopping);
-                    continue;
-                }
-
-                var trimmed = line.Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                    continue;
-
-                var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                var commandName = parts[0];
-                var args = parts.Skip(1).ToArray();
-
-                if (registry.TryGet(commandName, out var command))
-                {
-                    var result = await command.ExecuteAsync(args, scope.ServiceProvider, lifetime.ApplicationStopping);
-                    if (!string.IsNullOrWhiteSpace(result))
-                    {
-                        Console.WriteLine(result);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Unknown command. Type 'help' for list.");
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // shutting down
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Command loop failed");
-        }
-    });
-}
 
 static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)
 {
