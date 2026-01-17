@@ -8,30 +8,32 @@ namespace kuiper.Plugins
     /// <summary>
     /// Stores tags from Connect and ConnectUpdate packets into the storage service keyed by connection id.
     /// </summary>
-    public class ConnectionTagsPlugin : IPlugin
+    public class ConnectionTagsPlugin : BasePlugin
     {
         private const string KeyPrefix = "#connection_tags:";
 
-        private readonly ILogger<ConnectionTagsPlugin> _logger;
         private readonly IStorageService _storage;
 
-        public ConnectionTagsPlugin(ILogger<ConnectionTagsPlugin> logger, IStorageService storage)
+        public ConnectionTagsPlugin(ILogger<ConnectionTagsPlugin> logger, WebSocketConnectionManager connectionManager, IStorageService storage)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            switch (packet)
-            {
-                case Connect connect:
-                    await StoreTagsAsync(connectionId, connect.Tags);
-                    break;
-                case ConnectUpdate update:
-                    await StoreTagsAsync(connectionId, update.Tags);
-                    break;
-            }
+            Handle<Connect>(HandleConnectAsync);
+            Handle<ConnectUpdate>(HandleConnectUpdateAsync);
+        }
+
+        private Task HandleConnectAsync(Connect packet, string connectionId)
+        {
+            return StoreTagsAsync(connectionId, packet.Tags);
+        }
+
+        private Task HandleConnectUpdateAsync(ConnectUpdate packet, string connectionId)
+        {
+            return StoreTagsAsync(connectionId, packet.Tags);
         }
 
         private async Task StoreTagsAsync(string connectionId, string[]? tags)
@@ -43,7 +45,7 @@ namespace kuiper.Plugins
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to store tags for connection {ConnectionId}", connectionId);
+                Logger.LogError(ex, "Failed to store tags for connection {ConnectionId}", connectionId);
             }
         }
     }

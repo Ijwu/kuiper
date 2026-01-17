@@ -7,10 +7,8 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class ReleasePlugin : IPlugin
+    public class ReleasePlugin : BasePlugin
     {
-        private readonly ILogger<ReleasePlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly ILocationCheckService _locationChecks;
         private readonly MultiData _multiData;
         private readonly IServerAnnouncementService _announcementService;
@@ -21,38 +19,36 @@ namespace kuiper.Plugins
             ILocationCheckService locationChecks,
             MultiData multiData,
             IServerAnnouncementService announcementService)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _locationChecks = locationChecks ?? throw new ArgumentNullException(nameof(locationChecks));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not StatusUpdate statusPacket)
-                return;
+            Handle<StatusUpdate>(HandleStatusUpdateAsync);
+        }
 
+        private async Task HandleStatusUpdateAsync(StatusUpdate statusPacket, string connectionId)
+        {
             if (statusPacket.Status != ClientStatus.Goal)
                 return;
 
-            var slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-            if (!slotId.HasValue)
-            {
-                _logger.LogDebug("Received ClientGoal status from {ConnectionId} without a mapped slot; skipping remaining release.", connectionId);
+            var (success, slotId) = await TryGetSlotForConnectionAsync(connectionId);
+            if (!success)
                 return;
-            }
 
-            await _announcementService.AnnounceGoalReachedAsync(slotId.Value, GetPlayerName(slotId.Value));
-            await ReleaseRemainingItemsAsync(slotId.Value);
+            await _announcementService.AnnounceGoalReachedAsync(slotId, GetPlayerName(slotId));
+            await ReleaseRemainingItemsAsync(slotId);
         }
 
         private async Task ReleaseRemainingItemsAsync(long slotId)
         {
             if (!_multiData.Locations.TryGetValue(slotId, out var slotLocations) || slotLocations.Count == 0)
             {
-                _logger.LogDebug("No location data found for slot {Slot}; nothing to release.", slotId);
+                Logger.LogDebug("No location data found for slot {Slot}; nothing to release.", slotId);
                 return;
             }
 
@@ -60,7 +56,7 @@ namespace kuiper.Plugins
             var remainingLocations = slotLocations.Keys.Where(loc => !recordedChecks.Contains(loc)).ToArray();
             if (remainingLocations.Length == 0)
             {
-                _logger.LogInformation("Slot {Slot} has no remaining items to release.", slotId);
+                Logger.LogInformation("Slot {Slot} has no remaining items to release.", slotId);
                 return;
             }
 
@@ -76,35 +72,23 @@ namespace kuiper.Plugins
 
             if (releasedItems.Count == 0)
             {
-                _logger.LogInformation("Slot {Slot} had no releasable items after reaching goal.", slotId);
+                Logger.LogInformation("Slot {Slot} had no releasable items after reaching goal.", slotId);
                 return;
             }
 
             foreach (var group in releasedItems.GroupBy(item => item.Player))
             {
-
-                var targetConnectionIds = await _connectionManager.GetConnectionIdsForSlotAsync(group.Key);
-                if (targetConnectionIds.Count == 0)
-                {
-                    _logger.LogInformation("Could not deliver {Count} remaining item(s) from slot {SourceSlot} to slot {TargetSlot} because the target is offline.", group.Count(), slotId, group.Key);
-                    continue;
-                }
-
                 var totalChecks = await _locationChecks.GetChecksAsync(group.Key);
-
                 var packet = new ReceivedItems(totalChecks.Count(), group.ToArray());
 
-                foreach (var connection in targetConnectionIds)
-                {
-                    await _connectionManager.SendJsonToConnectionAsync(connection, new[] { packet });
-                }
+                await SendToSlotAsync(group.Key, packet);
 
                 foreach (var item in group)
                 {
                     await _announcementService.AnnounceItemSentAsync(slotId, item.Player, GetItemName(slotId, item.Item), item.Item, item.Location);
                 }
 
-                _logger.LogInformation("Released {Count} remaining item(s) from slot {SourceSlot} to slot {TargetSlot}.", group.Count(), slotId, group.Key);
+                Logger.LogInformation("Released {Count} remaining item(s) from slot {SourceSlot} to slot {TargetSlot}.", group.Count(), slotId, group.Key);
             }
         }
 
@@ -131,7 +115,7 @@ namespace kuiper.Plugins
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Failed to resolve item name for {ItemId}; using id.", itemId);
+                Logger.LogDebug(ex, "Failed to resolve item name for {ItemId}; using id.", itemId);
             }
             return itemId.ToString();
         }

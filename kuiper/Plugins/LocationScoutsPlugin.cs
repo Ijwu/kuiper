@@ -8,37 +8,32 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class LocationScoutsPlugin : IPlugin
+    public class LocationScoutsPlugin : BasePlugin
     {
-        private readonly ILogger<LocationScoutsPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly MultiData _multiData;
         private readonly IHintService _hintService;
 
         public LocationScoutsPlugin(ILogger<LocationScoutsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService)
+            : base(logger, connectionManager)
         {
-            _logger = logger;
-            _connectionManager = connectionManager;
-            _multiData = multiData;
-            _hintService = hintService;
+            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
+            _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not LocationScouts locationScoutsPacket)
+            Handle<LocationScouts>(HandleLocationScoutsAsync);
+        }
+
+        private async Task HandleLocationScoutsAsync(LocationScouts locationScoutsPacket, string connectionId)
+        {
+            Logger.LogDebug("Handling LocationScoutsPacket for connection {ConnectionId}", connectionId);
+
+            var (success, slotId) = await TryGetSlotForConnectionAsync(connectionId);
+            if (!success)
                 return;
 
-            _logger.LogDebug("Handling LocationScoutsPacket for connection {ConnectionId}", connectionId);
-
-            long? slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-
-            if (slotId == null)
-            {
-                _logger.LogDebug("Received LocationScoutsPacket from connection {ConnectionId} with no mapped slot; ignoring.", connectionId);
-                return;
-            }
-
-            var allLocationsForSlot = _multiData.Locations[slotId.Value];
+            var allLocationsForSlot = _multiData.Locations[slotId];
 
             var scouts = locationScoutsPacket.Locations
                 .Where(loc => allLocationsForSlot.ContainsKey((int)loc))
@@ -49,14 +44,14 @@ namespace kuiper.Plugins
             if (scouts.Length > 0)
             {
                 var responsePacket = new LocationInfo(scouts);
-                await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { responsePacket });
-                _logger.LogInformation("Sent {Length} scouted locations to connection {ConnectionId}", scouts.Length, connectionId);
+                await SendToConnectionAsync(connectionId, responsePacket);
+                Logger.LogInformation("Sent {Length} scouted locations to connection {ConnectionId}", scouts.Length, connectionId);
 
-                await CreateHintsIfRequestedAsync(locationScoutsPacket.CreateAsHint, slotId.Value, scouts);
+                await CreateHintsIfRequestedAsync(locationScoutsPacket.CreateAsHint, slotId, scouts);
             }
             else
             {
-                _logger.LogDebug("No valid locations in LocationScoutsPacket from connection {ConnectionId}", connectionId);
+                Logger.LogDebug("No valid locations in LocationScoutsPacket from connection {ConnectionId}", connectionId);
             }
         }
 
@@ -92,7 +87,7 @@ namespace kuiper.Plugins
 
             if (hintsCreated > 0)
             {
-                _logger.LogInformation("Created {Count} hints from location scouts (CreateAsHint={Mode})", hintsCreated, createAsHint);
+                Logger.LogInformation("Created {Count} hints from location scouts (CreateAsHint={Mode})", hintsCreated, createAsHint);
             }
         }
     }

@@ -9,24 +9,23 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class DataStorageGetPlugin : IPlugin
+    public class DataStorageGetPlugin : BasePlugin
     {
-        private readonly ILogger<DataStorageGetPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IStorageService _storage;
 
         public DataStorageGetPlugin(ILogger<DataStorageGetPlugin> logger, WebSocketConnectionManager connectionManager, IStorageService storage)
+            : base(logger, connectionManager)
         {
-            _logger = logger;
-            _connectionManager = connectionManager;
-            _storage = storage;
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not Get getPacket)
-                return;
+            Handle<Get>(HandleGetAsync);
+        }
 
+        private async Task HandleGetAsync(Get getPacket, string connectionId)
+        {
             Dictionary<string, object> responseData = new();
             foreach (var key in getPacket.Keys)
             {
@@ -40,15 +39,14 @@ namespace kuiper.Plugins
                 }
                 else
                 {
-                    _logger.LogDebug("No data found for key '{Key}' requested by connection {ConnectionId}", key, connectionId);
+                    Logger.LogDebug("No data found for key '{Key}' requested by connection {ConnectionId}", key, connectionId);
                 }
             }
 
             if (responseData.Count > 0)
             {
                 var responsePacket = new Retrieved(responseData.ToDictionary(kvp => kvp.Key, kvp => JsonSerializer.SerializeToNode(kvp.Value)));
-
-                await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { responsePacket });
+                await SendToConnectionAsync(connectionId, responsePacket);
             }
         }
     }

@@ -7,128 +7,105 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class LocationChecksPlugin : IPlugin
+    public class LocationChecksPlugin : BasePlugin
     {
-        private readonly ILogger<LocationChecksPlugin> _logger;
         private readonly ILocationCheckService _locationChecks;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IHintPointsService _hintPoints;
         private readonly IServerAnnouncementService _announcementService;
         private readonly IReceivedItemService _receivedItems;
         private readonly MultiData _multiData;
 
         public LocationChecksPlugin(ILogger<LocationChecksPlugin> logger, ILocationCheckService locationChecks, WebSocketConnectionManager connectionManager, IHintPointsService hintPoints, IServerAnnouncementService announcementService, IReceivedItemService receivedItems, MultiData multiData)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _locationChecks = locationChecks ?? throw new ArgumentNullException(nameof(locationChecks));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _hintPoints = hintPoints ?? throw new ArgumentNullException(nameof(hintPoints));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
             _receivedItems = receivedItems ?? throw new ArgumentNullException(nameof(receivedItems));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not LocationChecks locPacket)
+            Handle<LocationChecks>(HandleLocationChecksAsync);
+        }
+
+        private async Task HandleLocationChecksAsync(LocationChecks locPacket, string connectionId)
+        {
+            var (success, slotId) = await TryGetSlotForConnectionAsync(connectionId);
+            if (!success)
                 return;
 
-            try
+            // Determine which locations are new (not already recorded)
+            var existing = (await _locationChecks.GetChecksAsync(slotId)).ToHashSet();
+            var newLocations = locPacket.Locations?.Where(l => !existing.Contains((int)l)).Select(l => (int)l).ToArray() ?? Array.Empty<int>();
+
+
+            List<NetworkItem> items = new();
+            if (newLocations.Length > 0)
             {
-                var slotIdNullable = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-                if (!slotIdNullable.HasValue)
+                foreach (var loc in newLocations)
                 {
-                    _logger.LogDebug("Received LocationChecks from connection {ConnectionId} with no mapped slot; ignoring.", connectionId);
-                    return;
+                    var item = await _locationChecks.AddCheckAsync(slotId, loc);
+                    if (item != null)
+                    {
+                        items.Add(item);                            
+                    }
                 }
 
-                var slotId = slotIdNullable.Value;
+                // TODO: reward correct hint points
+                // Reward hint points for new checks (example: 1 point per check)
+                await _hintPoints.AddHintPointsAsync(slotId, newLocations.Length);
+                Logger.LogInformation("Recorded {Count} new location checks for slot {Slot} from connection {ConnectionId}", newLocations.Length, slotId, connectionId);
 
-                // Determine which locations are new (not already recorded)
-                var existing = (await _locationChecks.GetChecksAsync(slotId)).ToHashSet();
-                var newLocations = locPacket.Locations?.Where(l => !existing.Contains((int)l)).Select(l => (int)l).ToArray() ?? Array.Empty<int>();
+                // Send RoomUpdate to caller with updated hint points and newly checked locations
+                var updatedHintPoints = await _hintPoints.GetHintPointsAsync(slotId);
+                var roomUpdate = new RoomUpdate(
+                    hintPoints: updatedHintPoints,
+                    players: null,
+                    checkedLocations: newLocations.Select(l => (long)l).ToArray(),
+                    hintCost: null,
+                    locationCheckPoints: null,
+                    permissions: null
+                );
+                await SendToConnectionAsync(connectionId, roomUpdate);
+            }
+            else
+            {
+                Logger.LogDebug("No new locations in LocationChecks from connection {ConnectionId}", connectionId);
+            }
 
-
-                List<NetworkItem> items = new();
-                if (newLocations.Length > 0)
+            Dictionary<long, List<NetworkItem>> itemsByPlayer = new();
+            foreach (NetworkItem item in items)
+            {
+                if (!itemsByPlayer.ContainsKey(item.Player))
                 {
-                    foreach (var loc in newLocations)
-                    {
-                        var item = await _locationChecks.AddCheckAsync(slotId, loc);
-                        if (item != null)
-                        {
-                            items.Add(item);                            
-                        }
-                    }
-
-                    // TODO: reward correct hint points
-                    // Reward hint points for new checks (example: 1 point per check)
-                    await _hintPoints.AddHintPointsAsync(slotId, newLocations.Length);
-                    _logger.LogInformation("Recorded {Count} new location checks for slot {Slot} from connection {ConnectionId}", newLocations.Length, slotId, connectionId);
-
-                    // Send RoomUpdate to caller with updated hint points and newly checked locations
-                    var updatedHintPoints = await _hintPoints.GetHintPointsAsync(slotId);
-                    var roomUpdate = new RoomUpdate(
-                        hintPoints: updatedHintPoints,
-                        players: null,
-                        checkedLocations: newLocations.Select(l => (long)l).ToArray(),
-                        hintCost: null,
-                        locationCheckPoints: null,
-                        permissions: null
-                    );
-                    await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { roomUpdate });
+                    itemsByPlayer[item.Player] = [ item ];
                 }
                 else
                 {
-                    _logger.LogDebug("No new locations in LocationChecks from connection {ConnectionId}", connectionId);
-                }
-
-                Dictionary<long, List<NetworkItem>> itemsByPlayer = new();
-                foreach (NetworkItem item in items)
-                {
-                    if (!itemsByPlayer.ContainsKey(item.Player))
-                    {
-                        itemsByPlayer[item.Player] = [ item ];
-                    }
-                    else
-                    {
-                        var list = itemsByPlayer[item.Player];
-                        list.Add(item);
-                    }
-                }
-
-                // Send back items grouped by player
-                foreach (var player in itemsByPlayer)
-                {
-                    var receivedSoFar = (await _receivedItems.GetReceivedItemsAsync(player.Key)).Count();
-                    var index = Math.Max(0, receivedSoFar - player.Value.Count);
-
-                    List<NetworkItem> itemListForPlayer = [..player.Value.Select(x => new NetworkItem(x.Item, x.Location, x.Player, x.Flags))];
-                    itemListForPlayer.ForEach(x => x.Player = slotId);
-                    var responsePacket = new ReceivedItems(index, itemListForPlayer.ToArray());
-
-                    var targetConnectionIds = await _connectionManager.GetConnectionIdsForSlotAsync(player.Key);
-                    if (targetConnectionIds.Count == 0)
-                    {
-                        _logger.LogDebug("No active connections mapped to slot {Slot}; skipping ReceivedItems broadcast.", player.Key);
-                        continue;
-                    }
-
-                    foreach (var connection in targetConnectionIds)
-                    {
-                        await _connectionManager.SendJsonToConnectionAsync(connection, new[] { responsePacket });
-                    }
-
-                    // Announce item sends
-                    foreach (var item in player.Value)
-                    {
-                        await _announcementService.AnnounceItemSentAsync(slotId, item.Player, GetItemName(slotId, item.Item), item.Item, item.Location);
-                    }
+                    var list = itemsByPlayer[item.Player];
+                    list.Add(item);
                 }
             }
-            catch (Exception ex)
+
+            // Send back items grouped by player
+            foreach (var player in itemsByPlayer)
             {
-                _logger.LogError(ex, "Error handling LocationChecks packet from {ConnectionId}", connectionId);
+                var receivedSoFar = (await _receivedItems.GetReceivedItemsAsync(player.Key)).Count();
+                var index = Math.Max(0, receivedSoFar - player.Value.Count);
+
+                List<NetworkItem> itemListForPlayer = [..player.Value.Select(x => new NetworkItem(x.Item, x.Location, x.Player, x.Flags))];
+                itemListForPlayer.ForEach(x => x.Player = slotId);
+                var responsePacket = new ReceivedItems(index, itemListForPlayer.ToArray());
+
+                await SendToSlotAsync(player.Key, responsePacket);
+
+                // Announce item sends
+                foreach (var item in player.Value)
+                {
+                    await _announcementService.AnnounceItemSentAsync(slotId, item.Player, GetItemName(slotId, item.Item), item.Item, item.Location);
+                }
             }
         }
 
@@ -148,7 +125,7 @@ namespace kuiper.Plugins
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Failed to resolve item name for {ItemId}; using id.", itemId);
+                Logger.LogDebug(ex, "Failed to resolve item name for {ItemId}; using id.", itemId);
             }
             return itemId.ToString();
         }

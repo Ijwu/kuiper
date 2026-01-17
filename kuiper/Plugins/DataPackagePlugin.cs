@@ -6,37 +6,29 @@ using kuiper.Services;
 
 namespace kuiper.Plugins
 {
-    public class DataPackagePlugin : IPlugin
+    public class DataPackagePlugin : BasePlugin
     {
-        private readonly ILogger<DataPackagePlugin> _logger;
         private readonly MultiData _multiData;
-        private readonly WebSocketConnectionManager _connectionManager;
 
         public DataPackagePlugin(ILogger<DataPackagePlugin> logger, MultiData multiData, WebSocketConnectionManager connectionManager)
+            : base(logger, connectionManager)
         {
-            _logger = logger;
-            _multiData = multiData;
-            _connectionManager = connectionManager;
+            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not GetDataPackage getDataPackagePacket)
-                return;
+            Handle<GetDataPackage>(HandleGetDataPackageAsync);
+        }
 
-            _logger.LogDebug("Handling GetDataPackagePacket for connection {ConnectionId}", connectionId);
+        private async Task HandleGetDataPackageAsync(GetDataPackage packet, string connectionId)
+        {
+            Logger.LogDebug("Handling GetDataPackagePacket for connection {ConnectionId}", connectionId);
 
             var dataPackagePacket = _multiData.ToDataPackage();
+            await SendToConnectionAsync(connectionId, dataPackagePacket);
 
-            try
-            {
-                await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { dataPackagePacket });
-                _logger.LogInformation("Sent DataPackagePacket to connection {ConnectionId}", connectionId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send DataPackagePacket to connection {ConnectionId}", connectionId);
-            }
+            Logger.LogInformation("Sent DataPackagePacket to connection {ConnectionId}", connectionId);
         }
     }
 }

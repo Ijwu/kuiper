@@ -7,33 +7,28 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class SyncPlugin : IPlugin
+    public class SyncPlugin : BasePlugin
     {
-        private readonly ILogger<SyncPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IReceivedItemService _receivedItems;
         private readonly MultiData _multiData;
 
         public SyncPlugin(ILogger<SyncPlugin> logger, WebSocketConnectionManager connectionManager, IReceivedItemService receivedItems, MultiData multiData)
+            : base(logger, connectionManager)
         {
-            _logger = logger;
-            _connectionManager = connectionManager;
-            _receivedItems = receivedItems;
-            _multiData = multiData;
+            _receivedItems = receivedItems ?? throw new ArgumentNullException(nameof(receivedItems));
+            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not Sync syncPacket)
-                return;
+            Handle<Sync>(HandleSyncAsync);
+        }
 
-            var slotIdNullable = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-            if (!slotIdNullable.HasValue)
-            {
-                _logger.LogDebug("Received SyncPacket from connection {ConnectionId} with no mapped slot; ignoring.", connectionId);
+        private async Task HandleSyncAsync(Sync packet, string connectionId)
+        {
+            var (success, slotId) = await TryGetSlotForConnectionAsync(connectionId);
+            if (!success)
                 return;
-            }
-            var slotId = slotIdNullable.Value;
 
             List<NetworkItem> items = new();
 
@@ -45,8 +40,7 @@ namespace kuiper.Plugins
             }
 
             var responsePacket = new ReceivedItems(0, items.ToArray());
-
-            await _connectionManager.SendJsonToConnectionAsync(connectionId, new[] { responsePacket });
+            await SendToConnectionAsync(connectionId, responsePacket);
         }
     }
 }

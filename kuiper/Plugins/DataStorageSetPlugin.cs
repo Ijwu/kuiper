@@ -11,38 +11,28 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class DataStorageSetPlugin : IPlugin
+    public class DataStorageSetPlugin : BasePlugin
     {
-        private readonly ILogger<DataStorageSetPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IStorageService _storage;
         private readonly ConcurrentDictionary<string, HashSet<string>> _subscriptions = new(StringComparer.OrdinalIgnoreCase);
 
         private const string NotifyStoragePrefix = "#setnotify:";
 
         public DataStorageSetPlugin(ILogger<DataStorageSetPlugin> logger, WebSocketConnectionManager connectionManager, IStorageService storage)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+        }
+
+        protected override void RegisterHandlers()
+        {
+            Handle<SetNotify>(HandleSetNotifyAsync);
+            Handle<Set>(HandleSetAsync);
         }
 
         private string NotifyKey(string connectionId) => NotifyStoragePrefix + connectionId;
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
-        {
-            switch (packet)
-            {
-                case SetNotify notify:
-                    await HandleSetNotifyAsync(connectionId, notify);
-                    break;
-                case Set set:
-                    await HandleSetAsync(connectionId, set);
-                    break;
-            }
-        }
-
-        private async Task HandleSetNotifyAsync(string connectionId, SetNotify notify)
+        private async Task HandleSetNotifyAsync(SetNotify notify, string connectionId)
         {
             if (notify.Keys is { Length: > 0 })
             {
@@ -63,36 +53,29 @@ namespace kuiper.Plugins
             }
         }
 
-        private async Task HandleSetAsync(string connectionId, Set setPacket)
+        private async Task HandleSetAsync(Set setPacket, string connectionId)
         {
-            try
+            var existing = await _storage.LoadAsync<JsonNode>(setPacket.Key);
+            var defaultNode = setPacket.Default;
+            var originalNode = existing ?? defaultNode;
+
+            var valueNode = existing ?? defaultNode;
+            foreach (var op in setPacket.Operations ?? Array.Empty<DataStorageOperation>())
             {
-                var existing = await _storage.LoadAsync<JsonNode>(setPacket.Key);
-                var defaultNode = setPacket.Default;
-                var originalNode = existing ?? defaultNode;
-
-                var valueNode = existing ?? defaultNode;
-                foreach (var op in setPacket.Operations ?? Array.Empty<DataStorageOperation>())
-                {
-                    valueNode = ApplyOperation(valueNode, op, defaultNode);
-                }
-
-                await _storage.SaveAsync(setPacket.Key, valueNode);
-
-                var slot = await _connectionManager.GetSlotForConnectionAsync(connectionId) ?? 0;
-
-                if (setPacket.WantReply)
-                {
-                    var reply = new SetReply(setPacket.Key, valueNode, originalNode, slot);
-                    await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { reply });
-                }
-
-                await NotifySubscribersAsync(setPacket.Key, valueNode, originalNode, slot);
+                valueNode = ApplyOperation(valueNode, op, defaultNode);
             }
-            catch (Exception ex)
+
+            await _storage.SaveAsync(setPacket.Key, valueNode);
+
+            var slot = await ConnectionManager.GetSlotForConnectionAsync(connectionId) ?? 0;
+
+            if (setPacket.WantReply)
             {
-                _logger.LogError(ex, "Failed to handle Set packet for key {Key}", setPacket.Key);
+                var reply = new SetReply(setPacket.Key, valueNode, originalNode, slot);
+                await SendToConnectionAsync(connectionId, reply);
             }
+
+            await NotifySubscribersAsync(setPacket.Key, valueNode, originalNode, slot);
         }
 
         private JsonNode ApplyOperation(JsonNode current, DataStorageOperation op, JsonNode defaultNode)
@@ -204,7 +187,7 @@ namespace kuiper.Plugins
             {
                 if (kvp.Value.Contains(key))
                 {
-                    await _connectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { setReply });
+                    await ConnectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { setReply });
                 }
             }
         }

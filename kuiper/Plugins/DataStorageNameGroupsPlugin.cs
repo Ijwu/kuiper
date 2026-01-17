@@ -10,27 +10,26 @@ using kuiper.Services;
 
 namespace kuiper.Plugins
 {
-    public class DataStorageNameGroupsPlugin : IPlugin
+    public class DataStorageNameGroupsPlugin : BasePlugin
     {
         private static readonly Regex ItemGroupsRegex = new("^_read_item_name_groups_(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex LocationGroupsRegex = new("^_read_location_name_groups_(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private readonly ILogger<DataStorageNameGroupsPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly MultiData _multiData;
 
         public DataStorageNameGroupsPlugin(ILogger<DataStorageNameGroupsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not Get getPacket)
-                return;
+            Handle<Get>(HandleGetAsync);
+        }
 
+        private async Task HandleGetAsync(Get getPacket, string connectionId)
+        {
             var responses = new Dictionary<string, JsonNode>();
 
             foreach (var key in getPacket.Keys)
@@ -48,7 +47,7 @@ namespace kuiper.Plugins
             if (responses.Count > 0)
             {
                 var retrieved = new Retrieved(responses);
-                await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { retrieved });
+                await SendToConnectionAsync(connectionId, retrieved);
             }
         }
 

@@ -10,26 +10,25 @@ using kuiper.Services.Abstract;
 
 namespace kuiper.Plugins
 {
-    public class DataStorageHintsPlugin : IPlugin
+    public class DataStorageHintsPlugin : BasePlugin
     {
         private static readonly Regex HintKeyRegex = new("^_read_hints_0_(?<slot>\\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private readonly ILogger<DataStorageHintsPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IHintService _hintService;
 
         public DataStorageHintsPlugin(ILogger<DataStorageHintsPlugin> logger, WebSocketConnectionManager connectionManager, IHintService hintService)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not Get getPacket)
-                return;
+            Handle<Get>(HandleGetAsync);
+        }
 
+        private async Task HandleGetAsync(Get getPacket, string connectionId)
+        {
             Dictionary<string, JsonNode> results = new();
 
             foreach (var key in getPacket.Keys)
@@ -52,14 +51,14 @@ namespace kuiper.Plugins
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to retrieve hints for slot {Slot}", slotId);
+                    Logger.LogError(ex, "Failed to retrieve hints for slot {Slot}", slotId);
                 }
             }
 
             if (results.Count > 0)
             {
                 var response = new Retrieved(results);
-                await _connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { response });
+                await SendToConnectionAsync(connectionId, response);
             }
         }
     }

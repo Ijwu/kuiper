@@ -9,52 +9,40 @@ namespace kuiper.Plugins
     /// <summary>
     /// Plugin that handles chat messages (SayPacket) from clients and broadcasts them to all connected players.
     /// </summary>
-    public class ChatPlugin : IPlugin
+    public class ChatPlugin : BasePlugin
     {
-        private readonly ILogger<ChatPlugin> _logger;
-        private readonly WebSocketConnectionManager _connectionManager;
         private readonly IServerAnnouncementService _announcementService;
 
         public ChatPlugin(
             ILogger<ChatPlugin> logger,
             WebSocketConnectionManager connectionManager,
             IServerAnnouncementService announcementService)
+            : base(logger, connectionManager)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
-        public async Task ReceivePacket(Packet packet, string connectionId)
+        protected override void RegisterHandlers()
         {
-            if (packet is not Say sayPacket)
-                return;
+            Handle<Say>(HandleSayAsync);
+        }
 
+        private async Task HandleSayAsync(Say sayPacket, string connectionId)
+        {
             if (sayPacket.Text.StartsWith("!"))
                 return;
 
-            try
+            var (success, slotId) = await TryGetSlotForConnectionAsync(connectionId);
+            if (!success)
+                return;
+
+            if (string.IsNullOrWhiteSpace(sayPacket.Text))
             {
-                var slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
-
-                if (!slotId.HasValue)
-                {
-                    _logger.LogDebug("Received SayPacket from connection {ConnectionId} with no mapped slot; ignoring.", connectionId);
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(sayPacket.Text))
-                {
-                    _logger.LogDebug("Received empty SayPacket from connection {ConnectionId}; ignoring.", connectionId);
-                    return;
-                }
-
-                await _announcementService.BroadcastChatMessageAsync(slotId.Value, sayPacket.Text);
+                Logger.LogDebug("Received empty SayPacket from connection {ConnectionId}; ignoring.", connectionId);
+                return;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error handling SayPacket from connection {ConnectionId}", connectionId);
-            }
+
+            await _announcementService.BroadcastChatMessageAsync(slotId, sayPacket.Text);
         }
     }
 }
