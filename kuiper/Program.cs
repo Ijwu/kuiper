@@ -11,12 +11,26 @@ using Razorvine.Pickle;
 using Serilog;
 using Serilog.Events;
 using kbo.littlerocks;
+using NativeFileDialogSharp;
 
 Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
 Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
 
-string multidataFile = @"C:\ProgramData\Archipelago\output\hk2players.archipelago";
-//string multidataFile = @"C:\ProgramData\Archipelago\output\clique.archipelago";
+string? multidataFile = args.Length > 0 ? args[0] : null;
+
+if (string.IsNullOrEmpty(multidataFile) || !File.Exists(multidataFile))
+{
+    var result = Dialog.FileOpen("archipelago");
+    if (result.IsOk)
+    {
+        multidataFile = result.Path;
+    }
+    else
+    {
+        Console.WriteLine("No file selected. Exiting.");
+        return;
+    }
+}
 
 var fs = new FileStream(multidataFile, FileMode.Open);
 var multiData = MultidataUnpickler.Unpickle(fs);

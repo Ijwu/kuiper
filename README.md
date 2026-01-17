@@ -34,8 +34,6 @@ cd kuiper
 dotnet run
 ```
 
-The server loads multidata from a `.archipelago` file (configure path in `Program.cs`).
-
 ## kuiper Server Architecture
 
 ### Directory Structure
