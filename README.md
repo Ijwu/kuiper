@@ -13,9 +13,7 @@ A .NET implementation of an [Archipelago](https://archipelago.gg/) multiworld ra
 | **telescope** | Additional tooling |
 | **belters** | Unit tests |
 
-## Features
-
-### Server (kuiper)
+## kuiper Features
 
 - **WebSocket Server**: Full Archipelago protocol support
 - **Plugin Architecture**: Extensible packet handling system
