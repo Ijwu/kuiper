@@ -2,6 +2,7 @@ using System.Text.Json;
 using kuiper.Pickle;
 using kuiper.Services;
 using kuiper.Services.Abstract;
+using kuiper.Utilities;
 using kbo;
 using kbo.bigrocks;
 using kbo.littlerocks;
@@ -18,7 +19,7 @@ namespace kuiper.Commands
         {
             if (args.Length < 2)
             {
-                return "Usage: hint <slotId> <item name>";
+                return "Usage: hint <slotId_or_name> <item name>";
             }
 
             var multiData = services.GetRequiredService<MultiData>();
@@ -26,15 +27,14 @@ namespace kuiper.Commands
             var storage = services.GetRequiredService<IStorageService>();
             var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
 
-            if (!long.TryParse(args[0], out var slotId))
+            var identifier = args[0];
+            if (!SlotResolver.TryResolveSlotId(identifier, multiData, out var slotId))
             {
-                return "Invalid slot id.";
+                return $"Unknown slot '{identifier}'.";
             }
-
-            if (!multiData.SlotInfo.TryGetValue((int)slotId, out var slotInfo))
-            {
-                return $"Unknown slot {slotId}.";
-            }
+            
+            // slotId is now valid and verified against multiData in TryResolveSlotId
+            var slotInfo = multiData.SlotInfo[(int)slotId];
 
             var game = slotInfo.Game;
             if (!multiData.DataPackage.TryGetValue(game, out var package))

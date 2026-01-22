@@ -1,5 +1,6 @@
 using kuiper.Services.Abstract;
 using kuiper.Pickle;
+using kuiper.Utilities; // Add this
 
 namespace kuiper.Commands
 {
@@ -23,26 +24,11 @@ namespace kuiper.Commands
                 return "Usage: release <slot_id_or_name>";
 
             var identifier = string.Join(" ", args);
-            long slotId = -1;
-
-            if (int.TryParse(identifier, out var id))
+            
+            if (!SlotResolver.TryResolveSlotId(identifier, _multiData, out var slotId))
             {
-                if (_multiData.SlotInfo.ContainsKey(id))
-                    slotId = id;
-            }
-
-            if (slotId == -1)
-            {
-                var slot = _multiData.SlotInfo.Values.FirstOrDefault(s => string.Equals(s.Name, identifier, StringComparison.OrdinalIgnoreCase));
-                if (slot != null && _multiData.SlotInfo.Any(kvp => kvp.Value == slot)) // Double check if needed, but values don't have ID directly usually?? Wait, MultiDataNetworkSlot probably has ID implicitly by map Key? No.
-                {
-                    // Find key for value
-                     slotId = _multiData.SlotInfo.FirstOrDefault(x => x.Value == slot).Key;
-                }
-            }
-
-            if (slotId == -1)
                 return $"Slot '{identifier}' not found.";
+            }
 
              await _releaseService.ReleaseRemainingItemsAsync(slotId);
              return $"Released items for slot {slotId}.";

@@ -1,4 +1,7 @@
 using kuiper.Services.Abstract;
+using kuiper.Pickle;
+using kuiper.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace kuiper.Commands
 {
@@ -6,15 +9,23 @@ namespace kuiper.Commands
     {
         public string Name => "authslot";
 
-        public string Description => "Authorize a slot to run in-game commands: authslot <slotId>";
+        public string Description => "Authorize a slot to run in-game commands: authslot <slotId_or_name>";
 
         private const string AuthorizedSlotsKey = "#authorized_command_slots";
 
         public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
-            if (args.Length != 1 || !long.TryParse(args[0], out var slotId))
+            if (args.Length != 1)
             {
-                return "Usage: authslot <slotId>";
+                return "Usage: authslot <slotId_or_name>";
+            }
+
+            var multiData = services.GetRequiredService<MultiData>();
+            var identifier = args[0];
+
+            if (!SlotResolver.TryResolveSlotId(identifier, multiData, out var slotId))
+            {
+                return $"Slot '{identifier}' not found.";
             }
 
             var storage = services.GetRequiredService<IStorageService>();
