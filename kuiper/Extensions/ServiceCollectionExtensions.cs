@@ -21,7 +21,8 @@ namespace kuiper.Extensions
             services.AddSingleton<IHintPointsService, HintPointsService>();
             services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
             services.AddSingleton<IHintService, HintService>();
-            services.AddSingleton<IKuiperConfig, KuiperConfigService>(); // Add this
+            services.AddSingleton<IKuiperConfig, KuiperConfigService>();
+            services.AddSingleton<IReleaseService, ReleaseService>();
 
             services.AddHostedService<CommandLoopService>();
 
@@ -40,6 +41,7 @@ namespace kuiper.Extensions
             services.AddSingleton<IConsoleCommand, BackupStorageCommand>();
             services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
             services.AddSingleton<IConsoleCommand, ListSlotsCommand>();
+            services.AddSingleton<IConsoleCommand, ReleaseCommand>();
 
             return services;
         }
