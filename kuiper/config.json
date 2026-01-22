@@ -1,6 +1,7 @@
 {
   "Server": {
-    "Port": 5272
+    "Port": 5272,
+    "Password":  "kuiper"
   },
   "Plugins": {
     "ReleasePlugin": {

@@ -15,14 +15,18 @@ namespace kuiper.Plugins
         private readonly ILocationCheckService _locationCheckService;
         private readonly IHintPointsService _hintPointsService;
         private readonly IServerAnnouncementService _announcementService;
+        private readonly IStorageService _storageService;
+        private readonly IKuiperConfig _kuiperConfig;
 
-        public ConnectHandlerPlugin(ILogger<ConnectHandlerPlugin> logger, MultiData multiData, WebSocketConnectionManager connectionManager, ILocationCheckService locationCheckService, IHintPointsService hintPointsService, IServerAnnouncementService announcementService)
+        public ConnectHandlerPlugin(ILogger<ConnectHandlerPlugin> logger, MultiData multiData, WebSocketConnectionManager connectionManager, ILocationCheckService locationCheckService, IHintPointsService hintPointsService, IServerAnnouncementService announcementService, IStorageService storageService, IKuiperConfig kuiperConfig)
             : base(logger, connectionManager)
         {
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _locationCheckService = locationCheckService ?? throw new ArgumentNullException(nameof(locationCheckService));
             _hintPointsService = hintPointsService ?? throw new ArgumentNullException(nameof(hintPointsService));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
+            _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+            _kuiperConfig = kuiperConfig ?? throw new ArgumentNullException(nameof(kuiperConfig));
         }
 
         protected override void RegisterHandlers()
@@ -39,7 +43,7 @@ namespace kuiper.Plugins
                 connectPacket.Version?.ToString() ?? "Unknown");
 
             // Validate the Connect packet
-            var validationResult = ValidateConnectPacket(connectPacket);
+            var validationResult = await ValidateConnectPacketAsync(connectPacket);
 
             if (!validationResult.IsValid)
             {
@@ -50,6 +54,8 @@ namespace kuiper.Plugins
                 Logger.LogWarning("Connection refused for client {Name} (ConnectionId: {ConnectionId}): {Reason}",
                     connectPacket.Name ?? "Unknown", connectionId, validationResult.Error);
 
+                await ConnectionManager.RemoveConnectionAsync(connectionId);
+
                 return;
             }
 
@@ -57,17 +63,7 @@ namespace kuiper.Plugins
             int? matchedSlotId = null;
             try
             {
-                if (!string.IsNullOrWhiteSpace(connectPacket.Name) && _multiData.SlotInfo != null)
-                {
-                    var match = _multiData.SlotInfo.FirstOrDefault(kvp =>
-                        string.Equals(kvp.Value.Name, connectPacket.Name, StringComparison.OrdinalIgnoreCase) &&
-                        (string.IsNullOrWhiteSpace(connectPacket.Game) || string.Equals(kvp.Value.Game, connectPacket.Game, StringComparison.OrdinalIgnoreCase)));
-
-                    if (!match.Equals(default(KeyValuePair<int, Pickle.MultiDataNetworkSlot>)))
-                    {
-                        matchedSlotId = match.Key;
-                    }
-                }
+                matchedSlotId = ResolveSlotId(connectPacket.Name, connectPacket.Game);
 
                 if (matchedSlotId.HasValue)
                 {
@@ -197,7 +193,7 @@ namespace kuiper.Plugins
         /// <summary>
         /// Validates a Connect packet against server state and configuration.
         /// </summary>
-        private ValidationResult ValidateConnectPacket(Connect packet)
+        private async Task<ValidationResult> ValidateConnectPacketAsync(Connect packet)
         {
             try
             {
@@ -209,17 +205,15 @@ namespace kuiper.Plugins
                     if (string.IsNullOrWhiteSpace(packet.Name))
                     {
                         Logger.LogDebug("Invalid or missing client name for Text Client");
-                        return new ValidationResult(false, "IncompatibleVersion");
+                        return new ValidationResult(false, "InvalidSlot");
                     }
-
-                    return new ValidationResult(true, null);
                 }
 
                 // Validate that the client name is specified
                 if (string.IsNullOrWhiteSpace(packet.Name))
                 {
                     Logger.LogDebug("Invalid or missing client name");
-                    return new ValidationResult(false, "IncompatibleVersion");
+                    return new ValidationResult(false, "InvalidSlot");
                 }
 
                 // Validate version compatibility (if needed)
@@ -230,13 +224,50 @@ namespace kuiper.Plugins
                 }
 
                 // Verify the game exists in our slot configuration
-                var gameExists = _multiData.SlotInfo.Values.Any(slot => 
-                    string.Equals(slot.Game, packet.Game, StringComparison.OrdinalIgnoreCase));
-
-                if (!gameExists)
+                // Note: Text clients skipped this check above.
+                if (!string.IsNullOrWhiteSpace(packet.Game) && packet.Game != "Archipelago")
                 {
-                    Logger.LogDebug("Game not found in server configuration: {Game}", packet.Game);
-                    return new ValidationResult(false, "IncompatibleVersion");
+                    var gameExists = _multiData.SlotInfo.Values.Any(slot => 
+                        string.Equals(slot.Game, packet.Game, StringComparison.OrdinalIgnoreCase));
+
+                    if (!gameExists)
+                    {
+                        Logger.LogDebug("Game not found in server configuration: {Game}", packet.Game);
+                        return new ValidationResult(false, "InvalidGame");
+                    }
+                }
+
+                // Password Check
+                string? expectedPassword = null;
+                int? slotId = ResolveSlotId(packet.Name, packet.Game);
+
+                if (slotId.HasValue)
+                {
+                    expectedPassword = await _storageService.LoadAsync<string>($"#password:slot:{slotId}");
+                }
+
+                if (string.IsNullOrEmpty(expectedPassword))
+                {
+                    // Fallback to server config
+                    try
+                    {
+                         // Using dynamic or map to class
+                         var serverConfig = _kuiperConfig.GetServerConfig<ServerConfig>("Server");
+                         expectedPassword = serverConfig?.Password;
+                    }
+                    catch 
+                    {
+                         // Config might be missing or section missing, ignore
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(expectedPassword))
+                {
+                    if (packet.Password != expectedPassword)
+                    {
+                         Logger.LogWarning("Invalid password for {Name}", packet.Name);
+                         return new ValidationResult(false, "InvalidPassword");
+                    }
                 }
 
                 return new ValidationResult(true, null);
@@ -247,5 +278,23 @@ namespace kuiper.Plugins
                 return new ValidationResult(false, "IncompatibleVersion");
             }
         }
+
+        private int? ResolveSlotId(string name, string? game)
+        {
+             if (string.IsNullOrWhiteSpace(name) || _multiData.SlotInfo == null)
+                return null;
+
+             var match = _multiData.SlotInfo.FirstOrDefault(kvp =>
+                string.Equals(kvp.Value.Name, name, StringComparison.OrdinalIgnoreCase) &&
+                (string.IsNullOrWhiteSpace(game) || game == "Archipelago" || string.Equals(kvp.Value.Game, game, StringComparison.OrdinalIgnoreCase)));
+
+             if (!match.Equals(default(KeyValuePair<int, Pickle.MultiDataNetworkSlot>)))
+             {
+                 return match.Key;
+             }
+             return null;
+        }
+
+        private record ServerConfig { public string? Password { get; set; } }
     }
 }

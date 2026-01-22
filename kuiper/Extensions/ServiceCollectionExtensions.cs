@@ -42,6 +42,7 @@ namespace kuiper.Extensions
             services.AddSingleton<IConsoleCommand, RestoreStorageCommand>();
             services.AddSingleton<IConsoleCommand, ListSlotsCommand>();
             services.AddSingleton<IConsoleCommand, ReleaseCommand>();
+            services.AddSingleton<IConsoleCommand, SetPasswordCommand>();
 
             return services;
         }

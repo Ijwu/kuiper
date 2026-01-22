@@ -33,7 +33,7 @@ namespace kuiper.Services
                 }
             }
 
-            // Optionally unmap slot mapping when connection removed
+            // unmap slot mapping when connection removed
             await UnmapConnectionAsync(connectionId);
         }
 
