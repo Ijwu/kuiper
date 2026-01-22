@@ -1,7 +1,6 @@
 using kuiper.Services.Abstract;
 using kuiper.Pickle;
 using kuiper.Utilities;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace kuiper.Commands
 {

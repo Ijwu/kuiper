@@ -14,7 +14,6 @@ namespace kuiper.Plugins
             public bool AutoReleaseOnGoal { get; set; } = true;
         }
 
-        private readonly ILocationCheckService _locationChecks;
         private readonly MultiData _multiData;
         private readonly IServerAnnouncementService _announcementService;
         private readonly IKuiperConfig _config;
@@ -23,14 +22,12 @@ namespace kuiper.Plugins
         public ReleasePlugin(
             ILogger<ReleasePlugin> logger,
             WebSocketConnectionManager connectionManager,
-            ILocationCheckService locationChecks,
             MultiData multiData,
             IServerAnnouncementService announcementService,
             IKuiperConfig config,
             IReleaseService releaseService)
             : base(logger, connectionManager)
         {
-            _locationChecks = locationChecks ?? throw new ArgumentNullException(nameof(locationChecks));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
             _config = config ?? throw new ArgumentNullException(nameof(config));
