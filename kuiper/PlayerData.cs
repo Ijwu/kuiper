@@ -6,7 +6,7 @@ namespace kuiper
 {
     public class PlayerData
     {
-        public MultiDataNetworkSlot Slot { get; set; }
-        public WebSocket Socket { get; set; }
+        public required MultiDataNetworkSlot Slot { get; set; }
+        public required WebSocket Socket { get; set; }
     }
 }

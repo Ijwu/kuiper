@@ -48,7 +48,7 @@ namespace kuiper.Plugins
             if (!validationResult.IsValid)
             {
                 // Send ConnectionRefused response only to origin connection
-                var refusedPacket = new ConnectionRefused(new[] { validationResult.Error });
+                var refusedPacket = new ConnectionRefused(validationResult.Error != null ? new[] { validationResult.Error } : []);
 
                 await SendToConnectionAsync(connectionId, refusedPacket);
                 Logger.LogWarning("Connection refused for client {Name} (ConnectionId: {ConnectionId}): {Reason}",
@@ -181,7 +181,7 @@ namespace kuiper.Plugins
 
             if (matchedSlotId.HasValue)
             {
-                await _announcementService.AnnouncePlayerConnectedAsync(matchedSlotId.Value, connectPacket.Name ?? _multiData.SlotInfo[matchedSlotId.Value].Name);
+                await _announcementService.AnnouncePlayerConnectedAsync(matchedSlotId.Value, connectPacket.Name ?? _multiData.SlotInfo![matchedSlotId.Value].Name);
             }
         }
 
@@ -279,7 +279,7 @@ namespace kuiper.Plugins
             }
         }
 
-        private int? ResolveSlotId(string name, string? game)
+        private int? ResolveSlotId(string? name, string? game)
         {
              if (string.IsNullOrWhiteSpace(name) || _multiData.SlotInfo == null)
                 return null;
