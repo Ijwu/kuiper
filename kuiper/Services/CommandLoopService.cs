@@ -82,18 +82,17 @@ namespace kuiper.Services
                             var result = await command.ExecuteAsync(args, scope.ServiceProvider, stoppingToken);
                             if (!string.IsNullOrWhiteSpace(result))
                             {
-                                Console.WriteLine(result);
+                                _logger.LogInformation("{Result}", result);
                             }
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, "Error executing command '{CommandName}'", commandName);
-                            Console.WriteLine($"Error executing command: {ex.Message}");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Unknown command. Type 'help' for list.");
+                        _logger.LogWarning("Unknown command '{CommandName}'. Type 'help' for list.", commandName);
                     }
                 }
             }
