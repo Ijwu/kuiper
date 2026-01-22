@@ -41,6 +41,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("config.json", optional: true, reloadOnChange: true);
 
+var port = builder.Configuration.GetValue<int?>("Server:Port");
+if (port.HasValue)
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(port.Value);
+    });
+}
+
 var logsDir = Path.Combine(AppContext.BaseDirectory, "logs");
 Directory.CreateDirectory(logsDir);
 
