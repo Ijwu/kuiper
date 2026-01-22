@@ -9,21 +9,29 @@ namespace kuiper.Plugins
 {
     public class ReleasePlugin : BasePlugin
     {
+        private class ReleasePluginConfig
+        {
+            public bool AutoReleaseOnGoal { get; set; } = true;
+        }
+
         private readonly ILocationCheckService _locationChecks;
         private readonly MultiData _multiData;
         private readonly IServerAnnouncementService _announcementService;
+        private readonly IKuiperConfig _config;
 
         public ReleasePlugin(
             ILogger<ReleasePlugin> logger,
             WebSocketConnectionManager connectionManager,
             ILocationCheckService locationChecks,
             MultiData multiData,
-            IServerAnnouncementService announcementService)
+            IServerAnnouncementService announcementService,
+            IKuiperConfig config)
             : base(logger, connectionManager)
         {
             _locationChecks = locationChecks ?? throw new ArgumentNullException(nameof(locationChecks));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         protected override void RegisterHandlers()
@@ -41,7 +49,12 @@ namespace kuiper.Plugins
                 return;
 
             await _announcementService.AnnounceGoalReachedAsync(slotId, GetPlayerName(slotId));
-            await ReleaseRemainingItemsAsync(slotId);
+
+            var config = _config.GetPluginConfig<ReleasePluginConfig>("ReleasePlugin");
+            if (config?.AutoReleaseOnGoal ?? true)
+            {
+                await ReleaseRemainingItemsAsync(slotId);
+            }
         }
 
         private async Task ReleaseRemainingItemsAsync(long slotId)

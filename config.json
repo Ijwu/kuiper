@@ -1,12 +1,10 @@
 {
   "Server": {
-    "Port": 38281,
-    "Password": "",
-    "WelcomeMessage": "Welcome to Archipelago Kuiper Server"
+    "Port": 38281
   },
   "Plugins": {
-    "SayCommand": {
-      "Enabled": true
+    "ReleasePlugin": {
+      "AutoReleaseOnGoal": true
     }
   }
 }
