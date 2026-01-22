@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace kuiper.Commands
 {
     public class QuitCommand : IConsoleCommand

@@ -1,12 +1,8 @@
-using Microsoft.Extensions.Hosting;
-using kuiper;
 using kuiper.Pickle;
 using kuiper.Plugins;
-using kuiper.Services;
 using kuiper.Services.Abstract;
-using kuiper.Commands;
 using kuiper.Extensions;
-using kuiper.Middleware; // Add this
+using kuiper.Middleware;
 
 using Razorvine.Pickle;
 

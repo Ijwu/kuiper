@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-
 namespace kuiper.Services.Abstract
 {
     public interface IKuiperConfig

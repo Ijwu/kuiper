@@ -3,7 +3,6 @@ using kuiper.Plugins;
 using kuiper.Services;
 using kuiper.Services.Abstract;
 using kuiper.Commands;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace kuiper.Extensions
 {
