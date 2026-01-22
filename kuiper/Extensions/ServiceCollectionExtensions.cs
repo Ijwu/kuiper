@@ -22,6 +22,7 @@ namespace kuiper.Extensions
             services.AddSingleton<IHintPointsService, HintPointsService>();
             services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
             services.AddSingleton<IHintService, HintService>();
+            services.AddSingleton<IKuiperConfig, KuiperConfigService>(); // Add this
 
             services.AddHostedService<CommandLoopService>();
 

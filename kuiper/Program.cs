@@ -39,6 +39,8 @@ var multiData = MultidataUnpickler.Unpickle(fs);
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("config.json", optional: true, reloadOnChange: true);
+
 var logsDir = Path.Combine(AppContext.BaseDirectory, "logs");
 Directory.CreateDirectory(logsDir);
 
