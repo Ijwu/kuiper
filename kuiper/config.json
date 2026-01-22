@@ -1,6 +1,6 @@
 {
   "Server": {
-    "Port": 38281
+    "Port": 5272
   },
   "Plugins": {
     "ReleasePlugin": {

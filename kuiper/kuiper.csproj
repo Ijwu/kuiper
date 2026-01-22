@@ -18,4 +18,10 @@
     <ProjectReference Include="..\kbo\kbo.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
