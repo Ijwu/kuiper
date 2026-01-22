@@ -9,29 +9,9 @@ using Razorvine.Pickle;
 using Serilog;
 using Serilog.Events;
 using kbo.littlerocks;
-using NativeFileDialogSharp;
 
 Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
 Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
-
-string? multidataFile = args.Length > 0 ? args[0] : null;
-
-if (string.IsNullOrEmpty(multidataFile) || !File.Exists(multidataFile))
-{
-    var result = Dialog.FileOpen("archipelago");
-    if (result.IsOk)
-    {
-        multidataFile = result.Path;
-    }
-    else
-    {
-        Console.WriteLine("No file selected. Exiting.");
-        return;
-    }
-}
-
-var fs = new FileStream(multidataFile, FileMode.Open);
-var multiData = MultidataUnpickler.Unpickle(fs);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +41,23 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+string? multidataFile = args.Length > 0 ? args[0] : null;
+if (multidataFile == null)
+{
+    var filePath = builder.Configuration.GetValue<string?>("Server:File");
+    if (!string.IsNullOrEmpty(filePath))
+    {
+        multidataFile = filePath;
+    }
+    else
+    {
+        Log.Logger.Fatal("No multidata file path provided and none was set in the configuration file.");
+        return;
+    }
+}
+var fs = new FileStream(multidataFile, FileMode.Open);
+var multiData = MultidataUnpickler.Unpickle(fs);
 
 builder.Services.AddKuiperServices(multiData)
                 .AddKuiperCommands();
