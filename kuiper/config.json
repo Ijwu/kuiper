@@ -1,7 +1,8 @@
 {
   "Server": {
     "Port": 5272,
-    "Password":  "kuiper"
+    "Password": "kuiper",
+    "IngameCommandPrefix": "!"
   },
   "Plugins": {
     "ReleasePlugin": {

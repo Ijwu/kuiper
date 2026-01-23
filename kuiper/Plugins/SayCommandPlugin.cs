@@ -13,19 +13,20 @@ namespace kuiper.Plugins
     /// </summary>
     public class SayCommandPlugin : BasePlugin
     {
-        private static readonly object ConsoleLock = new();
         private const string AuthorizedSlotsKey = "#authorized_command_slots";
 
         private readonly CommandRegistry _registry;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IStorageService _storage;
+        private readonly IKuiperConfig _config;
 
-        public SayCommandPlugin(ILogger<SayCommandPlugin> logger, CommandRegistry registry, IServiceScopeFactory scopeFactory, WebSocketConnectionManager connectionManager, IStorageService storage)
+        public SayCommandPlugin(ILogger<SayCommandPlugin> logger, CommandRegistry registry, IServiceScopeFactory scopeFactory, WebSocketConnectionManager connectionManager, IStorageService storage, IKuiperConfig config)
             : base(logger, connectionManager)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
         protected override void RegisterHandlers()
@@ -38,8 +39,22 @@ namespace kuiper.Plugins
             if (string.IsNullOrWhiteSpace(say.Text))
                 return;
 
+            var prefix = "!";
+            try
+            {
+                var serverConfig = _config.GetServerConfig<ServerConfig>("Server");
+                if (!string.IsNullOrEmpty(serverConfig?.IngameCommandPrefix))
+                {
+                    prefix = serverConfig.IngameCommandPrefix;
+                }
+            }
+            catch
+            {
+                // Fallback to default
+            }
+
             var text = say.Text.Trim();
-            if (!text.StartsWith("!"))
+            if (!text.StartsWith(prefix))
                 return;
 
             var slotId = await ConnectionManager.GetSlotForConnectionAsync(connectionId);
@@ -56,7 +71,7 @@ namespace kuiper.Plugins
                 return;
             }
 
-            var commandLine = text[1..].Trim();
+            var commandLine = text[prefix.Length..].Trim();
             if (string.IsNullOrWhiteSpace(commandLine))
                 return;
 
@@ -90,5 +105,7 @@ namespace kuiper.Plugins
             var print = new PrintJson(new JsonMessagePart.Text[] { new JsonMessagePart.Text(output) });
             await SendToConnectionAsync(connectionId, print);
         }
+
+        private class ServerConfig { public string? IngameCommandPrefix { get; set; } }
     }
 }
