@@ -53,9 +53,9 @@ namespace kuiper.Plugins
                     }
                 }
 
-                // TODO: reward correct hint points
-                // Reward hint points for new checks (example: 1 point per check)
-                await _hintPoints.AddHintPointsAsync(slotId, newLocations.Length);
+                // Reward hint points for new checks (Default: 1 point per check)
+                var pointsPerCheck = _multiData.ServerOptions.TryGetValue("location_check_points", out var lcp) ? Convert.ToInt32(lcp) : 1;
+                await _hintPoints.AddHintPointsAsync(slotId, pointsPerCheck * newLocations.Length);
                 Logger.LogInformation("Recorded {Count} new location checks for slot {Slot} from connection {ConnectionId}", newLocations.Length, slotId, connectionId);
 
                 // Send RoomUpdate to caller with updated hint points and newly checked locations
