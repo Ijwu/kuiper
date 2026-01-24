@@ -16,9 +16,9 @@ namespace kuiper.Services
             return _configuration.GetSection($"Plugins:{sectionName}").Get<T>();
         }
 
-        public T GetServerConfig<T>(string sectionName)
+        public T? GetServerConfig<T>(string sectionName)
         {
-            return _configuration.GetSection(sectionName).Get<T>() ?? throw new InvalidOperationException($"Configuration section '{sectionName}' is missing.");
+            return _configuration.GetSection(sectionName).Get<T>();
         }
     }
 }

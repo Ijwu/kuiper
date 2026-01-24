@@ -13,6 +13,6 @@ namespace kuiper.Constants
         public static string Checks(long slotId) => $"{ChecksPrefix}{slotId}";
         public static string ReceivedItems(long slotId) => $"{ReceivedItemsPrefix}{slotId}";
         public static string Password(long slotId) => $"{PasswordPrefix}{slotId}";
-        public static string SetNotify(string connectionId) => $"{PasswordPrefix}{connectionId}";
+        public static string SetNotify(string connectionId) => $"{SetNotifyPrefix}{connectionId}";
     }
 }

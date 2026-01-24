@@ -5,6 +5,7 @@ using System.Text.Json;
 using kbo.bigrocks;
 using kbo.littlerocks;
 
+using kuiper.Constants;
 using kuiper.Pickle;
 using kuiper.Plugins;
 using kuiper.Services.Abstract;
@@ -22,6 +23,7 @@ namespace kuiper.Services
         private readonly PluginManager _pluginManager;
         private readonly IServerAnnouncementService _announcementService;
         private readonly IKuiperConfig _kuiperConfig;
+        private readonly IStorageService _storage;
 
         public WebSocketHandler(
             ILogger<WebSocketHandler> logger,
@@ -29,7 +31,8 @@ namespace kuiper.Services
             MultiData multiData,
             PluginManager pluginManager,
             IServerAnnouncementService announcementService,
-            IKuiperConfig kuiperConfig)
+            IKuiperConfig kuiperConfig,
+            IStorageService storage)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
@@ -37,6 +40,7 @@ namespace kuiper.Services
             _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
             _kuiperConfig = kuiperConfig ?? throw new ArgumentNullException(nameof(kuiperConfig));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
         public async Task HandleConnectionAsync(string connectionId, PlayerData player)
@@ -102,7 +106,10 @@ namespace kuiper.Services
 
         private async Task SendRoomInfoAsync(WebSocket webSocket)
         {
+            // If the server itself or ANY slots have a password, then request password from the client. Since we don't know what slot they'll try to connect to.
             var hasPassword = _kuiperConfig.GetServerConfig<string?>("Server:Password") != null;
+            hasPassword = hasPassword || (await _storage.ListKeysAsync()).Any(x => x.StartsWith(StorageKeys.PasswordPrefix, StringComparison.OrdinalIgnoreCase));
+
             var roomInfo = new RoomInfo(new Version(0, 0, 1), // TODO: set correct protocol version
                                         _multiData.Version,
                                         _multiData.Tags,
