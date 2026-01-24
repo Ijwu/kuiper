@@ -21,19 +21,22 @@ namespace kuiper.Services
         private readonly MultiData _multiData;
         private readonly PluginManager _pluginManager;
         private readonly IServerAnnouncementService _announcementService;
+        private readonly IKuiperConfig _kuiperConfig;
 
         public WebSocketHandler(
             ILogger<WebSocketHandler> logger,
             WebSocketConnectionManager connectionManager,
             MultiData multiData,
             PluginManager pluginManager,
-            IServerAnnouncementService announcementService)
+            IServerAnnouncementService announcementService,
+            IKuiperConfig kuiperConfig)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
+            _kuiperConfig = kuiperConfig ?? throw new ArgumentNullException(nameof(kuiperConfig));
         }
 
         public async Task HandleConnectionAsync(string connectionId, PlayerData player)
@@ -99,10 +102,11 @@ namespace kuiper.Services
 
         private async Task SendRoomInfoAsync(WebSocket webSocket)
         {
+            var hasPassword = _kuiperConfig.GetServerConfig<string?>("Server:Password") != null;
             var roomInfo = new RoomInfo(new Version(0, 0, 1), // TODO: set correct protocol version
                                         _multiData.Version,
                                         _multiData.Tags,
-                                        false, // TODO: Implement password handling
+                                        hasPassword,
                                         GetPermissions(),
                                         _multiData.ServerOptions.TryGetValue("hint_cost", out var hc) ? Convert.ToInt32(hc) : 0,
                                         _multiData.ServerOptions.TryGetValue("location_check_points", out var lcp) ? Convert.ToInt32(lcp) : 0,
