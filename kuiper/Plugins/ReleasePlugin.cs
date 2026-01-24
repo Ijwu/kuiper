@@ -9,14 +9,8 @@ namespace kuiper.Plugins
 {
     public class ReleasePlugin : BasePlugin
     {
-        private class ReleasePluginConfig
-        {
-            public bool AutoReleaseOnGoal { get; set; } = true;
-        }
-
         private readonly MultiData _multiData;
         private readonly IServerAnnouncementService _announcementService;
-        private readonly IKuiperConfig _config;
         private readonly IReleaseService _releaseService;
 
         public ReleasePlugin(
@@ -24,13 +18,11 @@ namespace kuiper.Plugins
             WebSocketConnectionManager connectionManager,
             MultiData multiData,
             IServerAnnouncementService announcementService,
-            IKuiperConfig config,
             IReleaseService releaseService)
             : base(logger, connectionManager)
         {
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
-            _config = config ?? throw new ArgumentNullException(nameof(config));
             _releaseService = releaseService ?? throw new ArgumentNullException(nameof(releaseService));
         }
 
@@ -50,8 +42,9 @@ namespace kuiper.Plugins
 
             await _announcementService.AnnounceGoalReachedAsync(slotId, GetPlayerName(slotId));
 
-            var config = _config.GetPluginConfig<ReleasePluginConfig>("ReleasePlugin");
-            if (config?.AutoReleaseOnGoal ?? true)
+            var releaseMode = ParsePermission(_multiData.ServerOptions.GetValueOrDefault("release_mode")?.ToString());
+
+            if (releaseMode == CommandPermission.Auto || releaseMode == CommandPermission.AutoEnabled)
             {
                 await _releaseService.ReleaseRemainingItemsAsync(slotId);
             }
@@ -63,5 +56,15 @@ namespace kuiper.Plugins
                 return info.Name;
             return $"Player {slotId}";
         }
+
+        private static CommandPermission ParsePermission(string? value) => value switch
+        {
+            "enabled" => CommandPermission.Enabled,
+            "disabled" => CommandPermission.Disabled,
+            "auto" => CommandPermission.Auto,
+            "auto-enabled" => CommandPermission.AutoEnabled,
+            "goal" => CommandPermission.Goal,
+            _ => CommandPermission.Disabled
+        };
     }
 }

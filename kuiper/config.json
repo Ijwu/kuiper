@@ -3,10 +3,5 @@
     "Port": 5272,
     "Password": "kuiper",
     "IngameCommandPrefix": "!"
-  },
-  "Plugins": {
-    "ReleasePlugin": {
-      "AutoReleaseOnGoal": true
-    }
   }
 }
