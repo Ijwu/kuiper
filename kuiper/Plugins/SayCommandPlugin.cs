@@ -154,7 +154,6 @@ namespace kuiper.Plugins
             var totalChecksForSlot = _multiData.Locations[slotId].Count;
             var hintCostPercentage = (int)_multiData.ServerOptions["hint_cost"];
             var hintPointsForSlot = await _hintPointsService.GetHintPointsAsync(slotId);
-            hintPointsForSlot = 50;
 
             if (hintCostPercentage != 0)
             {
@@ -162,7 +161,7 @@ namespace kuiper.Plugins
 
                 if (hintPointsForSlot >= hintCost)
                 {
-                    //await _hintPointsService.AddHintPointsAsync(slotId, -hintCost);
+                    await _hintPointsService.AddHintPointsAsync(slotId, -hintCost);
                 }
                 else
                 {
