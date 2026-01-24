@@ -1,18 +1,18 @@
 using kuiper.Services.Abstract;
+using kuiper.Constants;
 
 namespace kuiper.Services
 {
     public class HintPointsService : IHintPointsService
     {
         private readonly IStorageService _storage;
-        private const string KeyPrefix = "#hintpoints:slot:";
 
         public HintPointsService(IStorageService storage)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
-        private string KeyForSlot(long slot) => KeyPrefix + slot;
+        private string KeyForSlot(long slot) => StorageKeys.HintPoints(slot);
 
         public async Task AddHintPointsAsync(long slot, int points)
         {

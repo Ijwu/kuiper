@@ -1,6 +1,7 @@
 using kuiper.Services.Abstract;
 using kuiper.Pickle;
 using kuiper.Utilities;
+using kuiper.Constants;
 
 namespace kuiper.Commands
 {
@@ -26,7 +27,7 @@ namespace kuiper.Commands
             }
             
             var storage = services.GetRequiredService<IStorageService>();
-            await storage.SaveAsync($"#password:slot:{slotId}", password);
+            await storage.SaveAsync(StorageKeys.Password(slotId), password);
             
             return $"Password set for slot {slotId} ({multiData.SlotInfo[(int)slotId].Name}).";
         }

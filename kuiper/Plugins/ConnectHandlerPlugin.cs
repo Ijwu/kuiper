@@ -3,6 +3,7 @@ using kuiper.Services;
 using kuiper.Pickle;
 using kbo.littlerocks;
 using kbo.bigrocks;
+using kuiper.Constants;
 
 namespace kuiper.Plugins
 {
@@ -243,7 +244,7 @@ namespace kuiper.Plugins
 
                 if (slotId.HasValue)
                 {
-                    expectedPassword = await _storageService.LoadAsync<string>($"#password:slot:{slotId}");
+                    expectedPassword = await _storageService.LoadAsync<string>(StorageKeys.Password(slotId.Value));
                 }
 
                 if (string.IsNullOrEmpty(expectedPassword))

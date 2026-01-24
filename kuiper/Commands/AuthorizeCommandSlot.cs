@@ -1,6 +1,7 @@
 using kuiper.Services.Abstract;
 using kuiper.Pickle;
 using kuiper.Utilities;
+using kuiper.Constants;
 
 namespace kuiper.Commands
 {
@@ -9,8 +10,6 @@ namespace kuiper.Commands
         public string Name => "authslot";
 
         public string Description => "Authorize a slot to run in-game commands: authslot <slotId_or_name>";
-
-        private const string AuthorizedSlotsKey = "#authorized_command_slots";
 
         public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
         {
@@ -28,14 +27,14 @@ namespace kuiper.Commands
             }
 
             var storage = services.GetRequiredService<IStorageService>();
-            var current = (await storage.LoadAsync<long[]>(AuthorizedSlotsKey)) ?? Array.Empty<long>();
+            var current = (await storage.LoadAsync<long[]>(StorageKeys.AuthorizedCommandSlots)) ?? Array.Empty<long>();
             if (current.Contains(slotId))
             {
                 return $"Slot {slotId} is already authorized.";
             }
 
             var updated = current.Concat(new[] { slotId }).Distinct().ToArray();
-            await storage.SaveAsync(AuthorizedSlotsKey, updated);
+            await storage.SaveAsync(StorageKeys.AuthorizedCommandSlots, updated);
             return $"Authorized slot {slotId}.";
         }
     }

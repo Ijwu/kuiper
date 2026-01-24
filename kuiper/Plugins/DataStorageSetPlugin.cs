@@ -6,6 +6,7 @@ using kbo;
 using kbo.bigrocks;
 using kbo.littlerocks;
 
+using kuiper.Constants;
 using kuiper.Services;
 using kuiper.Services.Abstract;
 
@@ -15,8 +16,6 @@ namespace kuiper.Plugins
     {
         private readonly IStorageService _storage;
         private readonly ConcurrentDictionary<string, HashSet<string>> _subscriptions = new(StringComparer.OrdinalIgnoreCase);
-
-        private const string NotifyStoragePrefix = "#setnotify:";
 
         public DataStorageSetPlugin(ILogger<DataStorageSetPlugin> logger, WebSocketConnectionManager connectionManager, IStorageService storage)
             : base(logger, connectionManager)
@@ -30,7 +29,7 @@ namespace kuiper.Plugins
             Handle<Set>(HandleSetAsync);
         }
 
-        private string NotifyKey(string connectionId) => NotifyStoragePrefix + connectionId;
+        private string NotifyKey(string connectionId) => StorageKeys.SetNotify(connectionId);
 
         private async Task HandleSetNotifyAsync(SetNotify notify, string connectionId)
         {

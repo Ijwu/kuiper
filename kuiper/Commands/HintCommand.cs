@@ -6,6 +6,7 @@ using kuiper.Utilities;
 using kbo;
 using kbo.bigrocks;
 using kbo.littlerocks;
+using kuiper.Constants;
 
 namespace kuiper.Commands
 {
@@ -94,16 +95,15 @@ namespace kuiper.Commands
 
         private static async Task NotifySubscribersAsync(long slotId, IHintService hintService, IStorageService storage, WebSocketConnectionManager connectionManager)
         {
-            const string notifyPrefix = "#setnotify:";
             var readKey = $"_read_hints_0_{slotId}";
 
             var keys = await storage.ListKeysAsync();
             foreach (var key in keys)
             {
-                if (!key.StartsWith(notifyPrefix, StringComparison.OrdinalIgnoreCase))
+                if (!key.StartsWith(StorageKeys.SetNotifyPrefix, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var connectionId = key.Substring(notifyPrefix.Length);
+                var connectionId = key.Substring(StorageKeys.SetNotifyPrefix.Length);
                 var subscriptions = await storage.LoadAsync<string[]>(key) ?? Array.Empty<string>();
                 if (!subscriptions.Any(k => string.Equals(k, readKey, StringComparison.OrdinalIgnoreCase)))
                     continue;

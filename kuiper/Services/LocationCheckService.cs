@@ -2,6 +2,7 @@ using kbo.littlerocks;
 
 using kuiper.Pickle;
 using kuiper.Services.Abstract;
+using kuiper.Constants;
 
 namespace kuiper.Services
 {
@@ -18,7 +19,7 @@ namespace kuiper.Services
             _receivedItems = receivedItems ?? throw new ArgumentNullException(nameof(receivedItems));
         }
 
-        private string KeyForSlot(long slot) => $"#checks:slot:{slot}";
+        private string KeyForSlot(long slot) => StorageKeys.Checks(slot);
 
         public async Task<NetworkItem?> AddCheckAsync(long slot, long locationId)
         {

@@ -1,19 +1,19 @@
 using kbo.littlerocks;
 using kuiper.Services.Abstract;
+using kuiper.Constants;
 
 namespace kuiper.Services
 {
     public class ReceivedItemService : IReceivedItemService
     {
         private readonly IStorageService _storage;
-        private const string KeyPrefix = "#received:slot:";
 
         public ReceivedItemService(IStorageService storage)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
-        private static string KeyForSlot(long slotId) => KeyPrefix + slotId;
+        private static string KeyForSlot(long slotId) => StorageKeys.ReceivedItems(slotId);
 
         public async Task AddReceivedItemAsync(long receivingSlot, long sendingSlot, NetworkItem item)
         {
