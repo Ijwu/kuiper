@@ -18,43 +18,33 @@ namespace kuiper.Services
 
         public async Task<Hint[]> GetHintsAsync(long slotId)
         {
-            var stored = await _storage.LoadAsync<StoredHint[]>(KeyForSlot(slotId));
-            return stored?.Select(h => h.Hint).ToArray() ?? Array.Empty<Hint>();
+            var stored = await _storage.LoadAsync<Hint[]>(KeyForSlot(slotId));
+            return stored?.ToArray() ?? Array.Empty<Hint>();
         }
 
-        public async Task<HintStatus> GetHintStatusAsync(long slotId, Hint hint)
-        {
-            if (hint == null) return HintStatus.Unspecified;
-
-            var stored = await _storage.LoadAsync<StoredHint[]>(KeyForSlot(slotId)) ?? Array.Empty<StoredHint>();
-            var match = stored.FirstOrDefault(h => Matches(h.Hint, hint));
-            return match?.Status ?? HintStatus.Unspecified;
-        }
-
-        public async Task AddHintAsync(long slotId, Hint hint, HintStatus status)
+        public async Task AddHintAsync(long slotId, Hint hint)
         {
             if (hint == null) return;
 
-            var list = (await _storage.LoadAsync<StoredHint[]>(KeyForSlot(slotId)) ?? Array.Empty<StoredHint>()).ToList();
-            var existingIndex = list.FindIndex(h => Matches(h.Hint, hint));
-            var newEntry = new StoredHint(hint, status);
+            var list = (await _storage.LoadAsync<Hint[]>(KeyForSlot(slotId)) ?? Array.Empty<Hint>()).ToList();
+            var existingIndex = list.FindIndex(h => Matches(h, hint));
 
             if (existingIndex >= 0)
             {
-                list[existingIndex] = newEntry;
+                list[existingIndex] = hint;
             }
             else
             {
-                list.Add(newEntry);
+                list.Add(hint);
             }
 
             await _storage.SaveAsync(KeyForSlot(slotId), list.ToArray());
         }
 
-        public async Task UpdateHintAsync(long slotId, Hint hint, HintStatus status)
+        public async Task UpdateHintAsync(long slotId, Hint hint)
         {
             // identical behavior to AddHintAsync but kept for interface symmetry
-            await AddHintAsync(slotId, hint, status);
+            await AddHintAsync(slotId, hint);
         }
 
         private static bool Matches(Hint a, Hint b) =>
@@ -69,26 +59,14 @@ namespace kuiper.Services
 
             foreach (var key in hintKeys)
             {
-                var stored = await _storage.LoadAsync<StoredHint[]>(key);
-                if (stored != null && stored.Any(h => h.Hint.Location == location))
+                var stored = await _storage.LoadAsync<Hint[]>(key);
+                if (stored != null && stored.Any(h => h.Location == location))
                 {
                     return true;
                 }
             }
 
             return false;
-        }
-
-        public record StoredHint
-        {
-            public Hint Hint { get; init; }
-            public HintStatus Status { get; init; }
-
-            public StoredHint(Hint hint, HintStatus status)
-            {
-                Hint = hint;
-                Status = status;
-            }
         }
     }
 }

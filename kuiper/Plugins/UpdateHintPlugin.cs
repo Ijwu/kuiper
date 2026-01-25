@@ -36,8 +36,11 @@ namespace kuiper.Plugins
                 return;
             }
 
-            var status = update.Status ?? HintStatus.Unspecified;
-            await _hintService.UpdateHintAsync(slotId, existing, status);
+            if (update.Status.HasValue)
+            {
+                existing.Status = update.Status.Value;
+            }
+            await _hintService.UpdateHintAsync(slotId, existing);
 
             await NotifySubscribersAsync(slotId);
         }

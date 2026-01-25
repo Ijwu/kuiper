@@ -78,10 +78,11 @@ namespace kuiper.Plugins
                     item: item.Item,
                     found: false,
                     entrance: string.Empty,
-                    itemFlags: item.Flags
+                    itemFlags: item.Flags,
+                    status: HintStatus.Unspecified
                 );
 
-                await _hintService.AddHintAsync(item.Player, hint, HintStatus.Unspecified);
+                await _hintService.AddHintAsync(item.Player, hint);
                 hintsCreated++;
             }
 

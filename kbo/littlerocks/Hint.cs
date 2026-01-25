@@ -23,7 +23,10 @@ public record Hint
     [JsonPropertyName("item_flags")]
     public NetworkItemFlags ItemFlags { get; set; }
 
-    public Hint(long receivingPlayer, long findingPlayer, long location, long item, bool found, string entrance, NetworkItemFlags itemFlags)
+    [JsonPropertyName("status")]
+    public HintStatus Status { get; set; }
+
+    public Hint(long receivingPlayer, long findingPlayer, long location, long item, bool found, string entrance, NetworkItemFlags itemFlags, HintStatus status)
     {
         ReceivingPlayer = receivingPlayer;
         FindingPlayer = findingPlayer;
@@ -32,5 +35,6 @@ public record Hint
         Found = found;
         Entrance = entrance;
         ItemFlags = itemFlags;
+        Status = status;
     }
 }

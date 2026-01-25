@@ -145,20 +145,19 @@ namespace kuiper.Plugins
 
         private async Task HandleUnauthorizedHintAsync(long slotId, string[] args, string connectionId)
         {
-            if (args.Length == 0)
-            {
-                await SendOutputAsync(connectionId, "Command rejected: no item name provided.");
-                return;
-            }
-
             var totalChecksForSlot = _multiData.Locations[slotId].Count;
             var hintCostPercentage = (int)_multiData.ServerOptions["hint_cost"];
             var hintPointsForSlot = await _hintPointsService.GetHintPointsAsync(slotId);
+            var hintCost = (totalChecksForSlot / (100 / hintCostPercentage));
+
+            if (args.Length == 0)
+            {
+                await SendOutputAsync(connectionId, $"Command rejected: no item name provided. You need {hintCost} hint points. You have {await _hintPointsService.GetHintPointsAsync(slotId)}.");
+                return;
+            }
 
             if (hintCostPercentage != 0)
             {
-                var hintCost = (totalChecksForSlot / (100 / hintCostPercentage));
-
                 if (hintPointsForSlot >= hintCost)
                 {
                     await _hintPointsService.AddHintPointsAsync(slotId, -hintCost);
@@ -216,13 +215,12 @@ namespace kuiper.Plugins
             var existing = existingHints.FirstOrDefault(h => h.Location == locId && h.Item == itemId && h.ReceivingPlayer == receivingPlayer);
             if (existing is not null)
             {
-                var statusExisting = await _hintService.GetHintStatusAsync(slotId, existing);
-                await SendOutputAsync(connectionId, $"Command Rejected: Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {statusExisting}.");
+                await SendOutputAsync(connectionId, $"Command Rejected: Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {existing.Status}.");
                 return;
             }
 
-            var hint = new Hint(receivingPlayer, slotId, locId, lookedUpItemId, found: false, entrance: string.Empty, itemFlags: itemFlags);
-            await _hintService.AddHintAsync(slotId, hint, status);
+            var hint = new Hint(receivingPlayer, slotId, locId, lookedUpItemId, found: false, entrance: string.Empty, itemFlags: itemFlags, status: status);
+            await _hintService.AddHintAsync(slotId, hint);
 
             await NotifySubscribersAsync(slotId, _hintService, _storage, ConnectionManager);
 
@@ -249,7 +247,7 @@ namespace kuiper.Plugins
                 if (node == null)
                     continue;
 
-                var reply = new SetReply(readKey, node, node, slotId);
+                var reply = new SetReply(readKey, node, null!, slotId);
                 await connectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { reply });
             }
         }
