@@ -77,25 +77,13 @@ namespace kuiper.Plugins
                 Logger.LogDebug(ex, "Error mapping connection to slot; continuing without mapping.");
             }
             
-            // Build player list from connections
-            var allConnectionIds = ConnectionManager.GetAllConnectionIds();
+            // Build player list from MultiData slots
             var players = new List<NetworkPlayer>();
-            foreach (var connId in allConnectionIds)
+            if (_multiData.SlotInfo != null)
             {
-                try
+                foreach (var kvp in _multiData.SlotInfo)
                 {
-                    var slotId = await ConnectionManager.GetSlotForConnectionAsync(connId);
-                    string playerName = "Unknown";
-                    if (slotId.HasValue && _multiData.SlotInfo != null && _multiData.SlotInfo.TryGetValue((int)slotId.Value, out var slotInfo))
-                    {
-                        playerName = slotInfo.Name;
-                    }
-                    var player = new NetworkPlayer(0, slotId ?? 0, playerName, playerName);
-                    players.Add(player);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogDebug(ex, "Error building player entry for connection {ConnectionId}; skipping.", connId);
+                    players.Add(new NetworkPlayer(0, kvp.Key, kvp.Value.Name, kvp.Value.Name));
                 }
             }
 
