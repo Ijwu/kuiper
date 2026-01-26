@@ -36,7 +36,7 @@ dotnet run
 
 Or run the EXE, I guess.
 
-The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time. A `.archipelago` file can be found inside the zipfile that the server outputs upon generation.
+The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time. A `.archipelago` file can be found inside the zipfile that the Archipelago Generator outputs upon generation.
 
 ### Server Commands
 
