@@ -36,13 +36,7 @@ dotnet run
 
 Or run the EXE, I guess.
 
-On startup, the server will open a file dialog prompting you to select a `.archipelago` file for the server to host. A `.archipelago` file can be found inside the zipfile that the server outputs upon generation.
-
-The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time.
-
-### Cross-platform?
-
-Uhhh, I made minor efforts to make this work on cross-platform. Namely, I told the AI to make `kuiper` cross platform when it got to file dialogs. I am skeptical of the nuget package it chose to make that happen, though. 🤔 
+The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time. A `.archipelago` file can be found inside the zipfile that the server outputs upon generation.
 
 ### Server Commands
 
