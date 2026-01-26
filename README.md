@@ -66,18 +66,6 @@ A key tenant behind this project is the idea that all of the server's state info
 
 ## kuiper Server Architecture
 
-### Directory Structure
-
-```
-kuiper/
-├── Commands/          # Console command implementations
-├── Extensions/        # Extension methods used throughout the project
-├── Middleware/        # Request/response middleware components
-├── Pickle/            # Python pickle deserialization for multidata
-├── Plugins/           # Packet handler plugins
-└── Services/          # Core services (storage, hints, connections)
-```
-
 ### Plugins
 The server uses a plugin architecture to handle incoming packets. Each plugin is responsible for handling one or more packet types. Plugins implement the `IPlugin` interface and register themselves with the `PluginManager` during server startup.
 When a packet is received, the server delegates the handling of the packet to each plugin. Each plugin decides if it is interested in the packet and handles it accordingly.
