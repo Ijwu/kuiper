@@ -12,12 +12,14 @@ namespace kuiper.Plugins
     {
         private readonly MultiData _multiData;
         private readonly IHintService _hintService;
+        private readonly IServerAnnouncementService _announcementService;
 
-        public LocationScoutsPlugin(ILogger<LocationScoutsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService)
+        public LocationScoutsPlugin(ILogger<LocationScoutsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService, IServerAnnouncementService announcementService)
             : base(logger, connectionManager)
         {
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
         protected override void RegisterHandlers()
@@ -83,6 +85,7 @@ namespace kuiper.Plugins
                 );
 
                 await _hintService.AddHintAsync(item.Player, hint);
+                await _announcementService.AnnounceHintAsync(item.Player, findingPlayer, item.Item, item.Location, item.Flags);
                 hintsCreated++;
             }
 

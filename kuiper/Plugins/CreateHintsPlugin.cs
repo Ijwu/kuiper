@@ -12,12 +12,14 @@ namespace kuiper.Plugins
     {
         private readonly MultiData _multiData;
         private readonly IHintService _hintService;
+        private readonly IServerAnnouncementService _announcementService;
 
-        public CreateHintsPlugin(ILogger<CreateHintsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService)
+        public CreateHintsPlugin(ILogger<CreateHintsPlugin> logger, WebSocketConnectionManager connectionManager, MultiData multiData, IHintService hintService, IServerAnnouncementService announcementService)
             : base(logger, connectionManager)
         {
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
             _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
         protected override void RegisterHandlers()
@@ -57,6 +59,7 @@ namespace kuiper.Plugins
 
                 var hint = new Hint(receivingPlayer, targetSlotId, loc, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags, status: status);
                 await _hintService.AddHintAsync(targetSlotId, hint);
+                await _announcementService.AnnounceHintAsync(receivingPlayer, targetSlotId, itemId, loc, itemFlags);
             }
         }
     }

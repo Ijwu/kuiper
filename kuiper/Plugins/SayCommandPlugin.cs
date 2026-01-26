@@ -27,6 +27,7 @@ namespace kuiper.Plugins
         private readonly IHintService _hintService;
         private readonly IHintPointsService _hintPointsService;
         private readonly MultiData _multiData;
+        private readonly IServerAnnouncementService _announcementService;
 
         public SayCommandPlugin(ILogger<SayCommandPlugin> logger,
                                 CommandRegistry registry,
@@ -36,7 +37,8 @@ namespace kuiper.Plugins
                                 IKuiperConfig config,
                                 IHintService hintService,
                                 IHintPointsService hintPointsService,
-                                MultiData multiData)
+                                MultiData multiData,
+                                IServerAnnouncementService announcementService)
             : base(logger, connectionManager)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
@@ -46,6 +48,7 @@ namespace kuiper.Plugins
             _hintService = hintService ?? throw new ArgumentNullException(nameof(hintService));
             _hintPointsService = hintPointsService ?? throw new ArgumentNullException(nameof(hintPointsService));
             _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
         }
 
         protected override void RegisterHandlers()
@@ -148,7 +151,8 @@ namespace kuiper.Plugins
             var totalChecksForSlot = _multiData.Locations[slotId].Count;
             var hintCostPercentage = (int)_multiData.ServerOptions["hint_cost"];
             var hintPointsForSlot = await _hintPointsService.GetHintPointsAsync(slotId);
-            var hintCost = (totalChecksForSlot / (100 / hintCostPercentage));
+
+            var hintCost = (hintCostPercentage == 0) ? 0 : (totalChecksForSlot / (100 / (hintCostPercentage)));
 
             if (args.Length == 0)
             {
@@ -223,8 +227,7 @@ namespace kuiper.Plugins
             await _hintService.AddHintAsync(slotId, hint);
 
             await NotifySubscribersAsync(slotId, _hintService, _storage, ConnectionManager);
-
-            await SendOutputAsync(connectionId, $"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).");
+            await _announcementService.AnnounceHintAsync(receivingPlayer, slotId, itemId, locId, itemFlags);
         }
 
         private static async Task NotifySubscribersAsync(long slotId, IHintService hintService, IStorageService storage, WebSocketConnectionManager connectionManager)

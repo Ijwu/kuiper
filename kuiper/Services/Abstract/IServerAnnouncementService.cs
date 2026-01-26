@@ -1,3 +1,5 @@
+using kbo.littlerocks;
+
 namespace kuiper.Services.Abstract
 {
     /// <summary>
@@ -34,5 +36,10 @@ namespace kuiper.Services.Abstract
         /// Broadcasts a server message to all connected clients.
         /// </summary>
         Task BroadcastServerMessageAsync(string message);
+
+        /// <summary>
+        /// Announces that a hint was found.
+        /// </summary>
+        Task AnnounceHintAsync(long receivingSlotId, long findingSlotId, long itemId, long locationId, NetworkItemFlags flags);
     }
 }

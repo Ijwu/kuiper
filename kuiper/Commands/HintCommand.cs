@@ -27,6 +27,7 @@ namespace kuiper.Commands
             var hintService = services.GetRequiredService<IHintService>();
             var storage = services.GetRequiredService<IStorageService>();
             var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
+            var announcementService = services.GetRequiredService<IServerAnnouncementService>();
 
             var identifier = args[0];
             if (!SlotResolver.TryResolveSlotId(identifier, multiData, out var slotId))
@@ -88,6 +89,7 @@ namespace kuiper.Commands
             await hintService.AddHintAsync(slotId, hint);
 
             await NotifySubscribersAsync(slotId, hintService, storage, connectionManager);
+            await announcementService.AnnounceHintAsync(receivingPlayer, slotId, itemId, locId, itemFlags);
 
             return $"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).";
         }

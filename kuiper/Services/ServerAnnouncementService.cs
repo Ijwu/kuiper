@@ -112,6 +112,26 @@ namespace kuiper.Services
             await BroadcastPacketAsync(packet);
         }
 
+        public async Task AnnounceHintAsync(long receivingSlotId, long findingSlotId, long itemId, long locationId, NetworkItemFlags flags)
+        {
+            _logger.LogInformation("Hint revealed: Player {Receiver} item {Item} at {Location} in {Finder}", 
+                receivingSlotId, itemId, locationId, findingSlotId);
+
+            var packet = CreatePrintJsonPacket(
+                CreateTextPart("[Hint]: "),
+                CreatePlayerPart(receivingSlotId),
+                CreateTextPart("'s "),
+                CreateItemPart(itemId, receivingSlotId, flags),
+                CreateTextPart(" is at "),
+                CreateLocationPart(locationId, findingSlotId),
+                CreateTextPart(" in "),
+                CreatePlayerPart(findingSlotId),
+                CreateTextPart("'s World")
+            );
+
+            await BroadcastPacketAsync(packet);
+        }
+
         private string GetPlayerName(int slotId)
         {
             if (_multiData.SlotInfo.TryGetValue(slotId, out var slot))
@@ -138,7 +158,12 @@ namespace kuiper.Services
 
         private static JsonMessagePart.Text CreateItemPart(long itemId, long player)
         {
-            return new JsonMessagePart.ItemId(itemId.ToString(), NetworkItemFlags.None, player); //TODO: Set proper flags
+            return CreateItemPart(itemId, player, NetworkItemFlags.None);
+        }
+
+        private static JsonMessagePart.Text CreateItemPart(long itemId, long player, NetworkItemFlags flags)
+        {
+            return new JsonMessagePart.ItemId(itemId.ToString(), flags, player);
         }
 
         private static JsonMessagePart.Text CreateLocationPart(long locationId, long player)
