@@ -38,6 +38,8 @@ Or run the EXE, I guess.
 
 The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time. A `.archipelago` file can be found inside the zipfile that the Archipelago Generator outputs upon generation.
 
+Open the `config.json` file and explore the config. There isn't much there yet so it should be self-explanatory, and I will eventually document the options in the README. Also info on config options is in the changelog on the releases page.
+
 ### Server Commands
 
 - `authslot <slotId>` - Authorizes a player slot to execute server commands over chat by using the `!<command> <arguments>` format.
