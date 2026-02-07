@@ -1,3 +1,4 @@
+using kuiper.Extensions;
 using kuiper.Middleware;
 using kuiper.Pickle;
 
@@ -26,7 +27,9 @@ var logsDir = Path.Combine(AppContext.BaseDirectory, "logs");
 Directory.CreateDirectory(logsDir);
 
 Log.Logger = new LoggerConfiguration()
+#if DEBUG
     .MinimumLevel.Debug()
+#endif
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // keep framework noise lower
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -55,7 +58,8 @@ if (multidataFile == null)
 var fs = new FileStream(multidataFile, FileMode.Open);
 var multiData = MultidataUnpickler.Unpickle(fs);
 
-
+builder.Services.AddSingleton(multiData);
+builder.Services.AddKuiperServices();
 
 builder.Services.AddCors(options =>
 {
