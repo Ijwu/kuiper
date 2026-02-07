@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kbo", "kbo\kbo.csproj", "{49541CDD-5735-4121-9C92-83B33AB13DB1}"
 EndProject
@@ -13,12 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stm", "stm\stm.csproj", "{5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "telescope", "telescope\telescope.csproj", "{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper", "kuiper\kuiper.csproj", "{E67E92B6-97C2-432B-8771-3E915D82EC59}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F252BD60-32DB-4382-B0A0-71B188A86867}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper", "kuiper\kuiper.csproj", "{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +46,10 @@ Global
 		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A2F1FA1-0AE7-4E59-B9C6-A203A60DFC25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E67E92B6-97C2-432B-8771-3E915D82EC59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E67E92B6-97C2-432B-8771-3E915D82EC59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E67E92B6-97C2-432B-8771-3E915D82EC59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E67E92B6-97C2-432B-8771-3E915D82EC59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
