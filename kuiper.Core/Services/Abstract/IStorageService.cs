@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace kuiper.Core.Services.Abstract
+﻿namespace kuiper.Core.Services.Abstract
 {
     public interface IStorageService
     {

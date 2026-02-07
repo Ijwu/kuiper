@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-using kbo.littlerocks;
+﻿using kbo.littlerocks;
 
 namespace kuiper.Plugins
 {
