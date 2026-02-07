@@ -18,6 +18,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\kbo\kbo.csproj" />
+        <ProjectReference Include="..\kuiper.Core\kuiper.Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper", "kuiper\kuiper.csproj", "{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core", "kuiper.Core\kuiper.Core.csproj", "{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{695FE8D8-FFE4-409E-B8DF-4DDF4F6E31BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

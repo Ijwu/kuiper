@@ -1,3 +1,4 @@
+using kuiper.Middleware;
 using kuiper.Pickle;
 
 using Razorvine.Pickle;

@@ -1,0 +1,182 @@
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+
+using kbo.bigrocks;
+using kbo.littlerocks;
+
+using kuiper.Pickle;
+using kuiper.Core.Services.Abstract;
+using kuiper.Internal;
+using kuiper.Core.Constants;
+using kuiper.Plugins;
+
+namespace kuiper.Services
+{
+    /// <summary>
+    /// Handles WebSocket connection lifecycle and message processing for Archipelago clients.
+    /// </summary>
+    internal class WebSocketHandler : IWebSocketHandler
+    {
+        private readonly ILogger<WebSocketHandler> _logger;
+        private readonly IConnectionManager _connectionManager;
+        private readonly MultiData _multiData;
+        private readonly PluginManager _pluginManager;
+        private readonly IServerAnnouncementService _announcementService;
+        private readonly IKuiperConfig _kuiperConfig;
+        private readonly IStorageService _storage;
+
+        public WebSocketHandler(
+            ILogger<WebSocketHandler> logger,
+            IConnectionManager connectionManager,
+            MultiData multiData,
+            PluginManager pluginManager,
+            IServerAnnouncementService announcementService,
+            IKuiperConfig kuiperConfig,
+            IStorageService storage)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
+            _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
+            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
+            _kuiperConfig = kuiperConfig ?? throw new ArgumentNullException(nameof(kuiperConfig));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+        }
+
+        public async Task HandleConnectionAsync(string connectionId, WebSocket connection)
+        {
+            var buffer = new byte[1024 * 4];
+            long? slotId = null;
+
+            try
+            {
+                await SendRoomInfoAsync(connection);
+
+                var result = await connection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                var messageBuilder = new StringBuilder();
+
+                while (!result.CloseStatus.HasValue)
+                {
+                    if (result.MessageType == WebSocketMessageType.Text)
+                    {
+                        var messageChunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        
+                        if (messageBuilder.Length == 0)
+                        {
+                            _logger.LogDebug("Begin receiving: {MessageJson}", messageChunk);
+                        }
+                        else
+                        {
+                            _logger.LogDebug("Continuing receiving: {MessageJson}", messageChunk);
+                        }
+
+                        messageBuilder.Append(messageChunk);
+
+                        if (result.EndOfMessage)
+                        {
+                            await ProcessMessageAsync(messageBuilder.ToString(), connectionId);
+                            messageBuilder.Clear();
+                        }
+                    }
+
+                    result = await connection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                }
+
+                slotId = await _connectionManager.GetSlotForConnectionAsync(connectionId);
+                _logger.LogDebug("Connection was closed. Connection Id: {ConnectionId}", connectionId);
+                await _connectionManager.RemoveConnectionAsync(connectionId);
+                await connection.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+
+                if (slotId.HasValue)
+                {
+                    await AnnounceDisconnectAsync(slotId.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling WebSocket connection {ConnectionId}", connectionId);
+                slotId = slotId ?? await _connectionManager.GetSlotForConnectionAsync(connectionId);
+                await _connectionManager.RemoveConnectionAsync(connectionId);
+                if (slotId.HasValue)
+                {
+                    await AnnounceDisconnectAsync(slotId.Value);
+                }
+            }
+        }
+
+        private async Task SendRoomInfoAsync(WebSocket webSocket)
+        {
+            // If the server itself or ANY slots have a password, then request password from the client. Since we don't know what slot they'll try to connect to.
+            var hasPassword = _kuiperConfig.GetServerConfig<string?>("Server:Password") != null;
+            hasPassword = hasPassword || (await _storage.ListKeysAsync()).Any(x => x.StartsWith(StorageKeys.PasswordPrefix, StringComparison.OrdinalIgnoreCase));
+
+            var roomInfo = new RoomInfo(new Version(0, 0, 1), // TODO: set correct protocol version
+                                        _multiData.Version,
+                                        _multiData.Tags,
+                                        hasPassword,
+                                        GetPermissions(),
+                                        _multiData.ServerOptions.TryGetValue("hint_cost", out var hc) ? Convert.ToInt32(hc) : 0,
+                                        _multiData.ServerOptions.TryGetValue("location_check_points", out var lcp) ? Convert.ToInt32(lcp) : 0,
+                                        _multiData.SlotInfo.Select(x => x.Value.Game).Distinct().ToArray(),
+                                        _multiData.DataPackage.ToDictionary(x => x.Key, x => x.Value.Checksum),
+                                        _multiData.SeedName,
+                                        0d // TODO: Implement server time tracking
+                                    );
+
+            var json = JsonSerializer.Serialize(new List<Packet> { roomInfo });
+            var bytes = Encoding.UTF8.GetBytes(json);
+            await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private async Task ProcessMessageAsync(string json, string connectionId)
+        {
+            try
+            {
+                var settings = new JsonSerializerOptions();
+                settings.AllowOutOfOrderMetadataProperties = true;
+
+                var packets = JsonSerializer.Deserialize<List<Packet>>(json, settings);
+                if (packets != null)
+                {
+                    foreach (var packet in packets)
+                    {
+                        await _pluginManager.BroadcastPacketAsync(packet, connectionId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deserializing or broadcasting packet");
+            }
+        }
+
+        private async Task AnnounceDisconnectAsync(long slotId)
+        {
+            var name = _multiData.SlotInfo.TryGetValue((int)slotId, out var info) ? info.Name : $"Player {slotId}";
+            await _announcementService.AnnouncePlayerDisconnectedAsync(slotId, name);
+        }
+
+        private Dictionary<string, CommandPermission> GetPermissions()
+        {
+            var permissionsDict = new Dictionary<string, CommandPermission>
+            {
+                ["release"] = ParsePermission(_multiData.ServerOptions.GetValueOrDefault("release_mode")?.ToString()),
+                ["remaining"] = ParsePermission(_multiData.ServerOptions.GetValueOrDefault("remaining_mode")?.ToString()),
+                ["collect"] = ParsePermission(_multiData.ServerOptions.GetValueOrDefault("collect_mode")?.ToString())
+            };
+
+            return permissionsDict;
+        }
+
+        private static CommandPermission ParsePermission(string? value) => value switch
+        {
+            "enabled" => CommandPermission.Enabled,
+            "disabled" => CommandPermission.Disabled,
+            "auto" => CommandPermission.Auto,
+            "auto-enabled" => CommandPermission.AutoEnabled,
+            "goal" => CommandPermission.Goal,
+            _ => CommandPermission.Disabled
+        };
+    }
+}
