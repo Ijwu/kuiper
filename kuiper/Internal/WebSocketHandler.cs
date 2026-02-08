@@ -21,7 +21,7 @@ namespace kuiper.Internal
         private readonly MultiData _multiData;
         private readonly PluginManager _pluginManager;
         private readonly IServerAnnouncementService _announcementService;
-        private readonly IKuiperConfig _kuiperConfig;
+        private readonly IKuiperConfigService _kuiperConfig;
         private readonly IStorageService _storage;
 
         public WebSocketHandler(
@@ -30,7 +30,7 @@ namespace kuiper.Internal
             MultiData multiData,
             PluginManager pluginManager,
             IServerAnnouncementService announcementService,
-            IKuiperConfig kuiperConfig,
+            IKuiperConfigService kuiperConfig,
             IStorageService storage)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -122,7 +122,7 @@ namespace kuiper.Internal
                                         0d // TODO: Implement server time tracking
                                     );
 
-            var json = JsonSerializer.Serialize(new List<Packet> { roomInfo });
+            var json = JsonSerializer.Serialize(new List<Packet> { roomInfo }, Json.NetworkDefaultOptions);
             var bytes = Encoding.UTF8.GetBytes(json);
             await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
         }

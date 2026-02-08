@@ -1,5 +1,7 @@
 ﻿using kbo.littlerocks;
 
+using kuiper.Plugins.Abstract;
+
 namespace kuiper.Plugins
 {
     internal class PluginManager
@@ -16,13 +18,13 @@ namespace kuiper.Plugins
         /// <param name="pluginInstances">Plugin instances to manage. Expected to be injected by DI as a list of all registered <see cref="IKuiperPlugin"/>s.</param>
         /// <param name="maxDegreeOfParallelism">Maximum number of plugins to execute concurrently. Defaults to Environment.ProcessorCount * 2.</param>
         /// <param name="perPluginTimeout">Timeout for each plugin's ReceivePacket. Defaults to 5 seconds if not specified (null).</param>
-        public PluginManager(ILogger<PluginManager> logger, List<IKuiperPlugin> pluginInstances, int? maxDegreeOfParallelism = null, TimeSpan? perPluginTimeout = null)
+        public PluginManager(ILogger<PluginManager> logger, IEnumerable<IKuiperPlugin> pluginInstances, int? maxDegreeOfParallelism = null, TimeSpan? perPluginTimeout = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             var degree = maxDegreeOfParallelism.GetValueOrDefault(Math.Max(1, Environment.ProcessorCount * 2));
             _semaphore = new SemaphoreSlim(degree, degree);
             _perPluginTimeout = perPluginTimeout ?? TimeSpan.FromSeconds(5);
-            _plugins = pluginInstances;
+            _plugins = pluginInstances.ToList();
         }
         public Task BroadcastPacketAsync(Packet packet, string connectionId)
         {

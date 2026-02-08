@@ -1,6 +1,6 @@
 ﻿using kbo.littlerocks;
 
-namespace kuiper.Plugins
+namespace kuiper.Plugins.Abstract
 {
     public interface IKuiperPlugin
     {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace kuiper.Core.Services
 {
-    public class KuiperConfigService : IKuiperConfig
+    public class KuiperConfigService : IKuiperConfigService
     {
         private readonly IConfiguration _configuration;
 
