@@ -4,14 +4,12 @@ using System.Text.Json;
 
 using kbo.bigrocks;
 using kbo.littlerocks;
-
-using kuiper.Pickle;
 using kuiper.Core.Services.Abstract;
-using kuiper.Internal;
 using kuiper.Core.Constants;
 using kuiper.Plugins;
+using kuiper.Core.Pickle;
 
-namespace kuiper.Services
+namespace kuiper.Internal
 {
     /// <summary>
     /// Handles WebSocket connection lifecycle and message processing for Archipelago clients.

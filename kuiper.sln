@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper", "kuiper\kuiper.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core", "kuiper.Core\kuiper.Core.csproj", "{F2F26792-D0C8-49DD-8A72-ECBEAAB8F32A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

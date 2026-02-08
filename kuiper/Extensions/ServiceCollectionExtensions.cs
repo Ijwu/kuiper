@@ -2,7 +2,6 @@
 using kuiper.Core.Services.Abstract;
 using kuiper.Internal;
 using kuiper.Plugins;
-using kuiper.Services;
 
 namespace kuiper.Extensions
 {

@@ -4,10 +4,16 @@ using System.IO.Compression;
 
 using Razorvine.Pickle;
 
-namespace kuiper.Pickle
+namespace kuiper.Core.Pickle
 {
     public static class MultidataUnpickler
     {
+        static MultidataUnpickler()
+        {
+            Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
+            Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
+        }
+
         public static MultiData Unpickle(Stream stream)
         {
             using BinaryReader reader = new BinaryReader(stream);

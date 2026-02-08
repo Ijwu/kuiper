@@ -1,4 +1,4 @@
-﻿using kuiper.Pickle;
+﻿using kuiper.Core.Pickle;
 
 using Razorvine.Pickle;
 

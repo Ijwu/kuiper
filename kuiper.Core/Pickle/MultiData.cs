@@ -2,7 +2,7 @@
 using kbo.bigrocks;
 using kbo.littlerocks;
 
-namespace kuiper.Pickle
+namespace kuiper.Core.Pickle
 {
     public class MultiData
     {

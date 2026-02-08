@@ -1,14 +1,9 @@
+using kuiper.Core.Pickle;
 using kuiper.Extensions;
 using kuiper.Middleware;
-using kuiper.Pickle;
-
-using Razorvine.Pickle;
 
 using Serilog;
 using Serilog.Events;
-
-Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
-Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
 
 var builder = WebApplication.CreateBuilder(args);
 
