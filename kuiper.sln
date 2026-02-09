@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.ChecksHandler",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.ConnectHandler", "Plugins\kuiper.Core.ConnectHandler\kuiper.Core.ConnectHandler.csproj", "{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.ChatHandler", "Plugins\kuiper.Core.ChatHandler\kuiper.Core.ChatHandler.csproj", "{D4A378BC-09B8-4966-8B28-2F9B7179675D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4A378BC-09B8-4966-8B28-2F9B7179675D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4A378BC-09B8-4966-8B28-2F9B7179675D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4A378BC-09B8-4966-8B28-2F9B7179675D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4A378BC-09B8-4966-8B28-2F9B7179675D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1A42DAB9-DEB5-41F5-B47C-2109C19ACB11} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
 		{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
+		{D4A378BC-09B8-4966-8B28-2F9B7179675D} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93AA82D1-07D9-40D4-AB36-6DC820E658E4}

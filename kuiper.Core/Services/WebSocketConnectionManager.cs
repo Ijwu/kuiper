@@ -142,5 +142,10 @@ namespace kuiper.Core.Services
             }
             return Task.CompletedTask;
         }
+
+        public async Task<IEnumerable<string>> GetAllConnectionIdsAsync()
+        {
+            return _connections.Keys.AsEnumerable();
+        }
     }
 }

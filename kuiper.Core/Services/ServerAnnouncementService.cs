@@ -85,7 +85,7 @@ namespace kuiper.Core.Services
         public async Task BroadcastChatMessageAsync(long senderSlotId, string message)
         {
             var senderName = GetPlayerName((int)senderSlotId);
-            _logger.LogInformation("[Chat] {PlayerName}: {Message}", senderName, message);
+            _logger.LogInformation("[Chat] {PlayerName} ({Slot}): {Message}", senderName, senderSlotId, message);
 
             var packet = CreatePrintJsonPacket(
                 Player(senderSlotId),

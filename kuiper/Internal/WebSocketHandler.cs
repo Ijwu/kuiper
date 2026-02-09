@@ -33,13 +33,13 @@ namespace kuiper.Internal
             IKuiperConfigService kuiperConfig,
             INotifyingStorageService storage)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
-            _multiData = multiData ?? throw new ArgumentNullException(nameof(multiData));
-            _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
-            _announcementService = announcementService ?? throw new ArgumentNullException(nameof(announcementService));
-            _kuiperConfig = kuiperConfig ?? throw new ArgumentNullException(nameof(kuiperConfig));
-            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _logger = logger;
+            _connectionManager = connectionManager;
+            _multiData = multiData;
+            _pluginManager = pluginManager;
+            _announcementService = announcementService;
+            _kuiperConfig = kuiperConfig;
+            _storage = storage;
         }
 
         public async Task HandleConnectionAsync(string connectionId, WebSocket connection)

@@ -32,6 +32,11 @@ namespace kuiper.Extensions
             services.AddHostedService<CommandLoopService>();
 
             services.AddTransient<ICommand, HelpCommand>();
+            services.AddTransient<ICommand, QuitCommand>();
+            services.AddTransient<ICommand, SayCommand>();
+            services.AddTransient<ICommand, AuthorizeSlotCommand>();
+            services.AddTransient<ICommand, ListSlotsCommand>();
+
 
             return services;
         }

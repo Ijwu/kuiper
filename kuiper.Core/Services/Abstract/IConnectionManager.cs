@@ -14,5 +14,6 @@ namespace kuiper.Core.Services.Abstract
         Task<long?> GetSlotForConnectionAsync(string connectionId);
         Task<IReadOnlyCollection<string>> GetConnectionIdsForSlotAsync(long slot);
         Task UnmapConnectionAsync(string connectionId);
+        Task<IEnumerable<string>> GetAllConnectionIdsAsync();
     }
 }
