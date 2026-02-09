@@ -74,6 +74,23 @@ namespace kuiper.Core.Services
             }
         }
 
+        public async Task BroadcastMessageAsync(string message)
+        {
+            foreach (var connectionId in _connections.Keys)
+            {
+                await SendToConnectionAsync(connectionId, message);
+            }
+        }
+
+        public async Task BroadcastJsonAsync<T>(T obj)
+        {
+            var json = JsonSerializer.Serialize(obj, Json.NetworkDefaultOptions);
+            foreach (var connectionId in _connections.Keys)
+            {
+                await SendToConnectionAsync(connectionId, json);
+            }
+        }
+
         public Task<IReadOnlyCollection<string>> GetConnectionIdsForSlotAsync(long slot)
         {
             if (_slotsMapping.TryGetValue(slot, out var connectionIds))

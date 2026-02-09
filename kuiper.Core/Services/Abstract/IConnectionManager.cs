@@ -8,6 +8,8 @@ namespace kuiper.Core.Services.Abstract
         Task RemoveConnectionAsync(string connectionId);
         Task SendToConnectionAsync(string connectionId, string message);
         Task SendJsonToConnectionAsync<T>(string connectionId, T obj);
+        Task BroadcastMessageAsync(string message);
+        Task BroadcastJsonAsync<T>(T obj);
         Task MapConnectionToSlotAsync(string connectionId, long slot);
         Task<long?> GetSlotForConnectionAsync(string connectionId);
         Task<IReadOnlyCollection<string>> GetConnectionIdsForSlotAsync(long slot);

@@ -4,7 +4,6 @@ using kuiper.Core.Services;
 using kuiper.Core.Services.Abstract;
 using kuiper.Internal;
 using kuiper.Plugins;
-using kuiper.Services;
 
 namespace kuiper.Extensions
 {
@@ -21,6 +20,7 @@ namespace kuiper.Extensions
             services.AddSingleton<IKuiperConfigService, KuiperConfigService>();
             services.AddSingleton<IStorageService, InMemoryStorageService>();
             services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
+            services.AddSingleton<IHintPointsService, HintPointsService>();
 
             return services;
         }

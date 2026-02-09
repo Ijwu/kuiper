@@ -1,3 +1,5 @@
+using kbo.littlerocks;
+
 namespace kuiper.Core.Services.Abstract
 {
     /// <summary>
@@ -5,6 +7,9 @@ namespace kuiper.Core.Services.Abstract
     /// </summary>
     public interface IServerAnnouncementService
     {
+        Task AnnounceHintAsync(long receivingPlayer, long findingPlayer, long itemId, long locationId, NetworkItemFlags itemFlags);
+        Task AnnounceItemSentAsync(long slotId, long receivingPlayer, string itemName, long itemId, long locationId);
+
         /// <summary>
         /// Announces that a player has connected to the server.
         /// </summary>

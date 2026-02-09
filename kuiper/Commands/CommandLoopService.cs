@@ -1,7 +1,6 @@
-using kuiper.Commands;
 using kuiper.Commands.Abstract;
 
-namespace kuiper.Services
+namespace kuiper.Commands
 {
     public class CommandLoopService : BackgroundService
     {
