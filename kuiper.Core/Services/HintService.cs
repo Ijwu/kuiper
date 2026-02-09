@@ -10,9 +10,9 @@ namespace kuiper.Core.Services
     public class HintService : IHintService
     {
         private readonly ILogger<HintService> _logger;
-        private readonly IStorageService _storage;
+        private readonly INotifyingStorageService _storage;
 
-        public HintService(ILogger<HintService> logger, IStorageService storage)
+        public HintService(ILogger<HintService> logger, INotifyingStorageService storage)
         {
             _logger = logger;
             _storage = storage;
@@ -42,7 +42,7 @@ namespace kuiper.Core.Services
                 _logger.LogDebug("Added new hint for slot ({SlotId}). Hint: ({Hint})", slotId, hint);
             }
 
-            await _storage.SaveAsync(StorageKeys.Hint(slotId), list.ToArray());
+            await _storage.SaveAsync(StorageKeys.Hint(slotId), list.ToArray(), -1);
         }
 
         private static bool Matches(Hint a, Hint b) =>

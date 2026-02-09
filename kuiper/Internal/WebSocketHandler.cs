@@ -22,7 +22,7 @@ namespace kuiper.Internal
         private readonly PluginManager _pluginManager;
         private readonly IServerAnnouncementService _announcementService;
         private readonly IKuiperConfigService _kuiperConfig;
-        private readonly IStorageService _storage;
+        private readonly INotifyingStorageService _storage;
 
         public WebSocketHandler(
             ILogger<WebSocketHandler> logger,
@@ -31,7 +31,7 @@ namespace kuiper.Internal
             PluginManager pluginManager,
             IServerAnnouncementService announcementService,
             IKuiperConfigService kuiperConfig,
-            IStorageService storage)
+            INotifyingStorageService storage)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));

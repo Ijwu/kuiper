@@ -12,10 +12,10 @@ namespace kuiper.Core.Services
     {
         private readonly ILogger<LocationCheckService> _logger;
         private readonly MultiData _multiData;
-        private readonly IStorageService _storageService;
+        private readonly INotifyingStorageService _storageService;
         private readonly IReceivedItemService _receivedItemService;
 
-        public LocationCheckService(ILogger<LocationCheckService> logger, MultiData multiData, IStorageService storageService, IReceivedItemService receivedItemService)
+        public LocationCheckService(ILogger<LocationCheckService> logger, MultiData multiData, INotifyingStorageService storageService, IReceivedItemService receivedItemService)
         {
             _logger = logger;
             _multiData = multiData;
@@ -31,7 +31,7 @@ namespace kuiper.Core.Services
             if (!checks.Contains(locationId))
             {
                 long[] newChecks = [..checks, locationId];
-                await _storageService.SaveAsync(slotKey, newChecks);
+                await _storageService.SaveAsync(slotKey, newChecks, -1);
 
                 // Get item info for location from multidata
                 var itemData = _multiData.Locations[slot][locationId];

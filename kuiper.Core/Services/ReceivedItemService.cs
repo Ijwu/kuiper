@@ -12,9 +12,9 @@ namespace kuiper.Core.Services
         private record StoredReceivedItem(long Sender, NetworkItem Item);
 
         private readonly ILogger<ReceivedItemService> _logger;
-        private readonly IStorageService _storageService;
+        private readonly INotifyingStorageService _storageService;
 
-        public ReceivedItemService(ILogger<ReceivedItemService> logger, IStorageService storageService)
+        public ReceivedItemService(ILogger<ReceivedItemService> logger, INotifyingStorageService storageService)
         {
             _logger = logger;
             _storageService = storageService;
@@ -32,7 +32,7 @@ namespace kuiper.Core.Services
                 return;
             }
 
-            await _storageService.SaveAsync<StoredReceivedItem[]>(key, [.. existing, new StoredReceivedItem(sendingSlot, item)]);
+            await _storageService.SaveAsync<StoredReceivedItem[]>(key, [.. existing, new StoredReceivedItem(sendingSlot, item)], -1);
             _logger.LogDebug("Item ({Item}) was received by slot ({ReceivingSlot}) from sending slot ({SendingSlot}).", item, receivingSlot, sendingSlot);
         }
 

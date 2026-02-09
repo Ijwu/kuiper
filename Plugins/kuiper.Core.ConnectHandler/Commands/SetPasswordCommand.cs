@@ -9,9 +9,9 @@ namespace kuiper.Core.ConnectHandler.Commands
     public class SetPasswordCommand : ICommand
     {
         private readonly MultiData _multiData;
-        private readonly IStorageService _storageService;
+        private readonly INotifyingStorageService _storageService;
 
-        public SetPasswordCommand(MultiData multiData, IStorageService storageService)
+        public SetPasswordCommand(MultiData multiData, INotifyingStorageService storageService)
         {
             _multiData = multiData;
             _storageService = storageService;
@@ -35,7 +35,7 @@ namespace kuiper.Core.ConnectHandler.Commands
                 return $"Slot '{identifier}' not found.";
             }
             
-            await _storageService.SaveAsync(StorageKeys.Password(slotId!.Value), password);
+            await _storageService.SaveAsync(StorageKeys.Password(slotId!.Value), password, -1);
             
             return $"Password set for slot {slotId} ({_multiData.SlotInfo[(int)slotId].Name}).";
         }

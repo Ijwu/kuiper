@@ -8,9 +8,9 @@ namespace kuiper.Core.Services
     public class HintPointsService : IHintPointsService
     {
         private readonly ILogger<HintPointsService> _logger;
-        private readonly IStorageService _storageService;
+        private readonly INotifyingStorageService _storageService;
 
-        public HintPointsService(ILogger<HintPointsService> logger, IStorageService storageService)
+        public HintPointsService(ILogger<HintPointsService> logger, INotifyingStorageService storageService)
         {
             _logger = logger;
             _storageService = storageService;
@@ -19,7 +19,7 @@ namespace kuiper.Core.Services
         {
             var hintPoints = await _storageService.LoadAsync<long>(StorageKeys.HintPoints(slot));
 
-            await _storageService.SaveAsync(StorageKeys.HintPoints(slot), hintPoints + points);
+            await _storageService.SaveAsync(StorageKeys.HintPoints(slot), hintPoints + points, -1);
 
             _logger.LogDebug("Added `{HintPoints}` hint points to slot ({Slot}).", hintPoints, slot);
         }

@@ -17,7 +17,7 @@ namespace kuiper.Core.ConnectHandler.Plugins
         private readonly ILocationCheckService _locationCheckService;
         private readonly IHintPointsService _hintPointsService;
         private readonly IServerAnnouncementService _announcementService;
-        private readonly IStorageService _storageService;
+        private readonly INotifyingStorageService _storageService;
         private readonly IKuiperConfigService _kuiperConfig;
 
         public ConnectHandlerPlugin(ILogger<ConnectHandlerPlugin> logger,
@@ -26,7 +26,7 @@ namespace kuiper.Core.ConnectHandler.Plugins
                                     ILocationCheckService locationCheckService,
                                     IHintPointsService hintPointsService,
                                     IServerAnnouncementService announcementService,
-                                    IStorageService storageService,
+                                    INotifyingStorageService storageService,
                                     IKuiperConfigService kuiperConfig)
             : base(logger, connectionManager)
         {

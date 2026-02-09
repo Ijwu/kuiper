@@ -18,7 +18,7 @@ namespace kuiper.Extensions
             services.AddSingleton<ILocationCheckService, LocationCheckService>();
             services.AddSingleton<IReceivedItemService, ReceivedItemService>();
             services.AddSingleton<IKuiperConfigService, KuiperConfigService>();
-            services.AddSingleton<IStorageService, InMemoryStorageService>();
+            services.AddSingleton<INotifyingStorageService, InMemoryNotifyingStorageService>();
             services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
             services.AddSingleton<IHintPointsService, HintPointsService>();
 

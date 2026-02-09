@@ -13,9 +13,9 @@ namespace kuiper.Core.ConnectHandler.Plugins
     /// </summary>
     public class ConnectionTagsPlugin : BasePlugin
     {
-        private readonly IStorageService _storage;
+        private readonly INotifyingStorageService _storage;
 
-        public ConnectionTagsPlugin(ILogger<ConnectionTagsPlugin> logger, IConnectionManager connectionManager, IStorageService storage)
+        public ConnectionTagsPlugin(ILogger<ConnectionTagsPlugin> logger, IConnectionManager connectionManager, INotifyingStorageService storage)
             : base(logger, connectionManager)
         {
             _storage = storage;
@@ -40,7 +40,7 @@ namespace kuiper.Core.ConnectHandler.Plugins
         private async Task StoreTagsAsync(string connectionId, string[]? tags)
         {
             string[] value = tags ?? Array.Empty<string>();
-            await _storage.SaveAsync(StorageKeys.ConnectionTags(connectionId), value);
+            await _storage.SaveAsync(StorageKeys.ConnectionTags(connectionId), value, -1);
             Logger.LogDebug("Connection ({ConnectionId}) switched tags to ({Tags}).", connectionId, value);
         }
     }
