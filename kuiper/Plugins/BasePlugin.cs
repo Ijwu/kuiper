@@ -18,8 +18,8 @@ namespace kuiper.Plugins
 
         protected BasePlugin(ILogger logger, IConnectionManager connectionManager)
         {
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            ConnectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+            Logger = logger;
+            ConnectionManager = connectionManager;
             RegisterHandlers();
         }
 
@@ -45,17 +45,15 @@ namespace kuiper.Plugins
             try
             {
                 await handler(packet, connectionId);
+                Logger.LogDebug("Handled {PacketType} packet from connection {ConnectionId}", packetType.Name, connectionId);
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Error handling {PacketType} from connection {ConnectionId}", packetType.Name, connectionId);
+                throw;
             }
         }
 
-        /// <summary>
-        /// Gets the slot ID for a connection, logging a debug message if not found.
-        /// </summary>
-        /// <returns>The slot ID, or null if the connection has no mapped slot.</returns>
         protected async Task<long?> GetSlotForConnectionAsync(string connectionId)
         {
             var slotId = await ConnectionManager.GetSlotForConnectionAsync(connectionId);
@@ -66,27 +64,17 @@ namespace kuiper.Plugins
             return slotId;
         }
 
-        /// <summary>
-        /// Gets the slot ID for a connection, returning false if not found.
-        /// Provides a non-nullable slot ID when successful.
-        /// </summary>
         protected async Task<(bool Success, long SlotId)> TryGetSlotForConnectionAsync(string connectionId)
         {
             var slotId = await GetSlotForConnectionAsync(connectionId);
             return slotId.HasValue ? (true, slotId.Value) : (false, 0);
         }
 
-        /// <summary>
-        /// Sends a packet array to the specified connection.
-        /// </summary>
         protected Task SendToConnectionAsync(string connectionId, params Packet[] packets)
         {
             return ConnectionManager.SendJsonToConnectionAsync(connectionId, packets);
         }
 
-        /// <summary>
-        /// Sends a packet array to all connections for the specified slot.
-        /// </summary>
         protected async Task SendToSlotAsync(long slotId, params Packet[] packets)
         {
             var connectionIds = await ConnectionManager.GetConnectionIdsForSlotAsync(slotId);
