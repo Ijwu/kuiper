@@ -1,7 +1,7 @@
 using kbo.bigrocks;
 using kbo.littlerocks;
 
-using kuiper.Commands;
+using kuiper.Commands.Abstract;
 using kuiper.Core.Pickle;
 using kuiper.Core.Services.Abstract;
 using kuiper.Plugins;
@@ -16,11 +16,11 @@ namespace kuiper.Core.Chats.Plugins
     /// </summary>
     public class SayCommandPlugin : BasePlugin
     {
-        private readonly CommandRegistry _registry;
+        private readonly ICommandRegistry _registry;
         private readonly IKuiperConfigService _config;
 
         public SayCommandPlugin(ILogger<SayCommandPlugin> logger,
-                                CommandRegistry registry,
+                                ICommandRegistry registry,
                                 IConnectionManager connectionManager,
                                 INotifyingStorageService storage,
                                 IKuiperConfigService config,

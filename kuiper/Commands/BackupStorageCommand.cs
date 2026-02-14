@@ -14,7 +14,7 @@ namespace kuiper.Commands
             _storageService = storageService;
         }
         public string Name => "backupstorage";
-        public string Description => "Back up all storage keys to a JSON file: backupstorage <path>";
+        public string Description => "Back up all storage keys to a JSON file.";
 
         public async Task<string> ExecuteAsync(string[] args, long executingSlot, CancellationToken cancellationToken)
         {

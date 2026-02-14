@@ -12,7 +12,7 @@ namespace kuiper.Commands
         }
         public string Name => "quit";
 
-        public string Description => "Shut down the server";
+        public string Description => "Shut down the server.";
 
         public Task<string> ExecuteAsync(string[] args, long sendingSlot, CancellationToken cancellationToken)
         {

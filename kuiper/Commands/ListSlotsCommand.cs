@@ -18,7 +18,7 @@ namespace kuiper.Commands
             _storageService = storageService;
         }
         public string Name => "listslots";
-        public string Description => "List currently connected players and their mapped slots";
+        public string Description => "List currently connected players and their mapped slots.";
 
         public async Task<string> ExecuteAsync(string[] args, long sendingSlot, CancellationToken cancellationToken)
         {

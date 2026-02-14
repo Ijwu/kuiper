@@ -18,7 +18,7 @@ namespace kuiper.Core.Connections.Commands
         }
 
         public string Name => "password";
-        public string Description => "Set password for a slot: password <slotId_or_name> <password>";
+        public string Description => "Set password for a slot";
 
         public async Task<string> ExecuteAsync(string[] args, long executingSlot, CancellationToken cancellationToken)
         {

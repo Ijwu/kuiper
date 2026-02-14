@@ -13,7 +13,7 @@ namespace kuiper.Commands
         }
         public string Name => "say";
 
-        public string Description => "Broadcast a server message: say <message>";
+        public string Description => "Broadcast a server message.";
 
         public async Task<string> ExecuteAsync(string[] args, long sendingSlot, CancellationToken cancellationToken)
         {

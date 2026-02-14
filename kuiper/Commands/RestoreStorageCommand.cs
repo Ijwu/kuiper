@@ -14,7 +14,7 @@ namespace kuiper.Commands
             _storageService = storageService;
         }
         public string Name => "restorestorage";
-        public string Description => "Restore storage from a JSON backup: restorestorage <path>";
+        public string Description => "Restore storage from a JSON backup.";
 
         public async Task<string> ExecuteAsync(string[] args, long executingSlot, CancellationToken cancellationToken)
         {
