@@ -7,10 +7,11 @@ using kbo.littlerocks;
 
 using kuiper.Core.Constants;
 using kuiper.Core.Services.Abstract;
+using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Plugins
+namespace kuiper.Core.DataStorage.Plugins
 {
     public class DataStorageSetPlugin : BasePlugin
     {
