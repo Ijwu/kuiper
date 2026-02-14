@@ -23,7 +23,7 @@ namespace kuiper.Core.Pickle
         public Dictionary<string, MultiDataGamesPackage> DataPackage { get; set; }
         public long RaceMode { get; set; }
 
-        internal DataPackage ToDataPackage()
+        public DataPackage ToDataPackage()
         {
             var dataPackage = new DataPackage(new DataPackageContents(new()));
             foreach (var kvp in DataPackage)

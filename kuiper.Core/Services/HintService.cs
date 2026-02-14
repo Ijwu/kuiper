@@ -1,4 +1,4 @@
-using kbo;
+using kbo.littlerocks;
 
 using kuiper.Core.Constants;
 using kuiper.Core.Services.Abstract;

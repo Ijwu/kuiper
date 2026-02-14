@@ -26,13 +26,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{3CE4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Checks", "Plugins\kuiper.Core.Checks\kuiper.Core.Checks.csproj", "{1A42DAB9-DEB5-41F5-B47C-2109C19ACB11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Connect", "Plugins\kuiper.Core.Connections\kuiper.Core.Connections.csproj", "{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Connections", "Plugins\kuiper.Core.Connections\kuiper.Core.Connections.csproj", "{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Chat", "Plugins\kuiper.Core.Chats\kuiper.Core.Chats.csproj", "{D4A378BC-09B8-4966-8B28-2F9B7179675D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Chats", "Plugins\kuiper.Core.Chats\kuiper.Core.Chats.csproj", "{D4A378BC-09B8-4966-8B28-2F9B7179675D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Bounce", "Plugins\kuiper.Core.Bounces\kuiper.Core.Bounces.csproj", "{B586113F-8CFC-42BA-953E-D13892C4BCA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Bounces", "Plugins\kuiper.Core.Bounces\kuiper.Core.Bounces.csproj", "{B586113F-8CFC-42BA-953E-D13892C4BCA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Hints", "Plugins\kuiper.Core.Hints\kuiper.Core.Hints.csproj", "{954E1A20-C577-4FA6-BE72-8BBAE10AD911}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.DataStorage", "Plugins\kuiper.Core.DataStorage\kuiper.Core.DataStorage.csproj", "{FDF290AB-5503-4D74-BD78-34D20C3D66B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.DataPackages", "Plugins\kuiper.Core.DataPackages\kuiper.Core.DataPackages.csproj", "{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +92,14 @@ Global
 		{954E1A20-C577-4FA6-BE72-8BBAE10AD911}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{954E1A20-C577-4FA6-BE72-8BBAE10AD911}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{954E1A20-C577-4FA6-BE72-8BBAE10AD911}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDF290AB-5503-4D74-BD78-34D20C3D66B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDF290AB-5503-4D74-BD78-34D20C3D66B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDF290AB-5503-4D74-BD78-34D20C3D66B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDF290AB-5503-4D74-BD78-34D20C3D66B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +110,8 @@ Global
 		{D4A378BC-09B8-4966-8B28-2F9B7179675D} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
 		{B586113F-8CFC-42BA-953E-D13892C4BCA1} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
 		{954E1A20-C577-4FA6-BE72-8BBAE10AD911} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
+		{FDF290AB-5503-4D74-BD78-34D20C3D66B5} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
+		{31E73D35-2DE8-4CF2-BC13-A3AAB7696B4F} = {3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93AA82D1-07D9-40D4-AB36-6DC820E658E4}

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
-namespace kbo;
+namespace kbo.littlerocks;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "operation")]
 [JsonDerivedType(typeof(Replace), "replace")]

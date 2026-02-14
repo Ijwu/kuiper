@@ -1,4 +1,4 @@
-﻿using kbo;
+﻿using kbo.littlerocks;
 
 namespace kuiper.Core.Services.Abstract
 {
