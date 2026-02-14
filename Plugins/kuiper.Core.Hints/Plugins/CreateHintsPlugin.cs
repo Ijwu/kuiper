@@ -4,10 +4,11 @@ using kbo.littlerocks;
 
 using kuiper.Core.Pickle;
 using kuiper.Core.Services.Abstract;
+using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Plugins
+namespace kuiper.Core.Hints.Plugins
 {
     public class CreateHintsPlugin : BasePlugin
     {

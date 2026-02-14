@@ -7,7 +7,7 @@ using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Core.ChecksHandler.Plugins
+namespace kuiper.Core.Checks.Plugins
 {
     public class LocationChecksPlugin : BasePlugin
     {

@@ -6,7 +6,7 @@ using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Core.ConnectHandler.Plugins
+namespace kuiper.Core.Connections.Plugins
 {
     /// <summary>
     /// Stores tags from Connect and ConnectUpdate packets into the storage service keyed by connection id.

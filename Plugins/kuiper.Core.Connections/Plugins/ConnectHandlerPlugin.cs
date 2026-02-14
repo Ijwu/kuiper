@@ -6,7 +6,7 @@ using kuiper.Core.Services.Abstract;
 using Microsoft.Extensions.Logging;
 using kuiper.Core.Constants;
 
-namespace kuiper.Core.ConnectHandler.Plugins
+namespace kuiper.Core.Connections.Plugins
 {
     /// <summary>
     /// Plugin that handles Connect packets from clients and responds with Connected or ConnectionRefused.

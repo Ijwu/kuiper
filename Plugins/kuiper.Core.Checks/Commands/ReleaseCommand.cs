@@ -3,7 +3,7 @@ using kuiper.Core.Extensions;
 using kuiper.Core.Pickle;
 using kuiper.Core.Services.Abstract;
 
-namespace kuiper.Core.ChecksHandler.Commands
+namespace kuiper.Core.Checks.Commands
 {
     public class ReleaseCommand : ICommand
     {

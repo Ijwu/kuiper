@@ -21,6 +21,8 @@ namespace kuiper.Extensions
             services.AddSingleton<INotifyingStorageService, InMemoryNotifyingStorageService>();
             services.AddSingleton<IServerAnnouncementService, ServerAnnouncementService>();
             services.AddSingleton<IHintPointsService, HintPointsService>();
+            services.AddSingleton<IHintService, HintService>();
+            services.AddSingleton<IReleaseService, ReleaseService>();
 
             return services;
         }
@@ -36,6 +38,8 @@ namespace kuiper.Extensions
             services.AddTransient<ICommand, SayCommand>();
             services.AddTransient<ICommand, AuthorizeSlotCommand>();
             services.AddTransient<ICommand, ListSlotsCommand>();
+            services.AddTransient<ICommand, BackupStorageCommand>();
+            services.AddTransient<ICommand, RestoreStorageCommand>();
 
 
             return services;

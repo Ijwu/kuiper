@@ -10,7 +10,7 @@ using kuiper.Core.Extensions;
 using kuiper.Core.Pickle;
 using kuiper.Core.Services.Abstract;
 
-namespace kuiper.Commands
+namespace kuiper.Core.Hints.Commands
 {
     public class HintCommand : ICommand
     {

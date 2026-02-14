@@ -8,7 +8,7 @@ using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Core.BounceHandler.Plugins
+namespace kuiper.Core.Bounces.Plugins
 {
     /// <summary>
     /// Handles Bounce packets by forwarding them as Bounced to matching clients (games/slots/tags).

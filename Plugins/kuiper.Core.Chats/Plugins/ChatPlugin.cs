@@ -5,7 +5,7 @@ using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Core.ChatHandler.Plugins
+namespace kuiper.Core.Chats.Plugins
 {
     /// <summary>
     /// Plugin that handles chat messages (SayPacket) from clients and broadcasts them to all connected players.

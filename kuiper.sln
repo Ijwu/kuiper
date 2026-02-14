@@ -24,13 +24,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core", "kuiper.Core\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{3CE45E0B-D4DB-453E-86EF-6D1DC6FD197E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Checks", "Plugins\kuiper.Core.ChecksHandler\kuiper.Core.Checks.csproj", "{1A42DAB9-DEB5-41F5-B47C-2109C19ACB11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Checks", "Plugins\kuiper.Core.Checks\kuiper.Core.Checks.csproj", "{1A42DAB9-DEB5-41F5-B47C-2109C19ACB11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Connect", "Plugins\kuiper.Core.ConnectHandler\kuiper.Core.Connect.csproj", "{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Connect", "Plugins\kuiper.Core.Connections\kuiper.Core.Connections.csproj", "{AC164DFC-2994-8C8D-8642-5BAC1EAD7F88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Chat", "Plugins\kuiper.Core.ChatHandler\kuiper.Core.Chat.csproj", "{D4A378BC-09B8-4966-8B28-2F9B7179675D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Chat", "Plugins\kuiper.Core.Chats\kuiper.Core.Chats.csproj", "{D4A378BC-09B8-4966-8B28-2F9B7179675D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Bounce", "Plugins\kuiper.Core.BounceHandler\kuiper.Core.Bounce.csproj", "{B586113F-8CFC-42BA-953E-D13892C4BCA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Bounce", "Plugins\kuiper.Core.Bounces\kuiper.Core.Bounces.csproj", "{B586113F-8CFC-42BA-953E-D13892C4BCA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kuiper.Core.Hints", "Plugins\kuiper.Core.Hints\kuiper.Core.Hints.csproj", "{954E1A20-C577-4FA6-BE72-8BBAE10AD911}"
 EndProject

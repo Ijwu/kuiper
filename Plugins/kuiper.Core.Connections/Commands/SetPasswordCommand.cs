@@ -4,7 +4,7 @@ using kuiper.Core.Extensions;
 using kuiper.Core.Services.Abstract;
 using kuiper.Core.Constants;
 
-namespace kuiper.Core.ConnectHandler.Commands
+namespace kuiper.Core.Connections.Commands
 {
     public class SetPasswordCommand : ICommand
     {

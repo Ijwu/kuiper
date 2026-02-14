@@ -8,7 +8,7 @@ using kuiper.Plugins;
 
 using Microsoft.Extensions.Logging;
 
-namespace kuiper.Core.ChatHandler.Plugins
+namespace kuiper.Core.Chats.Plugins
 {
     /// <summary>
     /// Handles Say packets that start with '!' by executing the remainder as a console command
