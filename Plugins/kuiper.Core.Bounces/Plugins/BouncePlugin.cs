@@ -50,7 +50,7 @@ namespace kuiper.Core.Bounces.Plugins
                     continue;
                 }
 
-                Bounced bounced = new(bounce.Games ?? [], bounce.Slots ?? [], bounce.Tags ?? [], bounce.Data ?? new());
+                Bounced bounced = new(bounce.Games, bounce.Slots, bounce.Tags, bounce.Data);
                 await ConnectionManager.SendJsonToConnectionAsync(connId, new Packet[] { bounced });
             }
         }
@@ -58,7 +58,7 @@ namespace kuiper.Core.Bounces.Plugins
         private static bool MatchesFilters(Bounce bounce, long receiverSlot, string? receiverGame, string[] receiverTags)
         {
             bool anyMatch = false;
-            if (bounce.Games.Length > 0)
+            if (bounce.Games != null && bounce.Games.Length > 0)
             {
                 if (!string.IsNullOrEmpty(receiverGame))
                 {
@@ -69,7 +69,7 @@ namespace kuiper.Core.Bounces.Plugins
                 }
             }
 
-            if (bounce.Slots.Length > 0)
+            if (bounce.Slots != null && bounce.Slots.Length > 0)
             {
                 if (bounce.Slots.Contains(receiverSlot))
                 {
@@ -77,7 +77,7 @@ namespace kuiper.Core.Bounces.Plugins
                 }
             }
 
-            if (bounce.Tags.Length > 0)
+            if (bounce.Tags != null && bounce.Tags.Length > 0)
             {
                 if (bounce.Tags.Any(tag => receiverTags.Contains(tag)))
                 {
