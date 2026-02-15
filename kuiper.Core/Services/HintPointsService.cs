@@ -21,7 +21,7 @@ namespace kuiper.Core.Services
 
             await _storageService.SaveAsync(StorageKeys.HintPoints(slot), hintPoints + points, -1);
 
-            _logger.LogDebug("Added `{HintPoints}` hint points to slot ({Slot}).", hintPoints, slot);
+            _logger.LogDebug("Added `{HintPoints}` ({Total}) hint points to slot ({Slot}).", points, hintPoints + points, slot);
         }
 
         public async Task<long> GetHintPointsAsync(long slot)

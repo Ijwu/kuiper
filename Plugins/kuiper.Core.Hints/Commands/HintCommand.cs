@@ -1,6 +1,5 @@
 using System.Text.Json;
 
-using kbo;
 using kbo.bigrocks;
 using kbo.littlerocks;
 
@@ -110,33 +109,50 @@ namespace kuiper.Core.Hints.Commands
             string itemName = matches.Single().Key;
             long itemId = matches.Single().Value;
 
-            if (!_multiData.Locations.TryGetValue(slotId.Value, out Dictionary<long, long[]>? locations))
+            KeyValuePair<long, long[]> match = default;
+            bool foundMatch = false;
+            long sendingPlayer = 0;
+            foreach (KeyValuePair<long, Dictionary<long, long[]>> slotLocations in _multiData.Locations)
             {
-                return $"No locations for slot {slotId}.";
+                Dictionary<long, long[]> locations = slotLocations.Value;
+                foreach (KeyValuePair<long, long[]> location in locations)
+                {
+                    if (location.Value[0] == itemId && location.Value[1] == slotId)
+                    {
+                        match = location;
+                        foundMatch = true;
+                        break;
+                    }
+                }
+
+                if (foundMatch)
+                {
+                    sendingPlayer = slotLocations.Key;
+                    break;
+                }
             }
 
-            KeyValuePair<long, long[]> match = locations.FirstOrDefault(kvp => kvp.Value.Length >= 3 && kvp.Value[0] == itemId);
-            if (match.Key == 0 && match.Value == null)
+            if (!foundMatch)
             {
-                return $"No location contains item '{itemName}' (id {itemId}) for slot {slotId}.";
+                return "Could not find hinted item in any world.";
             }
 
-            var locId = match.Key;
-            var data = match.Value;
-            var receivingPlayer = data[1];
-            var itemFlags = (NetworkItemFlags)data[2];
+            long locId = match.Key;
+            long[] data = match.Value;
+            long receivingPlayer = data[1];
+            NetworkItemFlags itemFlags = (NetworkItemFlags)data[2];
 
-            var locationName = package.LocationNameToId.FirstOrDefault(kvp => kvp.Value == locId).Key ?? locId.ToString();
+            string locationName = package.LocationNameToId.FirstOrDefault(kvp => kvp.Value == locId).Key ?? locId.ToString();
 
-            var existingHints = await _hintService.GetHintsAsync(slotId.Value);
-            var existing = existingHints.FirstOrDefault(h => h.Location == locId && h.Item == itemId && h.ReceivingPlayer == receivingPlayer);
+            Hint[] existingHints = await _hintService.GetHintsAsync(slotId.Value);
+            Hint? existing = existingHints.FirstOrDefault(h => h.Location == locId && h.Item == itemId && h.FindingPlayer == sendingPlayer);
             if (existing is not null)
             {
-                return $"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}), status {existing.Status}.";
+                return $"Hint already exists for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, finding p[layer {sendingPlayer}), status {existing.Status}.";
             }
 
-            var status = itemFlags.HasFlag(NetworkItemFlags.Trap) ? HintStatus.Avoid : HintStatus.Priority;
-            var hint = new Hint(receivingPlayer, slotId.Value, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags, status: status);
+            HintStatus status = itemFlags.HasFlag(NetworkItemFlags.Trap) ? HintStatus.Avoid : HintStatus.Priority;
+            Hint hint = new(receivingPlayer, sendingPlayer, locId, itemId, found: false, entrance: string.Empty, itemFlags: itemFlags, status: status);
             await _hintService.AddOrUpdateHintAsync(slotId.Value, hint);
 
             if (executingSlot != -1)
@@ -145,9 +161,9 @@ namespace kuiper.Core.Hints.Commands
             }
 
             await NotifySubscribersAsync(slotId.Value, _hintService, _storage, _connectionManager);
-            await _serverAnnouncementService.AnnounceHintAsync(receivingPlayer, slotId.Value, itemId, locId, itemFlags);
+            await _serverAnnouncementService.AnnounceHintAsync(receivingPlayer, sendingPlayer, itemId, locId, itemFlags);
 
-            return $"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, receiving player {receivingPlayer}).";
+            return $"Hint created for slot {slotId}: item '{itemName}' (id {itemId}) at location '{locationName}' (id {locId}, finding player {sendingPlayer}).";
         }
 
         private static async Task NotifySubscribersAsync(long slotId, IHintService hintService, INotifyingStorageService storage, IConnectionManager connectionManager)
