@@ -28,17 +28,17 @@ namespace kuiper.Commands
                 return "Usage: restorestorage <path>";
             }
 
-            var path = args[0];
+            string path = args[0];
             if (!File.Exists(path))
             {
                 return $"File not found: {path}";
             }
 
-            var json = await File.ReadAllTextAsync(path, cancellationToken);
-            var entries = JsonSerializer.Deserialize<List<Entry>>(json) ?? new();
+            string json = await File.ReadAllTextAsync(path, cancellationToken);
+            List<Entry> entries = JsonSerializer.Deserialize<List<Entry>>(json) ?? new();
 
             int restored = 0;
-            foreach (var entry in entries)
+            foreach (Entry entry in entries)
             {
                 object? value = null;
                 Type? type = null;

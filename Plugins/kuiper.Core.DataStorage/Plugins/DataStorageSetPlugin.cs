@@ -60,12 +60,17 @@ namespace kuiper.Core.DataStorage.Plugins
                 return;
             }
 
+            if (setPacket.Key.StartsWith("_") || setPacket.Key.StartsWith("#"))
+            {
+                return;
+            }
+
             JsonNode? existing = await _storage.LoadAsync<JsonNode>(setPacket.Key);
             JsonNode defaultNode = setPacket.Default;
             JsonNode originalNode = existing ?? defaultNode;
 
             JsonNode valueNode = existing ?? defaultNode;
-            foreach (var op in setPacket.Operations ?? Array.Empty<DataStorageOperation>())
+            foreach (DataStorageOperation op in setPacket.Operations ?? [])
             {
                 valueNode = ApplyOperation(valueNode, op, defaultNode);
             }

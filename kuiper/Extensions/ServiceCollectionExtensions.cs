@@ -40,6 +40,7 @@ namespace kuiper.Extensions
             services.AddTransient<ICommand, ListSlotsCommand>();
             services.AddTransient<ICommand, BackupStorageCommand>();
             services.AddTransient<ICommand, RestoreStorageCommand>();
+            services.AddTransient<ICommand, DumpStorageCommand>();
 
 
             return services;

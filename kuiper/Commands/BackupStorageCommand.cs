@@ -28,22 +28,23 @@ namespace kuiper.Commands
                 return "Usage: backupstorage <path>";
             }
 
-            var path = args[0];
+            string path = args[0];
 
-            var keys = await _storageService.ListKeysAsync();
-            var list = new List<Entry>();
+            List<Entry> list = [];
 
-            foreach (var key in keys)
+            foreach (string key in await _storageService.ListKeysAsync())
             {
-                var value = await _storageService.LoadAsync<object>(key);
-                var typeName = value?.GetType().AssemblyQualifiedName ?? string.Empty;
-                var json = JsonSerializer.Serialize(value);
+                object? value = await _storageService.LoadAsync<object>(key);
+                string typeName = value?.GetType().AssemblyQualifiedName ?? string.Empty;
+                string json = JsonSerializer.Serialize(value);
                 list.Add(new Entry(key, typeName, json));
             }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path)) ?? ".");
-            var payload = JsonSerializer.Serialize(list, options);
+            JsonSerializerOptions options = new() { WriteIndented = true };
+            string directory = Path.GetDirectoryName(Path.GetFullPath(path)) ?? ".";
+            Directory.CreateDirectory(directory);
+
+            string payload = JsonSerializer.Serialize(list, options);
             await File.WriteAllTextAsync(path, payload, cancellationToken);
 
             return $"Backed up {list.Count} keys to {path}.";
