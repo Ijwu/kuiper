@@ -1,19 +1,27 @@
 using System.Text;
 
+using kuiper.Commands.Abstract;
+
 namespace kuiper.Commands
 {
-    public class HelpCommand : IConsoleCommand
+    public class HelpCommand : ICommand
     {
+        private readonly ICommandRegistry _commandRegistry;
+
+        public HelpCommand(ICommandRegistry commandRegistry)
+        {
+            _commandRegistry = commandRegistry;
+        }
+
         public string Name => "help";
 
         public string Description => "List available commands";
 
-        public Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public Task<string> ExecuteAsync(string[] args, long executingSlot, CancellationToken cancellationToken)
         {
-            var registry = services.GetRequiredService<CommandRegistry>();
             var sb = new StringBuilder();
             sb.AppendLine("Commands:");
-            foreach (var cmd in registry.List())
+            foreach (var cmd in _commandRegistry.ListCommands())
             {
                 sb.AppendLine($"  {cmd.Name} - {cmd.Description}");
             }

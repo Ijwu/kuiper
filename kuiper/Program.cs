@@ -1,17 +1,13 @@
-using kuiper.Pickle;
-using kuiper.Plugins;
-using kuiper.Services.Abstract;
+using System.Reflection;
+
+using kuiper.Commands.Abstract;
+using kuiper.Core.Pickle;
 using kuiper.Extensions;
 using kuiper.Middleware;
-
-using Razorvine.Pickle;
+using kuiper.Plugins.Abstract;
 
 using Serilog;
 using Serilog.Events;
-using kbo.littlerocks;
-
-Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
-Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,15 +22,17 @@ if (port.HasValue)
     });
 }
 
-var logsDir = Path.Combine(AppContext.BaseDirectory, "logs");
+var logsDir = Path.Combine(AppContext.BaseDirectory, "Logs");
 Directory.CreateDirectory(logsDir);
 
 Log.Logger = new LoggerConfiguration()
+#if DEBUG
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // keep framework noise lower
+#endif
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File(Path.Combine(logsDir, "app.log"),
+    .WriteTo.File(Path.Combine(logsDir, "kuiper.log"),
                   retainedFileCountLimit: 14,
                   restrictedToMinimumLevel: LogEventLevel.Debug,
                   outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
@@ -59,8 +57,38 @@ if (multidataFile == null)
 var fs = new FileStream(multidataFile, FileMode.Open);
 var multiData = MultidataUnpickler.Unpickle(fs);
 
-builder.Services.AddKuiperServices(multiData)
-                .AddKuiperCommands();
+builder.Services.AddSingleton(multiData);
+builder.Services.AddKuiperServices();
+builder.Services.AddKuiperCommands();
+
+var pluginDir = Path.Combine(AppContext.BaseDirectory, "Plugins");
+Directory.CreateDirectory(pluginDir);
+
+foreach (var file in Directory.EnumerateFiles(pluginDir, "*.dll"))
+{
+    Assembly? loadedAsm = null;
+    try
+    {
+        loadedAsm = Assembly.LoadFile(file);
+    }
+    catch 
+    {
+        Log.Logger.Warning("Failed to load file as plugin: {FilePath}", file);
+        continue;
+    }
+
+    builder.Services.Scan(scrutor =>
+        scrutor
+            .FromAssemblies(loadedAsm)
+                .AddClasses(classes => classes.AssignableTo<IKuiperPlugin>())
+                .As<IKuiperPlugin>()
+                .WithTransientLifetime()
+                .AddClasses(classes => classes.AssignableTo<ICommand>())
+                .As<ICommand>()
+                .WithTransientLifetime()
+    );
+    Log.Logger.Information("Loaded file as plugin: {FilePath}", file);
+}
 
 builder.Services.AddCors(options =>
 {
@@ -74,17 +102,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-var logger = app.Logger;
-
-// Resolve PluginManager and initialize plugin instances. Register plugin types before calling Initialize.
-var pluginManager = app.Services.GetRequiredService<PluginManager>();
-// Register built-in plugins
-pluginManager.RegisterBuiltInPlugins();
-
-pluginManager.Initialize(app.Services);
-
-// Preload precollected items as checks
-await PreloadPrecollectedItemsAsync(app.Services, logger);
 
 if (app.Environment.IsDevelopment())
 {
@@ -97,40 +114,3 @@ app.UseWebSockets();
 app.UseMiddleware<KuiperWebSocketMiddleware>();
 
 app.Run();
-
-static async Task PreloadPrecollectedItemsAsync(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)
-{
-    try
-    {
-        using var scope = services.CreateScope();
-        var multiData = scope.ServiceProvider.GetRequiredService<MultiData>();
-        var locationCheckService = scope.ServiceProvider.GetRequiredService<ILocationCheckService>();
-        var receivedItemService = scope.ServiceProvider.GetRequiredService<IReceivedItemService>();
-
-        if (multiData.PrecollectedItems is null || multiData.PrecollectedItems.Count == 0)
-            return;
-
-        int totalChecks = 0;
-        foreach (var kvp in multiData.PrecollectedItems)
-        {
-            var slot = kvp.Key;
-            var itemIds = kvp.Value;
-
-            if (!multiData.Locations.TryGetValue(slot, out var slotLocations))
-                continue;
-
-            foreach (var itemId in itemIds)
-            {
-                var item = new NetworkItem(itemId, 0, slot, NetworkItemFlags.None);
-                await receivedItemService.AddReceivedItemAsync(item.Player, 0, item);
-                totalChecks++;   
-            }
-        }
-
-        logger.LogInformation("Preloaded {TotalChecks} precollected items for {SlotCount} slots", totalChecks, multiData.PrecollectedItems.Count);
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Failed to preload precollected items");
-    }
-}

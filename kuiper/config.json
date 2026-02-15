@@ -1,7 +1,0 @@
-{
-  "Server": {
-    "Port": 5272,
-    "Password": "kuiper",
-    "IngameCommandPrefix": "!"
-  }
-}

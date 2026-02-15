@@ -1,38 +1,48 @@
+using System.Text;
 using System.Text.Json;
 
-using kuiper.Services.Abstract;
+using kuiper.Commands.Abstract;
+using kuiper.Core.Services.Abstract;
 
 namespace kuiper.Commands
 {
-    public class DumpStorageCommand : IConsoleCommand
+    public class DumpStorageCommand : ICommand
     {
+        private readonly INotifyingStorageService _storage;
+
+        public DumpStorageCommand(INotifyingStorageService storage)
+        {
+            _storage = storage;
+        }
+
         public string Name => "dumpkey";
 
-        public string Description => "Pretty print the current value of a data storage key: dumpkey <key>";
+        public string Description => "Pretty print the current value of a data storage key.";
 
-        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public async Task<string> ExecuteAsync(string[] args, long sendingSlot, CancellationToken cancellationToken)
         {
-            var storage = services.GetRequiredService<IStorageService>();
-
             if (args.Length == 0)
             {
-                var keys = await storage.ListKeysAsync();
-                var list = keys?.ToArray() ?? Array.Empty<string>();
-                if (list.Length == 0)
+                string[] keysInStorage = (await _storage.ListKeysAsync())?.ToArray() ?? [];
+                
+                if (keysInStorage.Length == 0)
                 {
                     return "No keys found.";
                 }
-                var sb = new System.Text.StringBuilder();
+
+                StringBuilder sb = new();
                 sb.AppendLine("Keys:");
-                foreach (var k in list)
+
+                foreach (var k in keysInStorage)
                 {
                     sb.AppendLine(" - " + k);
                 }
+
                 return sb.ToString().TrimEnd();
             }
 
             var key = args[0];
-            var value = await storage.LoadAsync<object>(key);
+            var value = await _storage.LoadAsync<object>(key);
             if (value is null)
             {
                 return $"Key '{key}' not found or null.";
@@ -40,7 +50,7 @@ namespace kuiper.Commands
 
             try
             {
-                var json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
+                string json = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
                 return json;
             }
             catch

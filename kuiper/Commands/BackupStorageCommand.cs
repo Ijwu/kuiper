@@ -1,37 +1,50 @@
 using System.Text.Json;
 
-using kuiper.Services.Abstract;
+using kuiper.Commands.Abstract;
+using kuiper.Core.Services.Abstract;
 
 namespace kuiper.Commands
 {
-    public class BackupStorageCommand : IConsoleCommand
+    public class BackupStorageCommand : ICommand
     {
-        public string Name => "backupstorage";
-        public string Description => "Back up all storage keys to a JSON file: backupstorage <path>";
+        private readonly INotifyingStorageService _storageService;
 
-        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public BackupStorageCommand(INotifyingStorageService storageService)
         {
+            _storageService = storageService;
+        }
+        public string Name => "backupstorage";
+        public string Description => "Back up all storage keys to a JSON file.";
+
+        public async Task<string> ExecuteAsync(string[] args, long executingSlot, CancellationToken cancellationToken)
+        {
+            if (executingSlot != -1)
+            {
+                return "The 'backupstorage' command may only be used from the server console.";
+            }
+
             if (args.Length != 1)
             {
                 return "Usage: backupstorage <path>";
             }
 
-            var path = args[0];
-            var storage = services.GetRequiredService<IStorageService>();
-            var keys = await storage.ListKeysAsync();
-            var list = new List<Entry>();
+            string path = args[0];
 
-            foreach (var key in keys)
+            List<Entry> list = [];
+
+            foreach (string key in await _storageService.ListKeysAsync())
             {
-                var value = await storage.LoadAsync<object>(key);
-                var typeName = value?.GetType().AssemblyQualifiedName ?? string.Empty;
-                var json = JsonSerializer.Serialize(value);
+                object? value = await _storageService.LoadAsync<object>(key);
+                string typeName = value?.GetType().AssemblyQualifiedName ?? string.Empty;
+                string json = JsonSerializer.Serialize(value);
                 list.Add(new Entry(key, typeName, json));
             }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path)) ?? ".");
-            var payload = JsonSerializer.Serialize(list, options);
+            JsonSerializerOptions options = new() { WriteIndented = true };
+            string directory = Path.GetDirectoryName(Path.GetFullPath(path)) ?? ".";
+            Directory.CreateDirectory(directory);
+
+            string payload = JsonSerializer.Serialize(list, options);
             await File.WriteAllTextAsync(path, payload, cancellationToken);
 
             return $"Backed up {list.Count} keys to {path}.";

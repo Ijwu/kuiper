@@ -1,42 +1,50 @@
-using kuiper.Services;
-using kuiper.Pickle;
-using kuiper.Services.Abstract;
+using kuiper.Core.Services.Abstract;
+using kuiper.Core.Pickle;
+using kuiper.Commands.Abstract;
+using kuiper.Core.Constants;
 
 namespace kuiper.Commands
 {
-    public class ListSlotsCommand : IConsoleCommand
+    public class ListSlotsCommand : ICommand
     {
-        public string Name => "listslots";
-        public string Description => "List currently connected players and their mapped slots";
+        private readonly IConnectionManager _connectionManager;
+        private readonly MultiData _multiData;
+        private readonly INotifyingStorageService _storageService;
 
-        public async Task<string> ExecuteAsync(string[] args, IServiceProvider services, CancellationToken cancellationToken)
+        public ListSlotsCommand(IConnectionManager connectionManager, MultiData multiData, INotifyingStorageService storageService)
         {
-            var connectionManager = services.GetRequiredService<WebSocketConnectionManager>();
-            var multiData = services.GetRequiredService<MultiData>();
-            var storage = services.GetRequiredService<IStorageService>();
+            _connectionManager = connectionManager;
+            _multiData = multiData;
+            _storageService = storageService;
+        }
+        public string Name => "listslots";
+        public string Description => "List currently connected players and their mapped slots.";
 
-            var connections = connectionManager.GetAllConnectionIds();
-            if (connections.Count == 0)
+        public async Task<string> ExecuteAsync(string[] args, long sendingSlot, CancellationToken cancellationToken)
+        {
+            var connections = await _connectionManager.GetAllConnectionIdsAsync();
+            if (!connections.Any())
             {
                 return "No active connections.";
             }
 
-            const string tagKeyPrefix = "#connection_tags:";
             var lines = new List<string>();
             foreach (var connectionId in connections.OrderBy(id => id))
             {
-                var slot = await connectionManager.GetSlotForConnectionAsync(connectionId);
+                long? slot = await _connectionManager.GetSlotForConnectionAsync(connectionId);
+
                 string slotLabel = slot.HasValue ? slot.Value.ToString() : "(unmapped)";
                 string slotName = string.Empty;
                 string game = string.Empty;
-                if (slot.HasValue && multiData.SlotInfo.TryGetValue((int)slot.Value, out var info))
+
+                if (slot.HasValue && _multiData.SlotInfo.TryGetValue((int)slot.Value, out MultiDataNetworkSlot? info))
                 {
                     slotName = string.IsNullOrWhiteSpace(info.Name) ? string.Empty : $" ({info.Name})";
                     game = string.IsNullOrWhiteSpace(info.Game) ? string.Empty : $" - {info.Game}";
                 }
 
-                var tags = await storage.LoadAsync<string[]>(tagKeyPrefix + connectionId) ?? Array.Empty<string>();
-                var tagText = tags.Length > 0 ? $" tags: [{string.Join(", ", tags)}]" : string.Empty;
+                string[] tags = await _storageService.LoadAsync<string[]>(StorageKeys.ConnectionTags(connectionId)) ?? [];
+                string tagText = tags.Length > 0 ? $" tags: [{string.Join(", ", tags)}]" : string.Empty;
 
                 lines.Add($"{connectionId} => slot {slotLabel}{slotName}{game}{tagText}");
             }
