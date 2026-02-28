@@ -1,11 +1,11 @@
 ﻿# Kuiper
 
-A .NET implementation of an [Archipelago](https://archipelago.gg/) multiworld randomizer server and client library.
+A .NET implementation of an [Archipelago](https://archipelago.gg/) multiworld randomizer server.
 
 ## kuiper Features
 
 - **WebSocket Server**: Minimal Archipelago protocol support for now. 
-- **Plugin Architecture**: Extensible packet handling system (To be implemented.)
+- **Plugin Architecture**: Extensible packet handling system
 - **Data Storage**: Key-value storage with Set/Get operations
 - **Hint System**: Create, store, and broadcast hints to players
 - **Console Commands**: Interactive server management
