@@ -2,17 +2,6 @@
 
 A .NET implementation of an [Archipelago](https://archipelago.gg/) multiworld randomizer server and client library.
 
-## Projects
-
-| Project | Description |
-|---------|-------------|
-| **kuiper** | Archipelago server implementation with WebSocket support, plugin system, and console commands |
-| **kbo** | Core packet definitions and network protocol types (Kuiper Belt Objects) |
-| **spaceport** | Client library for connecting to Archipelago servers |
-| **stm** | Terminal UI client using Terminal.Gui (Space Traffic Management) |
-| **telescope** | Additional tooling |
-| **belters** | Unit tests |
-
 ## kuiper Features
 
 - **WebSocket Server**: Minimal Archipelago protocol support for now. 
@@ -28,13 +17,6 @@ A .NET implementation of an [Archipelago](https://archipelago.gg/) multiworld ra
 - .NET 10 SDK
 
 ### Running the Server
-
-```bash
-cd kuiper
-dotnet run
-```
-
-Or run the EXE, I guess.
 
 The server takes a single argument: the path to a `.archipelago` file to host. There are no other accepted parameters at this time. A `.archipelago` file can be found inside the zipfile that the Archipelago Generator outputs upon generation.
 
@@ -69,15 +51,26 @@ A key tenant behind this project is the idea that all of the server's state info
 ## kuiper Server Architecture
 
 ### Plugins
-The server uses a plugin architecture to handle incoming packets. Each plugin is responsible for handling one or more packet types. Plugins implement the `IPlugin` interface and register themselves with the `PluginManager` during server startup.
-When a packet is received, the server delegates the handling of the packet to each plugin. Each plugin decides if it is interested in the packet and handles it accordingly.
+The server uses a plugin architecture to handle incoming packets. Each plugin is responsible for handling one or more packet types. Plugins implement the `IKuiperPlugin` interface. When a packet is received, the server delegates the handling of the packet to each plugin. Each plugin decides if it is interested in the packet and handles it accordingly.
 
-The idea is to load plugins dynamically at runtime from a `Plugins` directory. This is not yet implemented.
+All files with the extension `.dll` in the `Plugins` directory will be loaded as a .NET assembly and dynamically searched for new plugins or commands. 
+
+Commands implement the `ICommand` type and are used to provide additional console commands for the server.
+
+Default Plugins:
+- **kuiper.Core.Bounces** - Handles Bounce packets.
+- **kuiper.Core.Chats** - Enables players to chat and run commands via the chat system.
+- **kuiper.Core.Checks** - Enables location check tracking and Sync packet handlers. Enables the release command. This is the functionality you play AP for.
+- **kuiper.Core.Connections** - Responds to Connect packets and allows players to set their slot password.
+- **kuiper.Core.DataPackages** - Responds to requests for the data package.
+- **kuiper.Core.DataStorage** - Responds to all requests having to do with the data storage system.
+- **kuiper.Core.Hints** - Handles hint tracking, updating, and enables the hint command.
+
+
+None of the default plugins are technically required for the server to function, however you will miss out on the functionality covered by the plugin. The default plugins are meant to cover the base functionality expected from an Archipelago server.
 
 ## Background / Motivations
 
-I wanted to use this project as a way to spend free time messing about with AI. Almost all of the code in the `kuiper` project is touched in some way or another by AI. When you read the code and ask "Ijwu why?!?" in some way, it's likely the answer is AI. All in all, better than I thought and now I can likely extract a spec from this version and get an agent to rebuild it. At least that's the current plan.
+I wanted to use this project as a way to spend free time messing about with AI. Almost all of the code in the `kuiper` project is touched in some way or another by AI. 
 
-All of the other projects (`kbo`, `spaceport`, `stm`, etc.) are hand-written and not touched by AI (except for a missing packet the AI added to `kbo`). I was writing an AP packet handling library at first and it got mature enough that I thought I could make a server out of it too. 
-
-Well, that's not entirely true, I did use MultiClient.NET at first and try to use its packet types. It didn't work out for a couple of reasons, namely that MultiClient.NET is a client library so it was a doomed effort from the start. After that failed, I moved my project, which was just called "PrototypeArchipelagoServer" at the time into this solution, which was already named "kuiper". I created the eponymous `kuiper` project and bolted all the protoype code in and retrofitted it to work with `kbo`.
+V2 was me going through the code and refactoring into plugins and hand-fixing most of the AI slop.
