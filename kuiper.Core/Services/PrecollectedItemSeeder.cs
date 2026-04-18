@@ -26,29 +26,23 @@ namespace kuiper.Core.Services
         public async Task SeedAsync(CancellationToken cancellationToken)
         {
             var precollectedItems = _multiData.PrecollectedItems ?? [];
+            const long precollectedSenderId = 0;
+            const long precollectedLocationId = -2;
 
             var totalSlots = precollectedItems.Count;
             var totalItems = 0;
 
             foreach (var slotItems in precollectedItems)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
+                cancellationToken.ThrowIfCancellationRequested();
 
                 var receivingSlot = slotItems.Key;
                 var itemIds = slotItems.Value ?? [];
 
                 foreach (var itemId in itemIds)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    var networkItem = new NetworkItem(itemId, -2, receivingSlot, NetworkItemFlags.None);
-                    await _receivedItemService.AddReceivedItemAsync(receivingSlot, 0, networkItem);
+                    var networkItem = new NetworkItem(itemId, precollectedLocationId, receivingSlot, NetworkItemFlags.None);
+                    await _receivedItemService.AddReceivedItemAsync(receivingSlot, precollectedSenderId, networkItem);
                     totalItems++;
 
                     _logger.LogDebug(
