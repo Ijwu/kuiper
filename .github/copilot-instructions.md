@@ -106,15 +106,7 @@ Key projects in this repository:
 - `ConfigureAwait(false)` is encouraged in library-level code (for example `PluginManager`); optional in app/plugin-level code when context makes sense.
 - Plugin handlers run concurrently; do not assume ordering across plugins for the same packet.
 
-## 9. Idempotency
-
-- Startup seeding logic (such as pre-collected items/hints) must be idempotent.
-- Reuse existing deduplication contracts:
-  - `ReceivedItemService.AddReceivedItemAsync`
-  - `HintService.AddOrUpdateHintAsync`
-- Do not add bespoke one-time-run flags for seeding behavior.
-
-## 10. What to Avoid
+## 9. What to Avoid
 
 - Do not add business logic to `Program.cs` (keep it focused on app configuration and DI/bootstrap).
 - Do not bypass `INotifyingStorageService`.
