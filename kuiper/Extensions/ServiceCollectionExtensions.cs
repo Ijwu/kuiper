@@ -1,9 +1,10 @@
-﻿using kuiper.Commands;
+using kuiper.Commands;
 using kuiper.Commands.Abstract;
 using kuiper.Core.Services;
 using kuiper.Core.Services.Abstract;
 using kuiper.Internal;
 using kuiper.Plugins;
+using kuiper.Services;
 
 namespace kuiper.Extensions
 {
@@ -23,6 +24,8 @@ namespace kuiper.Extensions
             services.AddSingleton<IHintPointsService, HintPointsService>();
             services.AddSingleton<IHintService, HintService>();
             services.AddSingleton<IReleaseService, ReleaseService>();
+            services.AddSingleton<IPrecollectedItemSeeder, PrecollectedItemSeeder>();
+            services.AddHostedService<PrecollectedItemSeederHostedService>();
 
             return services;
         }
