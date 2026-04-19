@@ -164,9 +164,12 @@ namespace kuiper.Core.Pickle
 
         private static MultiDataHint ParsePrecollectedHintTuple(object[] hintTuple)
         {
-            if (hintTuple.Length < 7)
+            const int requiredTupleLength = 7;
+            const int statusIndex = 7;
+
+            if (hintTuple.Length < requiredTupleLength)
             {
-                throw new InvalidDataException($"Expected at least 7 values in pre-collected hint tuple but found {hintTuple.Length}.");
+                throw new InvalidDataException($"Expected at least {requiredTupleLength} values in pre-collected hint tuple but found {hintTuple.Length}.");
             }
 
             return new MultiDataHint
@@ -178,8 +181,8 @@ namespace kuiper.Core.Pickle
                 Found = Convert.ToBoolean(hintTuple[4]),
                 Entrance = Convert.ToString(hintTuple[5]) ?? string.Empty,
                 ItemFlags = Convert.ToInt64(hintTuple[6]),
-                Status = hintTuple.Length > 7
-                    ? (MultiDataHintStatus)Convert.ToInt32(hintTuple[7])
+                Status = hintTuple.Length > statusIndex
+                    ? (MultiDataHintStatus)Convert.ToInt32(hintTuple[statusIndex])
                     : MultiDataHintStatus.Unspecified
             };
         }
