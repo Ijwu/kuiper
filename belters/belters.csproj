@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\kbo\kbo.csproj" />
+    <ProjectReference Include="..\kuiper.Core\kuiper.Core.csproj" />
     <ProjectReference Include="..\spaceport\spaceport.csproj" />
   </ItemGroup>
 
