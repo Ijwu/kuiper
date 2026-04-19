@@ -59,7 +59,6 @@ var multiData = MultidataUnpickler.Unpickle(fs);
 
 builder.Services.AddSingleton(multiData);
 builder.Services.AddKuiperServices();
-builder.Services.AddKuiperCommands();
 
 var pluginDir = Path.Combine(AppContext.BaseDirectory, "Plugins");
 Directory.CreateDirectory(pluginDir);

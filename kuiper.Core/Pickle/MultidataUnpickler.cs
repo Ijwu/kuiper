@@ -136,55 +136,10 @@ namespace kuiper.Core.Pickle
             foreach (DictionaryEntry kvp in (Hashtable)unpickledPrecollectedHints)
             {
                 HashSet<object> hashset = (HashSet<object>)kvp.Value;
-                var value = Array.ConvertAll(hashset.ToArray(), ParsePrecollectedHint);
+                var value = Array.ConvertAll(hashset.ToArray(), item => (MultiDataHint)item);
                 ret.Add(Convert.ToInt64(kvp.Key), value);
             }
             return ret;
-        }
-
-        private static MultiDataHint ParsePrecollectedHint(object unpickledHint)
-        {
-            if (unpickledHint is MultiDataHint hint)
-            {
-                return hint;
-            }
-
-            if (unpickledHint is object[] hintTuple)
-            {
-                return ParsePrecollectedHintTuple(hintTuple);
-            }
-
-            if (unpickledHint is ArrayList hintList)
-            {
-                return ParsePrecollectedHintTuple(hintList.ToArray());
-            }
-
-            throw new InvalidDataException($"Unsupported pre-collected hint type '{unpickledHint.GetType().FullName}'.");
-        }
-
-        private static MultiDataHint ParsePrecollectedHintTuple(object[] hintTuple)
-        {
-            const int requiredTupleLength = 7;
-            const int statusIndex = 7;
-
-            if (hintTuple.Length < requiredTupleLength)
-            {
-                throw new InvalidDataException($"Expected at least {requiredTupleLength} values in pre-collected hint tuple but found {hintTuple.Length}.");
-            }
-
-            return new MultiDataHint
-            {
-                ReceivingPlayer = Convert.ToInt64(hintTuple[0]),
-                FindingPlayer = Convert.ToInt64(hintTuple[1]),
-                Location = Convert.ToInt64(hintTuple[2]),
-                Item = Convert.ToInt64(hintTuple[3]),
-                Found = Convert.ToBoolean(hintTuple[4]),
-                Entrance = Convert.ToString(hintTuple[5]) ?? string.Empty,
-                ItemFlags = Convert.ToInt64(hintTuple[6]),
-                Status = hintTuple.Length > statusIndex
-                    ? (MultiDataHintStatus)Convert.ToInt32(hintTuple[statusIndex])
-                    : MultiDataHintStatus.Unspecified
-            };
         }
 
         private static Dictionary<long, long[]> GetPrecollectedItems(object unpickledPrecollectedItems)

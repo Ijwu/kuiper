@@ -23,7 +23,7 @@ namespace kuiper.Core.Services
             _hintService = hintService;
         }
 
-        public async Task SeedAsync(CancellationToken cancellationToken)
+        public async Task SeedAsync()
         {
             var precollectedHints = _multiData.PrecollectedHints ?? [];
             var totalSlots = precollectedHints.Count;
@@ -31,14 +31,10 @@ namespace kuiper.Core.Services
 
             foreach (var slotHints in precollectedHints)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 var slotId = slotHints.Key;
                 var hints = slotHints.Value ?? [];
                 foreach (var multiDataHint in hints)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
                     var hint = new Hint(
                         multiDataHint.ReceivingPlayer,
                         multiDataHint.FindingPlayer,

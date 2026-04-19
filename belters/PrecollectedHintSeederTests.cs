@@ -60,7 +60,7 @@ public class PrecollectedHintSeederTests
         var sut = new PrecollectedHintSeeder(loggerMock.Object, multiData, hintServiceMock.Object);
 
         // Act
-        await sut.SeedAsync(CancellationToken.None);
+        await sut.SeedAsync();
 
         // Assert
         hintServiceMock.Verify(
@@ -102,7 +102,7 @@ public class PrecollectedHintSeederTests
         var sut = new PrecollectedHintSeeder(loggerMock.Object, multiData, hintServiceMock.Object);
 
         // Act
-        await sut.SeedAsync(CancellationToken.None);
+        await sut.SeedAsync();
 
         // Assert
         hintServiceMock.Verify(
