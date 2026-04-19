@@ -25,7 +25,9 @@ namespace kuiper.Extensions
             services.AddSingleton<IHintService, HintService>();
             services.AddSingleton<IReleaseService, ReleaseService>();
             services.AddSingleton<IPrecollectedItemSeeder, PrecollectedItemSeeder>();
+            services.AddSingleton<IPrecollectedHintSeeder, PrecollectedHintSeeder>();
             services.AddHostedService<PrecollectedItemSeederHostedService>();
+            services.AddHostedService<PrecollectedHintSeederHostedService>();
 
             return services;
         }
