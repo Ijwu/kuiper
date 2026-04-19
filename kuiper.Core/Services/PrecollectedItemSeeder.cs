@@ -23,7 +23,7 @@ namespace kuiper.Core.Services
             _receivedItemService = receivedItemService;
         }
 
-        public async Task SeedAsync(CancellationToken cancellationToken)
+        public async Task SeedAsync()
         {
             var precollectedItems = _multiData.PrecollectedItems ?? [];
             const long precollectedSenderId = 0;
@@ -34,8 +34,6 @@ namespace kuiper.Core.Services
 
             foreach (var slotItems in precollectedItems)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 var receivingSlot = slotItems.Key;
                 var itemIds = slotItems.Value ?? [];
 

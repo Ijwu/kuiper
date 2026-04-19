@@ -13,7 +13,7 @@ namespace kuiper.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            return _precollectedItemSeeder.SeedAsync(cancellationToken);
+            return _precollectedItemSeeder.SeedAsync();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

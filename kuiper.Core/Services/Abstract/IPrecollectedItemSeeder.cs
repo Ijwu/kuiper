@@ -2,6 +2,6 @@ namespace kuiper.Core.Services.Abstract
 {
     public interface IPrecollectedItemSeeder
     {
-        Task SeedAsync(CancellationToken cancellationToken);
+        Task SeedAsync();
     }
 }

@@ -30,7 +30,7 @@ public class PrecollectedItemSeederTests
         var sut = new PrecollectedItemSeeder(loggerMock.Object, multiData, receivedItemServiceMock.Object);
 
         // Act
-        await sut.SeedAsync(CancellationToken.None);
+        await sut.SeedAsync();
 
         // Assert
         receivedItemServiceMock.Verify(
@@ -72,7 +72,7 @@ public class PrecollectedItemSeederTests
         var sut = new PrecollectedItemSeeder(loggerMock.Object, multiData, receivedItemServiceMock.Object);
 
         // Act
-        await sut.SeedAsync(CancellationToken.None);
+        await sut.SeedAsync();
 
         // Assert
         receivedItemServiceMock.Verify(
