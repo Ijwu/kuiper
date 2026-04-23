@@ -12,6 +12,8 @@ namespace kuiper.Core.Pickle
         {
             Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
             Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
+            Unpickler.registerConstructor("NetUtils", "HintStatus", new HintStatusObjectConstructor());
+            Unpickler.registerConstructor("NetUtils", "Hint", new HintObjectConstructor());
         }
 
         public static MultiData Unpickle(Stream stream)
