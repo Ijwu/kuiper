@@ -25,7 +25,7 @@ namespace kuiper.Extensions
             services.AddSingleton<IHintService, HintService>();
             services.AddSingleton<IReleaseService, ReleaseService>();
             services.AddSingleton<IPrecollectedItemSeeder, PrecollectedItemSeeder>();
-            services.AddHostedService<PrecollectedItemSeederHostedService>();
+            services.AddSingleton<IPrecollectedHintSeeder, PrecollectedHintSeeder>();
 
             return services;
         }
@@ -33,8 +33,6 @@ namespace kuiper.Extensions
         public static IServiceCollection AddKuiperCommands(this IServiceCollection services)
         {
             services.AddSingleton<ICommandRegistry, CommandRegistry>();
-
-            services.AddHostedService<CommandLoopService>();
 
             services.AddTransient<ICommand, HelpCommand>();
             services.AddTransient<ICommand, QuitCommand>();
@@ -45,6 +43,14 @@ namespace kuiper.Extensions
             services.AddTransient<ICommand, RestoreStorageCommand>();
             services.AddTransient<ICommand, DumpStorageCommand>();
 
+            return services;
+        }
+
+        public static IServiceCollection AddKuiperHostedServices(this IServiceCollection services)
+        {
+            services.AddHostedService<PrecollectedItemSeederHostedService>();
+            services.AddHostedService<PrecollectedHintSeederHostedService>();
+            services.AddHostedService<CommandLoopService>();
 
             return services;
         }

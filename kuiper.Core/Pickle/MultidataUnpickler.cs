@@ -12,6 +12,8 @@ namespace kuiper.Core.Pickle
         {
             Unpickler.registerConstructor("NetUtils", "SlotType", new SlotTypeObjectConstructor());
             Unpickler.registerConstructor("NetUtils", "NetworkSlot", new MultiDataNetworkSlotObjectConstructor());
+            Unpickler.registerConstructor("NetUtils", "HintStatus", new HintStatusObjectConstructor());
+            Unpickler.registerConstructor("NetUtils", "Hint", new HintObjectConstructor());
         }
 
         public static MultiData Unpickle(Stream stream)
@@ -136,8 +138,8 @@ namespace kuiper.Core.Pickle
             foreach (DictionaryEntry kvp in (Hashtable)unpickledPrecollectedHints)
             {
                 HashSet<object> hashset = (HashSet<object>)kvp.Value;
-                var value = Array.ConvertAll(hashset.ToArray(), item => (MultiDataHint)item);//todo: this is probably wrong
-                ret.Add((int)kvp.Key, value);
+                var value = Array.ConvertAll(hashset.ToArray(), item => (MultiDataHint)item);
+                ret.Add(Convert.ToInt64(kvp.Key), value);
             }
             return ret;
         }
