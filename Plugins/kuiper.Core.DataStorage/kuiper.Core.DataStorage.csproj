@@ -12,4 +12,8 @@
     <ProjectReference Include="..\..\kuiper\kuiper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BigFloatLibrary" Version="4.3.0" />
+  </ItemGroup>
+
 </Project>
