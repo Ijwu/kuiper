@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
-using System.Text.Json;
 using System.Text.Json.Nodes;
+
+using BigFloatLibrary;
 
 using kbo.bigrocks;
 using kbo.littlerocks;
@@ -34,11 +35,11 @@ namespace kuiper.Core.DataStorage.Plugins
         {
             if (notify.Keys.Length > 0)
             {
-                var stored = await _storage.LoadAsync<string[]>(StorageKeys.SetNotify(connectionId)) ?? Array.Empty<string>();
+                var stored = await _storage.LoadAsync<string[]>(StorageKeys.SetNotify(connectionId)) ?? [];
                 var combined = new HashSet<string>(stored, StringComparer.OrdinalIgnoreCase);
-                foreach (var k in notify.Keys)
+                foreach (var key in notify.Keys)
                 {
-                    combined.Add(k);
+                    combined.Add(key);
                 }
 
                 _subscriptions[connectionId] = combined;
@@ -62,6 +63,7 @@ namespace kuiper.Core.DataStorage.Plugins
 
             if (setPacket.Key.StartsWith("_") || setPacket.Key.StartsWith("#"))
             {
+                Logger.LogDebug("Attempt to Set protected key {Key} from connection {ConnectionId}.", setPacket.Key, connectionId);
                 return;
             }
 
@@ -79,63 +81,94 @@ namespace kuiper.Core.DataStorage.Plugins
 
             if (setPacket.WantReply)
             {
-                var reply = new SetReply(setPacket.Key, valueNode, originalNode, slotId);
-                await SendToConnectionAsync(connectionId, reply);
+                await SendToConnectionAsync(connectionId, new SetReply(setPacket.Key, valueNode, originalNode, slotId));
             }
 
             await NotifySubscribersAsync(setPacket.Key, valueNode, originalNode, slotId);
         }
 
-        private JsonNode ApplyOperation(JsonNode current, DataStorageOperation op, JsonNode defaultNode)
+        private static JsonNode ApplyOperation(JsonNode current, DataStorageOperation op, JsonNode defaultNode)
         {
             return op switch
             {
-                Replace r => ToNode(r.Value),
-                Default => current ?? defaultNode,
-                Add add => ApplyNumeric(current, add.Value, (a, b) => a + b),
-                Mul mul => ApplyNumeric(current, mul.Value, (a, b) => a * b),
-                Pow pow => ApplyNumeric(current, pow.Value, Math.Pow),
-                Mod mod => ApplyNumeric(current, mod.Value, (a, b) => b == 0 ? a : a % b),
-                Floor => ApplyNumeric(current, 0, (a, _) => Math.Floor(a)),
-                Ceil => ApplyNumeric(current, 0, (a, _) => Math.Ceiling(a)),
-                Max max => ApplyNumeric(current, max.Value, Math.Max),
-                Min min => ApplyNumeric(current, min.Value, Math.Min),
-                And and => ApplyBitwise(current, and.Value, (a, b) => a & b),
-                Or or => ApplyBitwise(current, or.Value, (a, b) => a | b),
-                Xor xor => ApplyBitwise(current, xor.Value, (a, b) => a ^ b),
-                LeftShift ls => ApplyBitwise(current, ls.Value, (a, b) => a << b),
-                RightShift rs => ApplyBitwise(current, rs.Value, (a, b) => a >> b),
-                Remove rem => ApplyRemove(current, rem.Value),
-                Pop pop => ApplyPop(current, pop.Value),
-                Update upd => ApplyUpdate(current, upd.Value),
-                _ => current
+                Replace r       => r.Value,
+                Default         => current ?? defaultNode,
+                Add add         => ApplyNumericOp(current, add.Value, (a, b) => a + b),
+                Mul mul         => ApplyNumericOp(current, mul.Value, (a, b) => a * b),
+                Pow pow         => ApplyPow(current, pow.Value),
+                Mod mod         => ApplyNumericOp(current, mod.Value, (a, b) => b.IsZero ? a : a % b),
+                Floor           => ApplyNumericUnaryOp(current, BigFloat.Floor),
+                Ceil            => ApplyNumericUnaryOp(current, BigFloat.Ceiling),
+                Max max         => ApplyNumericOp(current, max.Value, (a, b) => a > b ? a : b),
+                Min min         => ApplyNumericOp(current, min.Value, (a, b) => a < b ? a : b),
+                And and         => ApplyBitwiseOp(current, and.Value, (a, b) => a & b),
+                Or or           => ApplyBitwiseOp(current, or.Value, (a, b) => a | (long)b),
+                Xor xor         => ApplyBitwiseOp(current, xor.Value, (a, b) => a ^ b),
+                LeftShift ls    => ApplyBitwiseOp(current, ls.Value, (a, b) => a << b),
+                RightShift rs   => ApplyBitwiseOp(current, rs.Value, (a, b) => a >> b),
+                Remove rem      => ApplyRemove(current, rem.Value),
+                Pop pop         => ApplyPop(current, pop.Value),
+                Update upd      => ApplyUpdate(current, upd.Value),
+                _               => current
             };
         }
 
-        private JsonNode ApplyNumeric(JsonNode current, object operand, Func<double, double, double> op)
+        /// <summary>
+        /// Applies a binary numeric operation using BigFloat for arbitrary precision.
+        /// </summary>
+        private static JsonNode ApplyNumericOp(JsonNode current, JsonNode operand, Func<BigFloat, BigFloat, BigFloat> op)
         {
-            if (!TryToDouble(current, out var a)) return current;
-            if (!TryToDouble(operand, out var b)) return current;
-            return JsonValue.Create(op(a, b))!;
+            if (!TryToBigFloat(current, out var a)) return current;
+            if (!TryToBigFloat(operand, out var b)) return current;
+            return BigFloatToNode(op(a, b));
         }
 
-        private JsonNode ApplyBitwise(JsonNode current, object operand, Func<long, int, long> op)
+        /// <summary>
+        /// Applies a unary numeric operation using BigFloat for arbitrary precision.
+        /// </summary>
+        private static JsonNode ApplyNumericUnaryOp(JsonNode current, Func<BigFloat, BigFloat> op)
+        {
+            if (!TryToBigFloat(current, out var a)) return current;
+            return BigFloatToNode(op(a));
+        }
+
+        /// <summary>
+        /// Applies the Pow operation. BigFloat.Pow requires an integer exponent; fractional
+        /// exponents are not supported and leave the value unchanged.
+        /// </summary>
+        private static JsonNode ApplyPow(JsonNode current, JsonNode exponent)
+        {
+            if (!TryToBigFloat(current, out var baseValue)) return current;
+            if (!TryToLong(exponent, out var exp) || exp < int.MinValue || exp > int.MaxValue) return current;
+            return BigFloatToNode(BigFloat.Pow(baseValue, (int)exp));
+        }
+
+        /// <summary>
+        /// Applies a bitwise operation. Bitwise operations work on 64-bit integers.
+        /// </summary>
+        private static JsonNode ApplyBitwiseOp(JsonNode current, JsonNode operand, Func<long, int, long> op)
         {
             if (!TryToLong(current, out var a)) return current;
-            if (!TryToInt(operand, out var b)) return current;
-            return JsonValue.Create(op(a, b))!;
+            if (!TryToLong(operand, out var b) || b < int.MinValue || b > int.MaxValue) return current;
+            return JsonValue.Create(op(a, (int)b))!;
         }
 
-        private JsonNode ApplyRemove(JsonNode current, object key)
+        /// <summary>
+        /// Removes a key from a JSON object. Has no effect on other value types.
+        /// </summary>
+        private static JsonNode ApplyRemove(JsonNode current, JsonNode key)
         {
             if (current is JsonObject obj)
             {
-                obj.Remove(key?.ToString() ?? string.Empty);
+                obj.Remove(key.ToString());
             }
             return current;
         }
 
-        private JsonNode ApplyPop(JsonNode current, object key)
+        /// <summary>
+        /// Removes the last element from a JSON array, or a named key from a JSON object.
+        /// </summary>
+        private static JsonNode ApplyPop(JsonNode current, JsonNode key)
         {
             if (current is JsonArray arr)
             {
@@ -148,92 +181,62 @@ namespace kuiper.Core.DataStorage.Plugins
 
             if (current is JsonObject obj)
             {
-                obj.Remove(key?.ToString() ?? string.Empty);
+                obj.Remove(key.ToString());
             }
             return current;
         }
 
-        private JsonNode ApplyUpdate(JsonNode current, object updates)
+        /// <summary>
+        /// Merges the properties of a JSON object into the current JSON object.
+        /// </summary>
+        private static JsonNode ApplyUpdate(JsonNode current, JsonNode updates)
         {
-            if (current is JsonObject obj)
+            if (current is JsonObject obj && updates is JsonObject updatesObj)
             {
-                if (updates is JsonObject updatesObj)
+                foreach (var kvp in updatesObj)
                 {
-                    foreach (var kvp in updatesObj)
-                    {
-                        obj[kvp.Key] = kvp.Value?.DeepClone();
-                    }
-                }
-                else if (updates is IDictionary<string, object> sdict)
-                {
-                    foreach (var kvp in sdict)
-                    {
-                        obj[kvp.Key] = ToNode(kvp.Value);
-                    }
-                }
-                else if (updates is IDictionary<object, object> dict)
-                {
-                    foreach (var kvp in dict)
-                    {
-                        obj[kvp.Key?.ToString() ?? string.Empty] = ToNode(kvp.Value);
-                    }
+                    obj[kvp.Key] = kvp.Value?.DeepClone();
                 }
             }
             return current;
         }
 
-        private static JsonNode ToNode(object? value)
+        /// <summary>
+        /// Converts a BigFloat to a JSON string node for storage.
+        /// </summary>
+        private static JsonNode BigFloatToNode(BigFloat value)
         {
-            return JsonSerializer.SerializeToNode(value) ?? JsonValue.Create(value)!;
+            return JsonValue.Create(value.ToString())!;
         }
 
-        private async Task NotifySubscribersAsync(string key, JsonNode value, JsonNode originalValue, long slot)
+        /// <summary>
+        /// Attempts to parse a JSON node as a BigFloat for numeric operations.
+        /// Supports numeric values, and string values that represent numbers.
+        /// </summary>
+        private static bool TryToBigFloat(JsonNode? node, out BigFloat value)
         {
-            var setReply = new SetReply(key, value, originalValue, slot);
-
-            foreach (var kvp in _subscriptions)
+            if (node is JsonValue jv)
             {
-                if (kvp.Value.Contains(key))
+                if (jv.TryGetValue<string>(out var s))
                 {
-                    await ConnectionManager.SendJsonToConnectionAsync(kvp.Key, new Packet[] { setReply });
+                    try { value = new BigFloat(s); return true; }
+                    catch (FormatException) { }
                 }
+                if (jv.TryGetValue<double>(out var d)) { value = new BigFloat(d); return true; }
+                if (jv.TryGetValue<long>(out var l)) { value = new BigFloat(l); return true; }
+                if (jv.TryGetValue<int>(out var i)) { value = new BigFloat(i); return true; }
             }
-        }
-
-        private static bool TryToDouble(JsonNode input, out double value)
-        {
-            if (input is JsonValue jv)
-            {
-                if (jv.TryGetValue<double>(out var d)) { value = d; return true; }
-                if (jv.TryGetValue<long>(out var l)) { value = l; return true; }
-                if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
-                if (jv.TryGetValue<decimal>(out var m)) { value = (double)m; return true; }
-                if (jv.TryGetValue<string>(out var s) && double.TryParse(s, out var parsed)) { value = parsed; return true; }
-            }
-            value = 0;
+            value = default;
             return false;
         }
 
-        private static bool TryToDouble(object input, out double value)
+        /// <summary>
+        /// Attempts to extract a long integer from a JSON node.
+        /// Supports numeric values and string values that represent integers.
+        /// </summary>
+        private static bool TryToLong(JsonNode? node, out long value)
         {
-            switch (input)
-            {
-                case double d: value = d; return true;
-                case float f: value = f; return true;
-                case int i: value = i; return true;
-                case long l: value = l; return true;
-                case decimal m: value = (double)m; return true;
-                case string s when double.TryParse(s, out var parsed): value = parsed; return true;
-                case JsonNode node when TryToDouble(node, out var v): value = v; return true;
-                default:
-                    value = 0;
-                    return false;
-            }
-        }
-
-        private static bool TryToLong(JsonNode input, out long value)
-        {
-            if (input is JsonValue jv)
+            if (node is JsonValue jv)
             {
                 if (jv.TryGetValue<long>(out var l)) { value = l; return true; }
                 if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
@@ -243,20 +246,18 @@ namespace kuiper.Core.DataStorage.Plugins
             return false;
         }
 
-        private static bool TryToInt(object input, out int value)
+        private async Task NotifySubscribersAsync(string key, JsonNode value, JsonNode originalValue, long slot)
         {
-            switch (input)
+            var setReply = new SetReply(key, value, originalValue, slot);
+
+            foreach (var (connectionId, subscribedKeys) in _subscriptions)
             {
-                case int i: value = i; return true;
-                case short s: value = s; return true;
-                case byte b: value = b; return true;
-                case long l when l >= int.MinValue && l <= int.MaxValue: value = (int)l; return true;
-                case string str when int.TryParse(str, out var parsed): value = parsed; return true;
-                case JsonNode node when TryToLong(node, out var v) && v >= int.MinValue && v <= int.MaxValue: value = (int)v; return true;
-                default:
-                    value = 0;
-                    return false;
+                if (subscribedKeys.Contains(key))
+                {
+                    await ConnectionManager.SendJsonToConnectionAsync(connectionId, new Packet[] { setReply });
+                }
             }
         }
     }
 }
+
