@@ -139,8 +139,8 @@ namespace kuiper.Core.DataStorage.Plugins
         private static JsonNode ApplyPow(JsonNode current, JsonNode exponent)
         {
             if (!TryToBigFloat(current, out var baseValue)) return current;
-            if (!TryToInt(exponent, out var exp)) return current;
-            return BigFloatToNode(BigFloat.Pow(baseValue, exp));
+            if (!TryToLong(exponent, out var exp) || exp < int.MinValue || exp > int.MaxValue) return current;
+            return BigFloatToNode(BigFloat.Pow(baseValue, (int)exp));
         }
 
         /// <summary>
@@ -149,8 +149,8 @@ namespace kuiper.Core.DataStorage.Plugins
         private static JsonNode ApplyBitwiseOp(JsonNode current, JsonNode operand, Func<long, int, long> op)
         {
             if (!TryToLong(current, out var a)) return current;
-            if (!TryToInt(operand, out var b)) return current;
-            return JsonValue.Create(op(a, b))!;
+            if (!TryToLong(operand, out var b) || b < int.MinValue || b > int.MaxValue) return current;
+            return JsonValue.Create(op(a, (int)b))!;
         }
 
         /// <summary>
@@ -202,23 +202,10 @@ namespace kuiper.Core.DataStorage.Plugins
         }
 
         /// <summary>
-        /// Converts a BigFloat to a JSON node. Integer values that fit in a long are stored
-        /// as JSON integers; all other values are stored as their string representation.
+        /// Converts a BigFloat to a JSON string node for storage.
         /// </summary>
         private static JsonNode BigFloatToNode(BigFloat value)
         {
-            if (value.IsInteger)
-            {
-                try
-                {
-                    long longValue = (long)value;
-                    return JsonValue.Create(longValue)!;
-                }
-                catch (OverflowException)
-                {
-                    // Fall through to string representation for integers too large for long.
-                }
-            }
             return JsonValue.Create(value.ToString())!;
         }
 
@@ -244,7 +231,8 @@ namespace kuiper.Core.DataStorage.Plugins
         }
 
         /// <summary>
-        /// Attempts to extract a long integer from a JSON node for bitwise operations.
+        /// Attempts to extract a long integer from a JSON node.
+        /// Supports numeric values and string values that represent integers.
         /// </summary>
         private static bool TryToLong(JsonNode? node, out long value)
         {
@@ -253,21 +241,6 @@ namespace kuiper.Core.DataStorage.Plugins
                 if (jv.TryGetValue<long>(out var l)) { value = l; return true; }
                 if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
                 if (jv.TryGetValue<string>(out var s) && long.TryParse(s, out var parsed)) { value = parsed; return true; }
-            }
-            value = 0;
-            return false;
-        }
-
-        /// <summary>
-        /// Attempts to extract an int from a JSON node for use as a shift amount or exponent.
-        /// </summary>
-        private static bool TryToInt(JsonNode? node, out int value)
-        {
-            if (node is JsonValue jv)
-            {
-                if (jv.TryGetValue<int>(out var i)) { value = i; return true; }
-                if (jv.TryGetValue<long>(out var l) && l >= int.MinValue && l <= int.MaxValue) { value = (int)l; return true; }
-                if (jv.TryGetValue<string>(out var s) && int.TryParse(s, out var parsed)) { value = parsed; return true; }
             }
             value = 0;
             return false;
