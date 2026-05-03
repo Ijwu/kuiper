@@ -11,7 +11,7 @@ Key projects in this repository:
 - **`kuiper.Core`** — shared services/interfaces/models/constants/extensions.
 - **`Plugins/`** — plugin assemblies (for example `kuiper.Core.Checks`, `kuiper.Core.Hints`, `kuiper.Core.DataStorage`) loaded dynamically from runtime `Plugins/` output.
 - **`kbo`** — packet definitions (`bigrocks`) and shared structures/base classes (`littlerocks`).
-- **`belters`** — unit tests.
+- **`belters`** — unit tests for all projects. ALL unit tests go in here.
 - **`spaceport`** — client-side WebSocket connection library.
 - **`stm`** — terminal UI test client.
 - **`telescope`** — minimal console test client.

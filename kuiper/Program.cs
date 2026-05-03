@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.Loader;
 
 using kuiper.Commands.Abstract;
 using kuiper.Core.Pickle;
@@ -101,6 +102,34 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+
+AssemblyLoadContext.Default.Resolving += LoadDependenciesFromPluginFolder;
+
+Assembly? LoadDependenciesFromPluginFolder(AssemblyLoadContext context, AssemblyName asmName)
+{
+    if (string.IsNullOrEmpty(asmName.Name))
+    {
+        return null;
+    }
+
+    // Try to find the assembly in the mod directory
+    var assemblyPath = Path.Combine(pluginDir, $"{asmName.Name}.dll");
+
+    if (File.Exists(assemblyPath))
+    {
+        try
+        {
+            return context.LoadFromAssemblyPath(assemblyPath);
+        }
+        catch
+        {
+            // If loading fails, return null to let other resolvers try
+            return null;
+        }
+    }
+
+    return null;
+}
 
 var app = builder.Build();
 
